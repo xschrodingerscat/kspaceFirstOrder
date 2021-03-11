@@ -238,6 +238,7 @@ void KSpaceFirstOrderSolver::loadInputData()
 	// Load data from the input file
 	mMatrixContainer.loadDataFromInputFile();
 
+
 	// Close the input file since we don't need it anymore.
 	inputFile.close();
 

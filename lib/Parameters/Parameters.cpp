@@ -159,6 +159,111 @@ Parameters& Parameters::getInstance()
 	}
 }// end of getInstance()
 //----------------------------------------------------------------------------------------------------------------------
+//
+void 
+Parameters::init(KConfig &kcfg)
+{
+	using PI = Parameters::ParameterNameIdx;
+	DimensionSizes scalarSizes(1, 1, 1);
+
+	const auto & kgrid = kcfg.mKGrid;
+	const auto & medium = kcfg.mMedium;
+	const auto & kpml = kcfg.mKPml;
+	const auto & sensor = kcfg.mSensor;
+	const auto & source = kcfg.mSource;
+
+	// Read dimension sizes
+	const size_t x = kgrid.mNx;
+	const size_t y = kgrid.mNy;
+	const size_t z = kgrid.mNz;;
+
+	mFullDimensionSizes    = DimensionSizes(x, y, z);
+	mReducedDimensionSizes = DimensionSizes(((x / 2) + 1), y, z);
+
+	mAxisymmetricFlag = kcfg.mAxisymmetricFlag && mFullDimensionSizes.is2D();
+
+	mNt = kgrid.mNt;
+
+	mDx = kgrid.mDx;
+	mDy = kgrid.mDy;
+	mDz = isSimulation3D() ? kgrid.mDz : 0.f;
+
+	mNonLinearFlag = kcfg.mNonLinearFlag;
+	mNonUniformGridFlag = kgrid.mNonUniformGridFlag;
+
+	assert(mNonLinearFlag == 0);
+
+	mC0ScalarFlag = medium.mC0ScalarFlag;
+	mC0Scalar = mC0ScalarFlag ? medium.mC0Scalar : 0.f;
+
+	mRho0ScalarFlag = medium.mRho0ScalarFlag;
+	mRho0Scalar = mRho0ScalarFlag ? medium.mRho0Scalar : 0.f;
+
+	mRho0SgxScalar = mRho0ScalarFlag ? medium.mRho0SgxScalar : 0.f;
+	mRho0SgyScalar = mRho0ScalarFlag ? medium.mRho0SgyScalar : 0.f;
+
+	auto flag = static_cast<size_t>(kpml.mAbsorbingFlag);
+	size_t absorbingFlagNumercValue = flag;
+
+	auto stockes = static_cast<size_t>(AbsorptionType::kStokes);
+
+	assert(absorbingFlagNumercValue <= stockes);
+	assert(mAbsorbingFlag == AbsorptionType::kLossless);
+
+
+	auto type = static_cast<size_t>(sensor.mSensorMaskType);
+	size_t sensorMaskTypeNumericValue = type;
+
+	/* Convert the size_t value to enum */
+	switch (sensorMaskTypeNumericValue)
+	{
+		case 0:
+			{
+				mSensorMaskType = SensorMaskType::kIndex;
+				break;
+			}
+		case 1:
+			{
+				mSensorMaskType = SensorMaskType::kCorners;
+				break;
+			}
+		default:
+			{
+				assert(false);
+			}
+	}
+
+	/* Read the input mask size */
+	switch (mSensorMaskType)
+	{
+		case SensorMaskType::kIndex:
+			{
+				mSensorMaskIndexSize = sensor.mSensorMaskIndex.size();
+				break;
+			}
+		case SensorMaskType::kCorners:
+			{
+				assert(false);
+			}
+		default:
+			assert(false);
+	}
+
+	mInitialPressureSourceFlag = source.mInitialPressureSourceFlag;
+	mPressureSourceFlag = source.mPressureSourceFlag;
+
+	mTransducerSourceFlag = source.mTransducerSourceFlag;
+
+	mVelocityXSourceFlag = source.mVelocityXSourceFlag;
+	mVelocityYSourceFlag = source.mVelocityYSourceFlag;
+	
+	mTransducerSourceInputSize = 0l;
+
+	mPressureSourceMode = SourceMode::kDirichlet;
+	mPressureSourceMany = 0;
+	mPressureSourceIndexSize = 0;
+
+}
 
 /**
  * Parse command line and read scalar values from the input file to initialize the class and the simulation.

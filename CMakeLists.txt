@@ -1,5 +1,5 @@
 
-project(kspaceFirstOrder)
+project(KSpaceSolver)
 
 
 # Prevent overriding the parent project's compiler/linker
@@ -50,7 +50,10 @@ set(APP_SOURCE
 	lib/OutputStreams/WholeDomainOutputStream.cpp 
 	lib/Parameters/CommandLineParameters.cpp      
 	lib/Parameters/Parameters.cpp					
-	src/kspaceFirstOrder.cpp
+	lib/KSpace/KMatrixUnitTest.cpp
+	lib/KSpace/KSpaceSolver.cpp
+	lib/KSpace/KConfig.cpp
+	src/KSpaceUnitTest.cpp
 )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3 -ffast-math -fassociative-math")

@@ -267,6 +267,8 @@ class MatrixContainer
 
     /// Load all marked matrices from the input HDF5 file.
     void loadDataFromInputFile();
+
+	void loadDataFromKConfig() {};
     /// Load marked matrices from the checkpoint HDF5 file.
     void loadDataFromCheckpointFile();
     /// Store marked matrices into the checkpoint HDF5 file.
