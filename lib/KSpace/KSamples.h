@@ -3,7 +3,8 @@
 
 
 #ifndef __KSAMPLE_H_INCLUDE__
-#define __KSAMPLE_H_INCLUDE__ 
+#define __KSAMPLE_H_INCLUDE__
+
 #include <Containers/OutputStreamContainer.h>
 
 using KSamplesBase = OutputStreamContainer;

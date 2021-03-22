@@ -1,9 +1,8 @@
 
 
 
-
 #ifndef __KSPACESOLVER_INCLUDE_H__
-#define __KSPACESOLVER_INCLUDE_H__ 
+#define __KSPACESOLVER_INCLUDE_H__
 
 #include <memory>
 #include <exception>
@@ -31,75 +30,77 @@
 
 using KSpaceSolver = KSpaceFirstOrderSolver;
 
-class KSpaceSolverFluid : public KSpaceSolver {
+class KSpaceSolverFluid : public KSpaceSolver
+{
 
 public:
-	KSpaceSolverFluid() = default;
+    KSpaceSolverFluid() = default;
 
-	~KSpaceSolverFluid() override = default;
+    ~KSpaceSolverFluid() override = default;
 
-	void allocateMemory() override;
+    void allocateMemory() override;
 
-	void loadInputData() override;
+    void loadInputData() override;
 
-	void freeMemory() override { KSpaceSolver::freeMemory(); }
+    void freeMemory() override { KSpaceSolver::freeMemory(); }
 
-	void compute() override;
+    void compute() override;
 
 };
 
-class KSpaceSolverElastic : public KSpaceSolver {
+class KSpaceSolverElastic : public KSpaceSolver
+{
 
 public:
-	KSpaceSolverElastic() = default;
+    KSpaceSolverElastic() = default;
 
-	~KSpaceSolverElastic() override = default;
+    ~KSpaceSolverElastic() override = default;
 
-	void fftTest();
+    void fftTest();
 
-	void allocateMemory() override;
+    void allocateMemory() override;
 
-	void loadInputData() override;
+    void loadInputData() override;
 
-	void freeMemory() override { KSpaceSolver::freeMemory(); }
+    void freeMemory() override { KSpaceSolver::freeMemory(); }
 
-	void compute() override;
+    void compute() override;
 
     template<Parameters::SimulationDimension simulationDimension>
-	void preProcessing();
+    void preProcessing();
 
     void generateDerivativeOperators();
 
-	template<Parameters::SimulationDimension simulationDimension,
-					 bool    rho0ScalarFlag,
-					 bool    bOnAScalarFlag,
-					 bool    c0ScalarFlag,
-					 bool	 s0ScalarFlag,
-					 bool    alphaCoefScalarFlag> 
-	void computeElastic(); 
+    template<Parameters::SimulationDimension simulationDimension,
+            bool rho0ScalarFlag,
+            bool bOnAScalarFlag,
+            bool c0ScalarFlag,
+            bool s0ScalarFlag,
+            bool alphaCoefScalarFlag>
+    void computeElastic();
 
-	template<Parameters::SimulationDimension simulationDimension>
-	void computePressureGradient();
+    template<Parameters::SimulationDimension simulationDimension>
+    void computePressureGradient();
 
-	template<Parameters::SimulationDimension simulationDimension>
-	void computeSplitVelocity();
+    template<Parameters::SimulationDimension simulationDimension>
+    void computeSplitVelocity();
 
-	template<Parameters::SimulationDimension simulationDimension>
-	void computeVelocity();
+    template<Parameters::SimulationDimension simulationDimension>
+    void computeVelocity();
 
     template<Parameters::SimulationDimension simulationDimension>
     void computeVelocityGradient();
 
-	template<Parameters::SimulationDimension simulationDimension>
-	void computeSplitPressure();
+    template<Parameters::SimulationDimension simulationDimension>
+    void computeSplitPressure();
 
-	template<Parameters::SimulationDimension simulationDimension,
-			 bool rho0ScalarFlag,
-			 bool c0ScalarFlag,
-			 bool s0ScalarFlag>
-	void addInitialPressureSource();
+    template<Parameters::SimulationDimension simulationDimension,
+            bool rho0ScalarFlag,
+            bool c0ScalarFlag,
+            bool s0ScalarFlag>
+    void addInitialPressureSource();
 
-    template <Parameters::SimulationDimension simulationDimension,
+    template<Parameters::SimulationDimension simulationDimension,
             bool rho0ScalarFlag,
             bool bOnAScalarFlag,
             bool c0ScalarFlag,
@@ -109,21 +110,22 @@ public:
 
 
 private:
-    using ComputeElasticFunc = std::function<void (KSpaceSolverElastic&)>;
+    using ComputeElasticFunc = std::function<void(KSpaceSolverElastic &)>;
 
     using ComputeElasticImp = std::map<
-			std::tuple<Parameters::SimulationDimension, 
-				bool, bool, bool, bool, bool>, ComputeElasticFunc>;
+            std::tuple<Parameters::SimulationDimension,
+                    bool, bool, bool, bool, bool>, ComputeElasticFunc>;
 
     /// Map with different implementations of ComputeMainLoop.
     static ComputeElasticImp sComputeElasticImp;
 
 private:
-	void generateLameConstant();
+    void generateLameConstant();
 
-	void generatePml() override;
+    void generatePml() override;
 
 };
+
 #endif /* ifndef __KSPACESOLVER_INCLUDE_H__ */
 
 

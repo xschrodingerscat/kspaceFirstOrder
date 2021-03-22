@@ -139,7 +139,7 @@ class KSpaceFirstOrderSolver
     /// Initialize FFTW plans.
     void initializeFftwPlans();
 
-    virtual /**
+    /**
      * @brief   Compute pre-processing phase.
      * @details Initialize all indices, pre-compute constants such as c^2, rho0Sgx * dt  and create kappa, derivative
      *          and shift operators, PML, absorbEta, absorbTau, absorbNabla1, absorbNabla2  matrices.
@@ -176,7 +176,7 @@ class KSpaceFirstOrderSolver
     void printStatistics();
 
     //----------------------------------------- Compute pressure gradient --------------------------------------------//
-    virtual /**
+    /**
      * @brief   Compute pressure gradient for normal medium.
      * @details Results dp/dx, dp/dy and dp/dz are stored in kTemp1RealND, kTemp1RealND and kTemp1RealND.
      *
@@ -333,7 +333,7 @@ class KSpaceFirstOrderSolver
     void computeDensityLinear();
 
     //---------------------------------------------- Compute pressure ------------------------------------------------//
-    virtual /**
+    /**
      * @brief  Compute acoustic pressure.
      *
      * @tparam simulationDimension - Dimensionality of the simulation.
@@ -561,7 +561,7 @@ class KSpaceFirstOrderSolver
                                    const RealMatrix&  velocitySourceInput,
                                    const IndexMatrix& velocitySourceIndex);
 
-    virtual /**
+    /**
      * @brief  Calculate initial pressure source.
      *
      * @tparam simulationDimension - Dimensionality of the simulation.

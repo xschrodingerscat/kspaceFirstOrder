@@ -1,7 +1,6 @@
 
 
 
-
 #include <KSpace/KSpaceSolver.h>
 
 using std::ios;
@@ -12,50 +11,50 @@ using MI = MatrixContainer::MatrixIdx;
 /* Shortcut for Output stream id in the container. */
 using OI = OutputStreamContainer::OutputStreamIdx;
 
-void 
-KSpaceSolverFluid::allocateMemory() 
+void
+KSpaceSolverFluid::allocateMemory()
 {
-	// Add matrices into the container and create all matrices
-	mMatrixContainer.init();
-	mMatrixContainer.createMatrices();
+    // Add matrices into the container and create all matrices
+    mMatrixContainer.init();
+    mMatrixContainer.createMatrices();
 
-	// Add output streams into container
-	mOutputStreamContainer.init(mMatrixContainer);
+    // Add output streams into container
+    mOutputStreamContainer.init(mMatrixContainer);
 }
 
-void 
-KSpaceSolverFluid::loadInputData() 
+void
+KSpaceSolverFluid::loadInputData()
 {
-	// Load data from the input file
-	mMatrixContainer.loadDataFromKConfig();
+    // Load data from the input file
+    mMatrixContainer.loadDataFromKConfig();
 
-	Hdf5File& outputFile = mParameters.getOutputFile();
+    Hdf5File &outputFile = mParameters.getOutputFile();
 
-	std::string filename = "example_output.h5";
-	outputFile.create(filename);
-	mOutputStreamContainer.createStreams();
+    std::string filename = "example_output.h5";
+    outputFile.create(filename);
+    mOutputStreamContainer.createStreams();
 }
 
-void 
+void
 KSpaceSolverFluid::compute()
 {
-	/* Initialize all used FFTW plans */
-	initializeFftwPlans();
+    /* Initialize all used FFTW plans */
+    initializeFftwPlans();
 
-	preProcessing<SD::k2D>();
+    preProcessing<SD::k2D>();
 
-	sComputeMainLoopImp[std::make_tuple(mParameters.getSimulationDimension(),
-			mParameters.getRho0ScalarFlag(),
-			mParameters.getBOnAScalarFlag(),
-			mParameters.getC0ScalarFlag(),
-			mParameters.getAlphaCoeffScalarFlag())](*this);
+    sComputeMainLoopImp[std::make_tuple(mParameters.getSimulationDimension(),
+                                        mParameters.getRho0ScalarFlag(),
+                                        mParameters.getBOnAScalarFlag(),
+                                        mParameters.getC0ScalarFlag(),
+                                        mParameters.getAlphaCoeffScalarFlag())](*this);
 
-	/* Post processing phase */
-	postProcessing();
+    /* Post processing phase */
+    postProcessing();
 
-	writeOutputDataInfo();
+    writeOutputDataInfo();
 
-	mParameters.getOutputFile().close();
+    mParameters.getOutputFile().close();
 }
 
 

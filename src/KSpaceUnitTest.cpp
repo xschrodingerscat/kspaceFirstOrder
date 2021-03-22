@@ -1,36 +1,35 @@
 
 
 
-
 #include <gtest/gtest.h>
 #include <KSpace/KSpaceSolver.h>
 
 
 TEST(KSpace, kFluid)
 {
-	/* create special global configuration (default 2D)*/
-	auto factory = AutoCreateInstance<KConfigFactory>();
-	auto kcfg = factory->AutoCreateKConfig(kFluid);
+    /* create special global configuration (default 2D)*/
+    auto factory = AutoCreateInstance<KConfigFactory>();
+    auto kcfg = factory->AutoCreateKConfig(kFluid);
 
-	auto kcmds = AutoCreateInstance<KCmds>();
-	/* preprocessing */
-	kcfg->preProcessing();
+    auto kcmds = AutoCreateInstance<KCmds>();
+    /* preprocessing */
+    kcfg->preProcessing();
 
-	/* initialize praram object with preprocessed config */
-	auto& params = Parameters::getInstance();
-	params.init(*kcfg, *kcmds);
+    /* initialize param object with preprocessed config */
+    auto &params = Parameters::getInstance();
+    params.init(*kcfg, *kcmds);
 
-	/* create first order PDE solver*/
-	auto solver = AutoCreateInstance<KSpaceSolverFluid>();
+    /* create first order PDE solver*/
+    auto solver = AutoCreateInstance<KSpaceSolverFluid>();
 
-	/* allocate memory for its container (such as matrix) */
-	solver->allocateMemory();
+    /* allocate memory for its container (such as matrix) */
+    solver->allocateMemory();
 
-	/* load data from kconfig */
-	solver->loadInputData();
+    /* load data from kconfig */
+    solver->loadInputData();
 
-	/* solve the pdes system*/
-	solver->compute();
+    /* solve the PDEs system*/
+    solver->compute();
 
 }
 
@@ -45,8 +44,8 @@ TEST(KSpace, kElastic)
 
     auto kcmds = AutoCreateInstance<KCmds>();
 
-    /* initialize praram object with preprocessed config */
-    auto& params = Parameters::getInstance();
+    /* initialize param object with preprocessed config */
+    auto &params = Parameters::getInstance();
     params.init(*kcfg, *kcmds);
 
     /* create first order PDE solver*/
@@ -58,35 +57,35 @@ TEST(KSpace, kElastic)
     /* load data from kconfig */
     solver->loadInputData();
 
-    /* solve the pdes system*/
+    /* solve the PDEs system*/
     solver->compute();
 
 }
 
 TEST(KSpace, kFftXY)
 {
-	/* create special global configuration (default 2D)*/
-	auto factory = AutoCreateInstance<KConfigFactory>();
-	auto kcfg = factory->AutoCreateKConfig(kElastic);
+    /* create special global configuration (default 2D)*/
+    auto factory = AutoCreateInstance<KConfigFactory>();
+    auto kcfg = factory->AutoCreateKConfig(kElastic);
 
-	/* preprocessing */
-	kcfg->preProcessing();
+    /* preprocessing */
+    kcfg->preProcessing();
 
-	auto kcmds = AutoCreateInstance<KCmds>();
+    auto kcmds = AutoCreateInstance<KCmds>();
 
-	/* initialize praram object with preprocessed config */
-	auto& params = Parameters::getInstance();
-	params.init(*kcfg, *kcmds);
+    /* initialize param object with preprocessed config */
+    auto &params = Parameters::getInstance();
+    params.init(*kcfg, *kcmds);
 
-	/* create first order PDE solver*/
-	auto solver = AutoCreateInstance<KSpaceSolverElastic>();
+    /* create first order PDE solver*/
+    auto solver = AutoCreateInstance<KSpaceSolverElastic>();
 
-	/* allocate memory for its container (such as matrix) */
-	solver->allocateMemory();
+    /* allocate memory for its container (such as matrix) */
+    solver->allocateMemory();
 
-	solver->loadInputData();
+    solver->loadInputData();
 
-	solver->fftTest();
+    solver->fftTest();
 }
 
 
