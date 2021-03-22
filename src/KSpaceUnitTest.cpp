@@ -7,36 +7,34 @@
 #include <KSpace/KSpaceSolver.h>
 
 
-//TEST(KSpace, kFluid)
-//{
-//	/* create special global configuration (default 2D)*/
-//	auto factory = AutoCreateInstance<KConfigFactory>();
-//	auto kcfg = factory->AutoCreateKConfig(kFluid);
-//
-//	auto kcmds = AutoCreateInstance<KCmds>();
-//	/* preprocessing */
-//	kcfg->preProcessing();
-//
-//	/* initialize praram object with preprocessed config */
-//	auto& params = Parameters::getInstance();
-//	params.init(*kcfg, *kcmds);
-//
-//	/* create first order PDE solver*/
-//	auto solver = AutoCreateInstance<KSpaceSolverFluid>();
-//
-//	/* allocate memory for its container (such as matrix) */
-//	solver->allocateMemory();
-//
-//	/* load data from kconfig */
-//	solver->loadInputData();
-//
-//	/* solve the pdes system*/
-//	solver->compute();
-//
-//}
-//
+TEST(KSpace, kFluid)
+{
+	/* create special global configuration (default 2D)*/
+	auto factory = AutoCreateInstance<KConfigFactory>();
+	auto kcfg = factory->AutoCreateKConfig(kFluid);
 
-#if 0
+	auto kcmds = AutoCreateInstance<KCmds>();
+	/* preprocessing */
+	kcfg->preProcessing();
+
+	/* initialize praram object with preprocessed config */
+	auto& params = Parameters::getInstance();
+	params.init(*kcfg, *kcmds);
+
+	/* create first order PDE solver*/
+	auto solver = AutoCreateInstance<KSpaceSolverFluid>();
+
+	/* allocate memory for its container (such as matrix) */
+	solver->allocateMemory();
+
+	/* load data from kconfig */
+	solver->loadInputData();
+
+	/* solve the pdes system*/
+	solver->compute();
+
+}
+
 TEST(KSpace, kFftXY)
 {
 	/* create special global configuration (default 2D)*/
@@ -61,11 +59,7 @@ TEST(KSpace, kFftXY)
 	solver->loadInputData();
 
 	solver->fftTest();
-
 }
-
-#else
-
 
 TEST(KSpace, kElastic)
 {
@@ -95,7 +89,6 @@ TEST(KSpace, kElastic)
 	solver->compute();
 
 }
-#endif
 
 
 
