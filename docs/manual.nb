@@ -1,0 +1,338 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 12.2' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     11548,        330]
+NotebookOptionsPosition[      9273,        285]
+NotebookOutlinePosition[      9701,        302]
+CellTagsIndexPosition[      9658,        299]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["K-Space Solver", "Title",
+ CellChangeTimes->{{3.8248457680318747`*^9, 
+  3.824845779700313*^9}},ExpressionUUID->"1c383628-2f70-434b-afe1-\
+3cab07a5a73e"],
+
+Cell["By Shaune Feng", "Author",
+ CellChangeTimes->{{3.8248457993550987`*^9, 3.8248458070307693`*^9}, {
+  3.824845841963737*^9, 3.824845844076846*^9}, {3.824849248276*^9, 
+  3.824849251207412*^9}},ExpressionUUID->"00d7c052-7c23-4518-a077-\
+76ad52831b97"],
+
+Cell[TextData[{
+ StyleBox["Abstract:",
+  FontWeight->"Bold"],
+ " K-Space Solver  which is based on K-Wave software mainly implemented the \
+simulation of ultrasonic  propagation within the mixture (includes fluid and \
+solid)."
+}], "Abstract",
+ CellChangeTimes->{{3.824845875595907*^9, 3.824845939006542*^9}, {
+  3.824845976138617*^9, 3.824846033062436*^9}, {3.824846064105153*^9, 
+  3.824846071508729*^9}, {3.8248463571198378`*^9, 3.82484649329668*^9}, {
+  3.8248465606461363`*^9, 3.824846567118425*^9}, {3.824847599150858*^9, 
+  3.824847600304008*^9}, {3.824849275804591*^9, 
+  3.8248492988443327`*^9}},ExpressionUUID->"f0404ca5-7bc8-4e09-a28f-\
+6b5f0ba513e1"],
+
+Cell[CellGroupData[{
+
+Cell[TextData[StyleBox["Version Information", "Subtitle"]], "Chapter",
+ CellChangeTimes->{{3.824846596648501*^9, 3.824846602409522*^9}, {
+  3.824846651616467*^9, 3.824846655043062*^9}, {3.8248467008659983`*^9, 
+  3.824846710252069*^9}, {3.8248467900202103`*^9, 3.824846791389855*^9}, {
+  3.8248468550570917`*^9, 3.824846897644205*^9}, {3.824849340356379*^9, 
+  3.82484934055488*^9}},ExpressionUUID->"1d587206-568f-4042-a848-\
+5682f59ff5c2"],
+
+Cell[TextData[{
+ "              ",
+ StyleBox["Software                        Version No.                  \
+Modified                        Description",
+  FontWeight->"Bold",
+  FontColor->RGBColor[
+   0.9862516212710766, 0.007125963225757229, 0.027435721370260166`]],
+ "\n       K-Space Solver                         1.10                        \
+ 03.16 2021                          Implemented ultrasonic propagation \
+simulation in the solid."
+}], "Text",
+ CellChangeTimes->{{3.8248472637718287`*^9, 3.8248474206436863`*^9}, {
+  3.824847456170895*^9, 3.824847456897725*^9}, {3.824847503763345*^9, 
+  3.8248476211900463`*^9}},ExpressionUUID->"c01899f9-04a7-45fa-b26d-\
+c394dd87d956"]
+}, Open  ]],
+
+Cell["0 Results", "Chapter",
+ CellChangeTimes->{{3.8248493776728897`*^9, 
+  3.824849381090582*^9}},ExpressionUUID->"99a379d9-91db-4e79-b676-\
+ae71b8eae999"],
+
+Cell["1 Theory", "Chapter",
+ CellChangeTimes->{{3.8248467142308283`*^9, 3.824846725197978*^9}, {
+  3.824849341963085*^9, 
+  3.8248493633757*^9}},ExpressionUUID->"341e3fbb-cc50-467e-ae35-dde0d7713a81"],
+
+Cell[CellGroupData[{
+
+Cell["2 Architecture", "Chapter",
+ CellChangeTimes->{{3.8248466084664793`*^9, 3.824846608994166*^9}, {
+  3.824846671607293*^9, 3.824846678427307*^9}, {3.824846729533372*^9, 
+  3.824846729710203*^9}, {3.824849343373744*^9, 
+  3.824849343666637*^9}},ExpressionUUID->"dcff70c5-1919-4fed-bef5-\
+8a5abc33da60"],
+
+Cell[CellGroupData[{
+
+Cell["2.2 Expansion Position", "Section",
+ CellChangeTimes->{{3.824847656234592*^9, 3.824847668541513*^9}, 
+   3.824847698610353*^9, {3.8248477572862988`*^9, 3.824847765222993*^9}, {
+   3.824849187809561*^9, 3.824849187944343*^9}, {3.8248493475573997`*^9, 
+   3.824849347687673*^9}},ExpressionUUID->"b6f9067c-7878-4608-895d-\
+23b73a569284"],
+
+Cell[TextData[{
+ StyleBox["KConfig",
+  FontWeight->"Bold"],
+ "\n",
+ StyleBox["Scalar flag definition :",
+  FontColor->RGBColor[0, 0, 1]],
+ "  KConfig class in KConfig.h.\n",
+ StyleBox["Scalar and Matrix definition:",
+  FontColor->RGBColor[
+   0.00010681315327687495`, 0.0017547875181200886`, 0.9982146944380865]],
+ " KConfig class in KConfig.h\n",
+ StyleBox["Variable initialization and assignment: ",
+  FontColor->RGBColor[0, 0, 1]],
+ "KConfig Constructor, ",
+ StyleBox["preprocessing",
+  FontWeight->"Bold"],
+ " and ",
+ StyleBox["init",
+  FontWeight->"Bold"],
+ " function of sub-class in KConfig.cc.\n",
+ StyleBox["KConfig Factory expansion:",
+  FontColor->RGBColor[0, 0, 1]],
+ " KConfig.cc"
+}], "Text",
+ CellDingbat->"\[FilledSquare]",
+ CellChangeTimes->{{3.8248476871642113`*^9, 3.824847753809231*^9}, {
+  3.824847817745698*^9, 3.824847843432819*^9}, {3.8248478973279247`*^9, 
+  3.8248481749254827`*^9}, {3.8248482414457073`*^9, 3.824848297097424*^9}, {
+  3.824848340543347*^9, 3.824848373869149*^9}, {3.824848510993544*^9, 
+  3.8248485187070923`*^9}, {3.8248488333813133`*^9, 
+  3.824848835035043*^9}},ExpressionUUID->"4ebbc0b3-6657-43fc-b39f-\
+6d30403e7321"],
+
+Cell[TextData[{
+ StyleBox["Parameters",
+  FontWeight->"Bold"],
+ "\n",
+ StyleBox["Scalar and its flag definition:",
+  FontColor->RGBColor[0, 0, 1]],
+ " Class Parameter in Parameters.h\n",
+ StyleBox["Scalar and its flag initialization: ",
+  FontColor->RGBColor[0, 0, 1]],
+ "Constructor in Parameters.cc\n",
+ StyleBox["Scalar and Matrix assignment:",
+  FontColor->RGBColor[0, 0, 1]],
+ " ",
+ StyleBox["KMatrixCached",
+  FontWeight->"Bold"],
+ " container and ",
+ StyleBox["init",
+  FontWeight->"Bold"],
+ " member function in Parameters.cc"
+}], "Text",
+ CellDingbat->"\[FilledSquare]",
+ CellChangeTimes->{{3.824848180337947*^9, 3.8248482065388927`*^9}, {
+  3.824848387442298*^9, 3.824848599130958*^9}, {3.824848633454074*^9, 
+  3.824848677886675*^9}},ExpressionUUID->"8b85e841-c197-4111-af39-\
+d1d8cb6d005d"],
+
+Cell[TextData[{
+ StyleBox["MatrixContainer",
+  FontWeight->"Bold"],
+ "\[LineSeparator]",
+ StyleBox["Memory Matrix:",
+  FontColor->RGBColor[0, 0, 1]],
+ " Define ",
+ StyleBox["MatrixIdx",
+  FontWeight->"Bold"],
+ "\n",
+ StyleBox["Memory Matrix loaded data:",
+  FontColor->RGBColor[0, 0, 1]],
+ " Define ",
+ StyleBox["MatrixIdx",
+  FontWeight->"Bold"],
+ " and associate string with ",
+ StyleBox["MatrixIdx",
+  FontWeight->"Bold"],
+ " in the ",
+ StyleBox["sMatrixHdf5Names",
+  FontWeight->"Bold"],
+ " map in MatrixContainer.cc\n",
+ StyleBox["Memory allocation:",
+  FontColor->RGBColor[0, 0, 1]],
+ " ",
+ StyleBox["Init",
+  FontWeight->"Bold"],
+ " function "
+}], "Text",
+ CellDingbat->"\[FilledSquare]",
+ CellChangeTimes->{{3.8248487074407578`*^9, 3.824848719905669*^9}, {
+   3.824848841434409*^9, 3.82484892508978*^9}, {3.824848958934622*^9, 
+   3.824849012100953*^9}, 3.8248490476291513`*^9, {3.824849136235285*^9, 
+   3.824849165957761*^9}, {3.824849417079962*^9, 3.824849417461609*^9}, 
+   3.824849469339006*^9},ExpressionUUID->"328c0d2b-dd6f-4f3d-908d-\
+8dafc24de525"],
+
+Cell[TextData[{
+ StyleBox["Matrix\n",
+  FontWeight->"Bold"],
+ "Read data: Implement ",
+ StyleBox["ReadData",
+  FontWeight->"Bold"],
+ " function in BaseMatrix.h (Subclass ",
+ StyleBox["IndexMatrix",
+  FontWeight->"Bold"],
+ " and ",
+ StyleBox["RealMatrix",
+  FontWeight->"Bold"],
+ ")"
+}], "Text",
+ CellDingbat->"\[FilledSquare]",
+ CellChangeTimes->{{3.824849716882208*^9, 3.824849777854982*^9}, {
+  3.824849814057267*^9, 
+  3.824849841931705*^9}},ExpressionUUID->"5857d36f-e46e-4b35-946e-\
+1edc18bca162"],
+
+Cell[TextData[{
+ StyleBox["KSpaceSolver\n",
+  FontWeight->"Bold"],
+ "Fluid Solver: KSpaceSolverFluid.cc\nSolid Solver: KSpaceSolverElastic.cc\n\
+Main function: ",
+ StyleBox["PreProcessing",
+  FontWeight->"Bold"],
+ ", ",
+ StyleBox["AllocateMemory",
+  FontWeight->"Bold"],
+ ", ",
+ StyleBox["LoadInputData",
+  FontWeight->"Bold"],
+ " and ",
+ StyleBox["Compute",
+  FontWeight->"Bold"],
+ "."
+}], "Text",
+ CellDingbat->"\[FilledSquare]",
+ CellChangeTimes->{{3.824849474623135*^9, 3.824849563920183*^9}, {
+  3.824849614618099*^9, 
+  3.8248496854718018`*^9}},ExpressionUUID->"d963925b-26da-4fe3-938e-\
+054995fe7fcf"]
+}, Open  ]]
+}, Open  ]],
+
+Cell["3 Example", "Chapter",
+ CellChangeTimes->{{3.824846682969675*^9, 3.824846731159*^9}, {
+  3.824849235053198*^9, 3.824849237068953*^9}, {3.824849351193532*^9, 
+  3.824849351409547*^9}},ExpressionUUID->"e0b61e8f-83bd-4fc9-9b86-\
+bb8a8029eef1"],
+
+Cell[CellGroupData[{
+
+Cell["4 Appendix", "Chapter",
+ CellChangeTimes->{{3.824846772628742*^9, 3.8248467753070173`*^9}, {
+  3.8248493527635727`*^9, 3.824849353128497*^9}, {3.824850746682601*^9, 
+  3.824850748032403*^9}},ExpressionUUID->"f8c88af6-77e5-438d-ae82-\
+40e751ad775e"],
+
+Cell[CellGroupData[{
+
+Cell["4.1 Useful Procedure", "Section",
+ CellChangeTimes->{{3.824850759025448*^9, 
+  3.824850775393808*^9}},ExpressionUUID->"06f39d37-23ab-473d-ab3e-\
+e818ce8fcf44"],
+
+Cell["Get real data from matrix name", "Text",
+ CellDingbat->"\[FilledSquare]",
+ CellChangeTimes->{{3.824850804636991*^9, 
+  3.8248508398300743`*^9}},ExpressionUUID->"50914fdb-cae2-4d8e-8f6d-\
+5ed37bed345b"],
+
+Cell[TextData[{
+ "float* c2 = ",
+ StyleBox["getRealData",
+  FontWeight->"Bold"],
+ "(MI::kC2);\n"
+}], "CodeText",
+ CellChangeTimes->{{3.8248507863643*^9, 
+  3.824850788482374*^9}},ExpressionUUID->"f236ab43-a903-4f99-94d3-\
+c640c783945d"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{Full, Full},
+WindowMargins->{{4, Automatic}, {Automatic, 4}},
+Magnification:>1.25 Inherited,
+FrontEndVersion->"12.2 for Mac OS X x86 (64-bit) (December 12, 2020)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"d31bf3cd-f308-4f72-b444-0cd8dc993158"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 159, 3, 153, "Title",ExpressionUUID->"1c383628-2f70-434b-afe1-3cab07a5a73e"],
+Cell[742, 27, 254, 4, 48, "Author",ExpressionUUID->"00d7c052-7c23-4518-a077-76ad52831b97"],
+Cell[999, 33, 662, 13, 135, "Abstract",ExpressionUUID->"f0404ca5-7bc8-4e09-a28f-6b5f0ba513e1"],
+Cell[CellGroupData[{
+Cell[1686, 50, 440, 6, 87, "Chapter",ExpressionUUID->"1d587206-568f-4042-a848-5682f59ff5c2"],
+Cell[2129, 58, 688, 14, 91, "Text",ExpressionUUID->"c01899f9-04a7-45fa-b26d-c394dd87d956"]
+}, Open  ]],
+Cell[2832, 75, 156, 3, 107, "Chapter",ExpressionUUID->"99a379d9-91db-4e79-b676-ae71b8eae999"],
+Cell[2991, 80, 200, 3, 88, "Chapter",ExpressionUUID->"341e3fbb-cc50-467e-ae35-dde0d7713a81"],
+Cell[CellGroupData[{
+Cell[3216, 87, 305, 5, 88, "Chapter",ExpressionUUID->"dcff70c5-1919-4fed-bef5-8a5abc33da60"],
+Cell[CellGroupData[{
+Cell[3546, 96, 340, 5, 105, "Section",ExpressionUUID->"b6f9067c-7878-4608-895d-23b73a569284"],
+Cell[3889, 103, 1164, 31, 198, "Text",ExpressionUUID->"4ebbc0b3-6657-43fc-b39f-6d30403e7321"],
+Cell[5056, 136, 802, 24, 163, "Text",ExpressionUUID->"8b85e841-c197-4111-af39-d1d8cb6d005d"],
+Cell[5861, 162, 1065, 35, 163, "Text",ExpressionUUID->"328c0d2b-dd6f-4f3d-908d-8dafc24de525"],
+Cell[6929, 199, 502, 18, 91, "Text",ExpressionUUID->"5857d36f-e46e-4b35-946e-1edc18bca162"],
+Cell[7434, 219, 608, 22, 163, "Text",ExpressionUUID->"d963925b-26da-4fe3-938e-054995fe7fcf"]
+}, Open  ]]
+}, Open  ]],
+Cell[8069, 245, 246, 4, 107, "Chapter",ExpressionUUID->"e0b61e8f-83bd-4fc9-9b86-bb8a8029eef1"],
+Cell[CellGroupData[{
+Cell[8340, 253, 254, 4, 88, "Chapter",ExpressionUUID->"f8c88af6-77e5-438d-ae82-40e751ad775e"],
+Cell[CellGroupData[{
+Cell[8619, 261, 165, 3, 105, "Section",ExpressionUUID->"06f39d37-23ab-473d-ab3e-e818ce8fcf44"],
+Cell[8787, 266, 207, 4, 55, "Text",ExpressionUUID->"50914fdb-cae2-4d8e-8f6d-5ed37bed345b"],
+Cell[8997, 272, 236, 8, 92, "CodeText",ExpressionUUID->"f236ab43-a903-4f99-94d3-c640c783945d"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
