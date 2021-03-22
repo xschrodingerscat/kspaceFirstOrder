@@ -35,6 +35,8 @@
 #include <Utils/DimensionSizes.h>
 #include <Hdf5/Hdf5File.h>
 
+#include <KSpace/KMatrixCached.h>
+
 /**
  * @class BaseMatrix
  * @brief Abstract base class. The common ancestor defining the common interface and allowing derived classes to be
@@ -88,6 +90,10 @@ class BaseMatrix
     virtual void writeData(Hdf5File&         file,
                            const MatrixName& matrixName,
                            const size_t      compressionLevel) = 0;
+
+	virtual void readData(KMatrixCached& cached, 
+			              const MatrixName& matrixName) {};
+
 };// end of BaseMatrix
 //----------------------------------------------------------------------------------------------------------------------
 

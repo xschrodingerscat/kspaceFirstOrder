@@ -56,6 +56,18 @@ IndexMatrix::~IndexMatrix()
 }// end of ~IndexMatrix
 //----------------------------------------------------------------------------------------------------------------------
 
+void 
+IndexMatrix::readData(KMatrixCached& cached, const MatrixName& matrixName)
+{
+	size_t idx = 0;
+	auto &mat = *static_cast<KMatrix<size_t>*>(cached[matrixName].get());
+
+	for (size_t j = 0; j < mat.colSize(); ++ j)
+		for (size_t i = 0; i < mat.rowSize(); ++ i) 
+			mData[idx ++] = mat[i][j];
+
+}
+
 /**
  * Read data from HDF5 file (only from the root group).
  */

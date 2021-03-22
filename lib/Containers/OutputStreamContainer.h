@@ -128,7 +128,7 @@ class OutputStreamContainer
     /// Copy constructor not allowed.
     OutputStreamContainer(const OutputStreamContainer&) = delete;
     /// Destructor.
-    ~OutputStreamContainer();
+    virtual ~OutputStreamContainer();
 
     /// Operator = not allowed.
     OutputStreamContainer& operator=(OutputStreamContainer&) = delete;

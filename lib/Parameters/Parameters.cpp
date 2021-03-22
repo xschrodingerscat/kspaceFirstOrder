@@ -161,16 +161,19 @@ Parameters& Parameters::getInstance()
 //----------------------------------------------------------------------------------------------------------------------
 //
 void 
-Parameters::init(KConfig &kcfg)
+Parameters::init(KConfig &kcfg, KCmds &kcmds)
 {
-	using PI = Parameters::ParameterNameIdx;
+	mKConfigFlag = true;
+
+	mKCmds = kcmds;
+
 	DimensionSizes scalarSizes(1, 1, 1);
 
-	const auto & kgrid = kcfg.mKGrid;
-	const auto & medium = kcfg.mMedium;
-	const auto & kpml = kcfg.mKPml;
-	const auto & sensor = kcfg.mSensor;
-	const auto & source = kcfg.mSource;
+	auto & kgrid = kcfg.mKGrid;
+	auto & medium = kcfg.mMedium;
+	auto & kpml = kcfg.mKPml;
+	auto & sensor = kcfg.mSensor;
+	auto & source = kcfg.mSource;
 
 	// Read dimension sizes
 	const size_t x = kgrid.mNx;
@@ -178,15 +181,30 @@ Parameters::init(KConfig &kcfg)
 	const size_t z = kgrid.mNz;;
 
 	mFullDimensionSizes    = DimensionSizes(x, y, z);
+
 	mReducedDimensionSizes = DimensionSizes(((x / 2) + 1), y, z);
+
+	mReducedXDimensionSizes = DimensionSizes(((x / 2) + 1), y, z);
+	mReducedYDimensionSizes = DimensionSizes(x, ((y / 2) + 1), z);
 
 	mAxisymmetricFlag = kcfg.mAxisymmetricFlag && mFullDimensionSizes.is2D();
 
 	mNt = kgrid.mNt;
 
+	mDt = kgrid.mDt;
 	mDx = kgrid.mDx;
 	mDy = kgrid.mDy;
 	mDz = isSimulation3D() ? kgrid.mDz : 0.f;
+
+	mCRef = medium.mCref;
+
+	mPmlXSize  = kpml.mPmlXSize;
+	mPmlYSize  = kpml.mPmlYSize;
+
+	mPmlXAlpha = kpml.mPmlXAlpha;
+	mPmlYAlpha = kpml.mPmlYAlpha;;
+
+	mMultiAxialPmlRatio = kpml.mMultiAxialPmlRatio;
 
 	mNonLinearFlag = kcfg.mNonLinearFlag;
 	mNonUniformGridFlag = kgrid.mNonUniformGridFlag;
@@ -238,7 +256,7 @@ Parameters::init(KConfig &kcfg)
 	{
 		case SensorMaskType::kIndex:
 			{
-				mSensorMaskIndexSize = sensor.mSensorMaskIndex.size();
+				mSensorMaskIndexSize = sensor.mSensorMaskIndex.colSize();
 				break;
 			}
 		case SensorMaskType::kCorners:
@@ -263,6 +281,35 @@ Parameters::init(KConfig &kcfg)
 	mPressureSourceMany = 0;
 	mPressureSourceIndexSize = 0;
 
+	/* store matrix from kconfig */
+	auto addMatrix = [this] (std::string name, KBaseMatrix *mat) 
+	{ 
+		mMatCached[name] = std::shared_ptr<KBaseMatrix>(mat); 
+
+		if(name == "c0") {
+
+			auto &mat = *static_cast<KMatrix<float>*>(mMatCached[name].get());
+
+			std::cout << mat[0][0] << std::endl;
+		}
+	};
+
+	addMatrix("rho0", medium.mRho0.clone());
+	addMatrix("rho0_sgx", medium.mRho0Sgx.clone());
+	addMatrix("rho0_sgy", medium.mRho0Sgy.clone());
+
+	addMatrix("c0", medium.mC0.clone());
+	addMatrix("p0_source_input", source.mInitialPressureSourceInput.clone());
+	addMatrix("sensor_mask_index", sensor.mSensorMaskIndex.clone());
+
+	mElasticFlag = kcfg.mElasticFlag;
+
+	if (kcfg.mElasticFlag) {
+		mS0ScalarFlag = medium.mS0ScalarFlag;
+		mS0Scalar = mS0ScalarFlag ? medium.mS0Scalar : 0.f;
+
+		addMatrix("s0", medium.mS0.clone());
+	}
 }
 
 /**
@@ -270,6 +317,8 @@ Parameters::init(KConfig &kcfg)
  */
 void Parameters::init(int argc, char** argv)
 {
+	mKConfigFlag = false;
+
 	mCommandLineParameters.parseCommandLine(argc, argv);
 
 	if (getGitHash() != "")
@@ -1157,7 +1206,12 @@ void Parameters::printSensorInfo()
  * Constructor.
  */
 Parameters::Parameters()
-	: mCommandLineParameters(),
+	: mKConfigFlag(false),
+	mElasticFlag(false),
+	mMultiAxialPmlRatio(0.f),
+	mS0ScalarFlag(false),
+	mS0Scalar(0.0f),
+	mCommandLineParameters(),
 	mInputFile(), mOutputFile(), mCheckpointFile(), mFileHeader(),
 	mFullDimensionSizes(0,0,0), mReducedDimensionSizes(0,0,0),
 	mAxisymmetricFlag(false),
@@ -1177,7 +1231,8 @@ Parameters::Parameters()
 	mPressureSourceIndexSize(0), mTransducerSourceInputSize(0),mVelocitySourceIndexSize(0),
 	mPressureSourceMode(SourceMode::kDirichlet), mPressureSourceMany(0),
 	mVelocitySourceMode(SourceMode::kDirichlet), mVelocitySourceMany(0),
-	mSensorMaskType(SensorMaskType::kIndex), mSensorMaskIndexSize (0), mSensorMaskCornersSize(0)
+	mSensorMaskType(SensorMaskType::kIndex), mSensorMaskIndexSize (0), 
+	mSensorMaskCornersSize(0)
 {
 
 }// end of Parameters

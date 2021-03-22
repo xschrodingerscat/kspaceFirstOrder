@@ -138,7 +138,8 @@ class KSpaceFirstOrderSolver
 
     /// Initialize FFTW plans.
     void initializeFftwPlans();
-    /**
+
+    virtual /**
      * @brief   Compute pre-processing phase.
      * @details Initialize all indices, pre-compute constants such as c^2, rho0Sgx * dt  and create kappa, derivative
      *          and shift operators, PML, absorbEta, absorbTau, absorbNabla1, absorbNabla2  matrices.
@@ -175,7 +176,7 @@ class KSpaceFirstOrderSolver
     void printStatistics();
 
     //----------------------------------------- Compute pressure gradient --------------------------------------------//
-    /**
+    virtual /**
      * @brief   Compute pressure gradient for normal medium.
      * @details Results dp/dx, dp/dy and dp/dz are stored in kTemp1RealND, kTemp1RealND and kTemp1RealND.
      *
@@ -332,7 +333,7 @@ class KSpaceFirstOrderSolver
     void computeDensityLinear();
 
     //---------------------------------------------- Compute pressure ------------------------------------------------//
-    /**
+    virtual /**
      * @brief  Compute acoustic pressure.
      *
      * @tparam simulationDimension - Dimensionality of the simulation.
@@ -559,7 +560,8 @@ class KSpaceFirstOrderSolver
     void computeVelocitySourceTerm(RealMatrix&        velocityMatrix,
                                    const RealMatrix&  velocitySourceInput,
                                    const IndexMatrix& velocitySourceIndex);
-    /**
+
+    virtual /**
      * @brief  Calculate initial pressure source.
      *
      * @tparam simulationDimension - Dimensionality of the simulation.
@@ -640,7 +642,8 @@ class KSpaceFirstOrderSolver
     void generateTau();
     /// Generate shift variables for non-staggered velocity sampling.
     void generateNonStaggeredShiftVariables();
-    /// Generate PML and staggered PML.
+
+    virtual /// Generate PML and staggered PML.
     void generatePml();
     /// Generate square of velocity.
     void generateC2();
@@ -710,6 +713,32 @@ class KSpaceFirstOrderSolver
     FftwRealMatrix& getTemp2FftwRealND()
     {
       return mMatrixContainer.getMatrix<FftwRealMatrix>(MatrixContainer::MatrixIdx::kTemp2RealND);
+    };
+
+
+    FftwComplexMatrix& getTempFftwXXdx()
+    {
+      return mMatrixContainer.getMatrix<FftwComplexMatrix>(MatrixContainer::MatrixIdx::kTmpFftwXXdx);
+    };
+    FftwComplexMatrix& getTempFftwXXdy()
+    {
+      return mMatrixContainer.getMatrix<FftwComplexMatrix>(MatrixContainer::MatrixIdx::kTmpFftwXXdy);
+    };
+    FftwComplexMatrix& getTempFftwYYdx()
+    {
+      return mMatrixContainer.getMatrix<FftwComplexMatrix>(MatrixContainer::MatrixIdx::kTmpFftwYYdx);
+    };
+    FftwComplexMatrix& getTempFftwYYdy()
+    {
+      return mMatrixContainer.getMatrix<FftwComplexMatrix>(MatrixContainer::MatrixIdx::kTmpFftwYYdy);
+    };
+    FftwComplexMatrix& getTempFftwXYdx()
+    {
+      return mMatrixContainer.getMatrix<FftwComplexMatrix>(MatrixContainer::MatrixIdx::kTmpFftwXYdx);
+    };
+    FftwComplexMatrix& getTempFftwXYdy()
+    {
+      return mMatrixContainer.getMatrix<FftwComplexMatrix>(MatrixContainer::MatrixIdx::kTmpFftwXYdy);
     };
 
     /**
@@ -856,7 +885,7 @@ class KSpaceFirstOrderSolver
       return (present) ? mMatrixContainer.getMatrix<IndexMatrix>(matrixIdx).getData() : nullptr;
     }
 
-  private:
+  protected:
     /// Pointer to computeMainLoop method.
     using ComputeMainLoopFnc = std::function<void(KSpaceFirstOrderSolver&)>;
     /**

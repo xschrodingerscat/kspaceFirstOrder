@@ -80,6 +80,9 @@ class IndexMatrix : public BaseIndexMatrix
                            const MatrixName& matrixName,
                            const size_t      compressionLevel) override;
 
+
+	virtual void readData(KMatrixCached& cached, 
+			              const MatrixName& matrixName) override;
     /**
      * @brief   Operator [].
      * @details This operator is not used in the code due to persisting performance issues with vectorization.

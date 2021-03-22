@@ -474,6 +474,8 @@ size_t KSpaceFirstOrderSolver::getMemoryUsage() const
 
 	return pmc.PeakWorkingSetSize >> 20;
 #endif
+
+	return 0;
 }// end of getMemoryUsage
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -833,12 +835,60 @@ void KSpaceFirstOrderSolver::initializeFftwPlans()
 			getTempFftwZ().createR2CFftPlanND(p);
 		}
 
+
 		// Create real to complex plans
 		getTempFftwX().createC2RFftPlanND(p);
 		getTempFftwY().createC2RFftPlanND(p);
 		if (mParameters.isSimulation3D())
 		{
 			getTempFftwZ().createC2RFftPlanND(p);
+		}
+
+		if (mParameters.getElasticFlag()) 
+		{
+#if 1
+			getTempFftwXXdx().createR2CFftPlan1DX(p);
+			getTempFftwXXdy().createR2CFftPlan1DX(p);
+			getTempFftwYYdx().createR2CFftPlan1DX(p);
+			getTempFftwYYdy().createR2CFftPlan1DX(p);
+			getTempFftwXYdx().createR2CFftPlan1DX(p);
+			getTempFftwXYdy().createR2CFftPlan1DX(p);
+
+			getTempFftwXXdx().createC2RFftPlan1DX(p);
+			getTempFftwXXdy().createC2RFftPlan1DX(p);
+			getTempFftwYYdx().createC2RFftPlan1DX(p);
+			getTempFftwYYdy().createC2RFftPlan1DX(p);
+			getTempFftwXYdx().createC2RFftPlan1DX(p);
+			getTempFftwXYdy().createC2RFftPlan1DX(p);
+
+			getTempFftwXXdx().createR2CFftPlan1DY(p);
+			getTempFftwXXdy().createR2CFftPlan1DY(p);
+			getTempFftwYYdx().createR2CFftPlan1DY(p);
+			getTempFftwYYdy().createR2CFftPlan1DY(p);
+			getTempFftwXYdx().createR2CFftPlan1DY(p);
+			getTempFftwXYdy().createR2CFftPlan1DY(p);
+
+			getTempFftwXXdx().createC2RFftPlan1DY(p);
+			getTempFftwXXdy().createC2RFftPlan1DY(p);
+			getTempFftwYYdx().createC2RFftPlan1DY(p);
+			getTempFftwYYdy().createC2RFftPlan1DY(p);
+			getTempFftwXYdx().createC2RFftPlan1DY(p);
+			getTempFftwXYdy().createC2RFftPlan1DY(p);
+#else
+			getTempFftwXXdx().createR2CFftPlanND(p);
+			getTempFftwXXdy().createR2CFftPlanND(p);
+			getTempFftwYYdx().createR2CFftPlanND(p);
+			getTempFftwYYdy().createR2CFftPlanND(p);
+			getTempFftwXYdx().createR2CFftPlanND(p);
+			getTempFftwXYdy().createR2CFftPlanND(p);
+
+			getTempFftwXXdx().createC2RFftPlanND(p);
+			getTempFftwXXdy().createC2RFftPlanND(p);
+			getTempFftwYYdx().createC2RFftPlanND(p);
+			getTempFftwYYdy().createC2RFftPlanND(p);
+			getTempFftwXYdx().createC2RFftPlanND(p);
+			getTempFftwXYdy().createC2RFftPlanND(p);
+#endif
 		}
 	}
 

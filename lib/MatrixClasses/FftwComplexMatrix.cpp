@@ -686,6 +686,13 @@ void FftwComplexMatrix::computeR2CFft1DX(RealMatrix& inMatrix)
                             reinterpret_cast<fftwf_complex*>(mData));
     #endif
 
+#if __APPLE__
+      fftwf_execute_dft_r2c(mR2CFftPlan1DX,
+                            inMatrix.getData(),
+                            reinterpret_cast<fftwf_complex*>(mData));
+#endif
+
+
     // Intel Compiler + MKL
     #if (defined(__INTEL_COMPILER))
       const DimensionSizes dims = Parameters::getInstance().getFullDimensionSizes();
@@ -718,6 +725,12 @@ void FftwComplexMatrix::computeR2CFft1DY(RealMatrix& inMatrix)
                             inMatrix.getData(),
                             reinterpret_cast<fftwf_complex*>(mData));
     #endif
+
+#if __APPLE__
+      fftwf_execute_dft_r2c(mR2CFftPlan1DY,
+                            inMatrix.getData(),
+                            reinterpret_cast<fftwf_complex*>(mData));
+#endif
 
     // Intel Compiler + MKL
     #if (defined(__INTEL_COMPILER))
@@ -752,6 +765,12 @@ void FftwComplexMatrix::computeR2CFft1DZ(RealMatrix& inMatrix)
                             reinterpret_cast<fftwf_complex*>(mData));
     #endif
 
+#if __APPLE__
+      fftwf_execute_dft_r2c(mR2CFftPlan1DZ,
+                            inMatrix.getData(),
+                            reinterpret_cast<fftwf_complex*>(mData));
+#endif
+
     // Intel Compiler + MKL
     #if (defined(__INTEL_COMPILER))
       const DimensionSizes dims = Parameters::getInstance().getFullDimensionSizes();
@@ -784,6 +803,12 @@ void FftwComplexMatrix::computeC2RFft1DX(RealMatrix& outMatrix)
                             reinterpret_cast<fftwf_complex*>(mData),
                             outMatrix.getData());
     #endif
+
+#if __APPLE__
+      fftwf_execute_dft_c2r(mC2RFftPlan1DX,
+                            reinterpret_cast<fftwf_complex*>(mData),
+                            outMatrix.getData());
+#endif
 
     // Intel Compiler + MKL
     #if (defined(__INTEL_COMPILER))
@@ -818,6 +843,12 @@ void FftwComplexMatrix::computeC2RFft1DY(RealMatrix& outMatrix)
                             outMatrix.getData());
     #endif
 
+#if __APPLE__
+      fftwf_execute_dft_c2r(mC2RFftPlan1DY,
+                            reinterpret_cast<fftwf_complex*>(mData),
+                            outMatrix.getData());
+#endif
+
     // Intel Compiler + MKL
     #if (defined(__INTEL_COMPILER))
       const DimensionSizes dims = Parameters::getInstance().getFullDimensionSizes();
@@ -850,6 +881,12 @@ void FftwComplexMatrix::computeC2RFft1DZ(RealMatrix& outMatrix)
                             reinterpret_cast<fftwf_complex*>(mData),
                             outMatrix.getData());
     #endif
+
+#if __APPLE__
+      fftwf_execute_dft_c2r(mC2RFftPlan1DZ,
+                            reinterpret_cast<fftwf_complex*>(mData),
+                            outMatrix.getData());
+#endif
 
     // Intel Compiler + MKL
     #if (defined(__INTEL_COMPILER))

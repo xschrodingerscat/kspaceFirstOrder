@@ -10,15 +10,31 @@
 #include <iostream>
 #include <cassert>
 
-template <typename T>
+template<typename T,  typename... Args>
+T* CreateInstance(Args... args)
+{
+	return new T(args...);
+}
 
+template<typename T,  typename... Args>
+std::shared_ptr<T> AutoCreateInstance(Args... args)
+{
+	return std::make_shared<T>(args...);
+}
+
+template <typename T>
 using KMatrixType = std::vector<std::vector<T>>;
 
+class KBaseMatrix { public: KBaseMatrix() {}; virtual ~KBaseMatrix() {}; };
+
 template <typename T> 
-class KMatrix {
+class KMatrix : public KBaseMatrix {
 public:
 	KMatrix() {};
-	KMatrix(KMatrixType<T> &base) { mBase = base; };
+	~KMatrix() {};
+
+	KMatrix(const KMatrix &mat) { mBase = mat.mBase; };
+	KMatrix(const KMatrixType<T> &base) { mBase = base; };
 
 	size_t rowSize() { 
 		return mBase.size();
@@ -73,6 +89,8 @@ public:
 
 		return ret;
 	}
+
+	KMatrix *clone() { return CreateInstance<KMatrix>(*this); }
 
 	std::vector<T> &operator[](int i) {
 		return mBase[i];

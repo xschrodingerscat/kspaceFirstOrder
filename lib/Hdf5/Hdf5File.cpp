@@ -168,6 +168,8 @@ bool Hdf5File::canAccess(const string& fileName)
   #ifdef _WIN64
      return (_access_s(fileName.c_str(), 0) == 0 );
   #endif
+
+	 return false;
 }// end of canAccess
 //----------------------------------------------------------------------------------------------------------------------
 

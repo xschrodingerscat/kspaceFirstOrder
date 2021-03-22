@@ -199,7 +199,51 @@ class MatrixContainer
       /// Temporary matrix for 1D fft in z.
       kTempFftwZ,
       /// Temporary matrix for fft shift.
-      kTempFftwShift
+      kTempFftwShift,
+
+	  /* add for elastic */
+	  kMu,
+	  kLambda,
+
+	  kS2,
+	  kMuSgxy,
+
+	  kMPmlX,
+	  kMPmlY,
+	  kMPmlXSgx,
+	  kMPmlYSgy,
+
+	  kUxSplitX,
+	  kUxSplitY,
+	  kUySplitX,
+	  kUySplitY,
+
+	  kSxxSplitX,
+	  kSxxSplitY,
+	  kSyySplitX,
+	  kSyySplitY,
+	  kSxySplitX,
+	  kSxySplitY,
+
+	  kDuxdy,
+	  kDuydx,
+
+	  kDSxxdx,
+	  kDSxydy,
+	  kDSxydx,
+	  kDSyydy,
+
+	  kTmpFftwXXdx,
+	  kTmpFftwXXdy,
+	  kTmpFftwYYdx,
+	  kTmpFftwYYdy,
+	  kTmpFftwXYdx,
+	  kTmpFftwXYdy,
+
+	  kTmpReal1,
+	  kTmpReal2,
+	  kTmpReal3,
+	  kTmpReal4, 
     };// end of MatrixIdx
 
     /// Constructor.
@@ -268,7 +312,7 @@ class MatrixContainer
     /// Load all marked matrices from the input HDF5 file.
     void loadDataFromInputFile();
 
-	void loadDataFromKConfig() {};
+	void loadDataFromKConfig();
     /// Load marked matrices from the checkpoint HDF5 file.
     void loadDataFromCheckpointFile();
     /// Store marked matrices into the checkpoint HDF5 file.

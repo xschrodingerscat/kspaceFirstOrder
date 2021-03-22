@@ -35,12 +35,14 @@
 #include <string>
 
 #include <Parameters/CommandLineParameters.h>
-#include <KSpace/KConfig.h>
-#include <KSpace/KConfig.h>
 #include <Utils/DimensionSizes.h>
 #include <Utils/TimeMeasure.h>
 #include <Hdf5/Hdf5File.h>
 #include <Hdf5/Hdf5FileHeader.h>
+
+#include <KSpace/KConfig.h>
+#include <KSpace/KCmds.h>
+#include <KSpace/KMatrixCached.h>
 
 /**
  * @class   Parameters
@@ -246,7 +248,7 @@ class Parameters
 		 */
 		void init(int argc, char** argv);
 
-		void init(KConfig &kcfg);
+		void init(KConfig &kcfg, KCmds &kcmds);
 
 		/// Print the simulation setup (all parameters).
 		void printSimulatoinSetup();
@@ -323,6 +325,10 @@ class Parameters
 		 * @return Handle to the input file.
 		 */
 		Hdf5File& getInputFile()                 { return mInputFile; };
+
+		KMatrixCached & getMatCached()           { return mMatCached; };
+
+		KCmds & getKCmds()						 { return mKCmds; };
 		/**
 		 * @brief  Get output file handle.
 		 * @return Handle to the output file.
@@ -371,6 +377,9 @@ class Parameters
 		 * @return Dimension sizes of reduced complex 3D matrices.
 		 */
 		DimensionSizes getReducedDimensionSizes()  const { return mReducedDimensionSizes; };
+
+		DimensionSizes getReducedXDimensionSizes()  const { return mReducedXDimensionSizes; };
+		DimensionSizes getReducedYDimensionSizes()  const { return mReducedYDimensionSizes; };
 
 		/**
 		 * @brief  Get the HDF5 dataset name of Nx.
@@ -733,7 +742,11 @@ class Parameters
 		 * @brief  Is  -p or --p_raw specified at the command line?
 		 * @return true if the flag is set.
 		 */
-		bool getStorePressureRawFlag()        const { return mCommandLineParameters.getStorePressureRawFlag(); };
+		bool getStorePressureRawFlag()        const 
+		{ 
+			return mKConfigFlag ? mKCmds.mStorePressureRawFlag
+				   : mCommandLineParameters.getStorePressureRawFlag(); 
+		};
 		/**
 		 * @brief  Is --p_rms set?
 		 * @return true if the flag is set.
@@ -816,9 +829,31 @@ class Parameters
 		 */
 		bool getCopySensorMaskFlag()          const { return mCommandLineParameters.getCopySensorMaskFlag(); };
 
+
+		bool getElasticFlag()				  const { return mElasticFlag; };
+
+		bool getS0ScalarFlag()				  const { return mS0ScalarFlag; };
+
+		float getMultiAxialPmlRatio()   const { return mMultiAxialPmlRatio; };
+
 	protected:
 
 	private:
+		bool		  mKConfigFlag;
+		KMatrixCached mMatCached;
+
+		KCmds		  mKCmds;
+
+		bool		  mElasticFlag;
+
+		float		  mMultiAxialPmlRatio;
+
+		/// Is sound speed in the medium homogeneous?
+		bool  mS0ScalarFlag;
+
+		/// Scalar value of sound speed.
+		float mS0Scalar;
+
 		/// Constructor not allowed for public.
 		Parameters();
 
@@ -869,6 +904,9 @@ class Parameters
 		DimensionSizes mFullDimensionSizes;
 		/// Reduced 3D dimension sizes.
 		DimensionSizes mReducedDimensionSizes;
+
+		DimensionSizes mReducedXDimensionSizes;
+		DimensionSizes mReducedYDimensionSizes;
 
 		/// Is the simulation axisymmetric?
 		bool   mAxisymmetricFlag;

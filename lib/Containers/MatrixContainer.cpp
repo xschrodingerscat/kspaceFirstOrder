@@ -137,6 +137,9 @@ std::map<MatrixContainer::MatrixIdx, MatrixName> MatrixContainer::sMatrixHdf5Nam
 		{MatrixIdx::kTempFftwY,                  "FFTW_Y_temp"},
 		{MatrixIdx::kTempFftwZ,                  "FFTW_Z_temp"},
 		{MatrixIdx::kTempFftwShift,              "FFTW_shift_temp"},
+
+		/* elastic */
+		{MatrixIdx::kS2,						 "s0"},
 };// end of sMatrixHdf5Names
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -177,6 +180,8 @@ void MatrixContainer::init()
 
 	DimensionSizes fullDims    = params.getFullDimensionSizes();
 	DimensionSizes reducedDims = params.getReducedDimensionSizes();
+    DimensionSizes reducedXDims = params.getReducedXDimensionSizes();
+    DimensionSizes reducedYDims = params.getReducedYDimensionSizes();
 
 	const bool isSimulation3D  = params.isSimulation3D();
 	const bool isSimulationAS  = params.isSimulationAS();
@@ -208,6 +213,68 @@ void MatrixContainer::init()
 	if (!params.getC0ScalarFlag())
 	{
 		addMatrix(MI::kC2,  MT::kReal, fullDims,      kLoad, kNoCheckpoint);
+	}
+
+	if (params.getElasticFlag())
+	{
+
+		addMatrix(MI::kMu, MT::kReal, fullDims, kNoLoad, kNoCheckpoint);
+		addMatrix(MI::kLambda, MT::kReal, fullDims, kNoLoad, kNoCheckpoint);
+
+		if (!params.getS0ScalarFlag())
+		{
+			addMatrix(MI::kS2, MT::kReal, fullDims, kLoad, kNoCheckpoint);
+		}
+
+		addMatrix(MI::kMuSgxy, MT::kReal, fullDims, kNoLoad, kNoCheckpoint);
+
+		addMatrix(MI::kMPmlX, MT::kReal, DimensionSizes(fullDims.nx, 1, 1), 
+				  kNoLoad, kNoCheckpoint);
+		addMatrix(MI::kMPmlY, MT::kReal, DimensionSizes(1, fullDims.ny, 1), 
+				  kNoLoad, kNoCheckpoint);
+
+		addMatrix(MI::kMPmlXSgx, MT::kReal, DimensionSizes(fullDims.nx, 1, 1), 
+				  kNoLoad, kNoCheckpoint);
+		addMatrix(MI::kMPmlYSgy, MT::kReal, DimensionSizes(1, fullDims.ny, 1), 
+				  kNoLoad, kNoCheckpoint);
+
+		addMatrix(MI::kUxSplitX, MT::kReal, fullDims, kNoLoad, kNoCheckpoint);
+		addMatrix(MI::kUxSplitY, MT::kReal, fullDims, kNoLoad, kNoCheckpoint);
+		addMatrix(MI::kUySplitX, MT::kReal, fullDims, kNoLoad, kNoCheckpoint);
+		addMatrix(MI::kUySplitY, MT::kReal, fullDims, kNoLoad, kNoCheckpoint);
+
+		addMatrix(MI::kSxxSplitX, MT::kReal, fullDims, kNoLoad, kNoCheckpoint);
+		addMatrix(MI::kSxxSplitY, MT::kReal, fullDims, kNoLoad, kNoCheckpoint);
+		addMatrix(MI::kSyySplitX, MT::kReal, fullDims, kNoLoad, kNoCheckpoint);
+		addMatrix(MI::kSyySplitY, MT::kReal, fullDims, kNoLoad, kNoCheckpoint);
+		addMatrix(MI::kSxySplitX, MT::kReal, fullDims, kNoLoad, kNoCheckpoint);
+		addMatrix(MI::kSxySplitY, MT::kReal, fullDims, kNoLoad, kNoCheckpoint);
+
+		addMatrix(MI::kDuxdy, MT::kReal, fullDims, kNoLoad, kNoCheckpoint);
+		addMatrix(MI::kDuydx, MT::kReal, fullDims, kNoLoad, kNoCheckpoint);
+
+		addMatrix(MI::kDSxxdx, MT::kReal, fullDims, kNoLoad, kNoCheckpoint);
+		addMatrix(MI::kDSxydy, MT::kReal, fullDims, kNoLoad, kNoCheckpoint);
+		addMatrix(MI::kDSxydx, MT::kReal, fullDims, kNoLoad, kNoCheckpoint);
+		addMatrix(MI::kDSyydy, MT::kReal, fullDims, kNoLoad, kNoCheckpoint);
+
+		addMatrix(MI::kTmpReal1, MT::kReal, fullDims, kNoLoad, kNoCheckpoint);
+		addMatrix(MI::kTmpReal2, MT::kReal, fullDims, kNoLoad, kNoCheckpoint);
+		addMatrix(MI::kTmpReal3, MT::kReal, fullDims, kNoLoad, kNoCheckpoint);
+		addMatrix(MI::kTmpReal4, MT::kReal, fullDims, kNoLoad, kNoCheckpoint);
+
+		addMatrix(MI::kTmpFftwXXdx, MT::kFftwComplex, reducedXDims,
+				  kNoLoad, kNoCheckpoint);
+		addMatrix(MI::kTmpFftwXXdy, MT::kFftwComplex, reducedYDims,
+				  kNoLoad, kNoCheckpoint);
+		addMatrix(MI::kTmpFftwYYdx, MT::kFftwComplex, reducedXDims,
+				  kNoLoad, kNoCheckpoint);
+		addMatrix(MI::kTmpFftwYYdy, MT::kFftwComplex, reducedYDims,
+				  kNoLoad, kNoCheckpoint);
+		addMatrix(MI::kTmpFftwXYdx, MT::kFftwComplex, reducedXDims,
+				  kNoLoad, kNoCheckpoint);
+		addMatrix(MI::kTmpFftwXYdy, MT::kFftwComplex, reducedYDims,
+				  kNoLoad, kNoCheckpoint);
 	}
 
 	addMatrix(MI::kP,     MT::kReal, fullDims,    kNoLoad,   kCheckpoint);
@@ -570,6 +637,15 @@ void MatrixContainer::freeMatrices()
 	}
 }// end of freeMatrices
 //----------------------------------------------------------------------------------------------------------------------
+
+void 
+MatrixContainer::loadDataFromKConfig()
+{
+	KMatrixCached& matCached = Parameters::getInstance().getMatCached();
+	for (const auto& it : mContainer)
+		if (it.second.loadData)
+			it.second.matrixPtr->readData(matCached, it.second.matrixName);
+}
 
 /**
  * Load all marked matrices from the input HDF5 file.

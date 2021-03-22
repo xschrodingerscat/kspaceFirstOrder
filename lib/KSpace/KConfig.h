@@ -11,18 +11,6 @@
 
 #include <KSpace/KMatrix.h>
 
-template<typename T,  typename... Args>
-T* CreateInstance(Args... args)
-{
-	return new T(args...);
-}
-
-template<typename T,  typename... Args>
-std::shared_ptr<T> AutoCreateInstance(Args... args)
-{
-	return std::make_shared<T>(args...);
-}
-
 
 struct KGrid {
 
@@ -33,11 +21,11 @@ struct KGrid {
 	size_t			mNy;
 	size_t			mNz;
 
-	double			mDx;
-	double			mDy;
-	double			mDz;
+	float			mDx;
+	float			mDy;
+	float			mDz;
 
-	double			mDt;
+	float			mDt;
 
 	/* derivate */
 	size_t			mNt;
@@ -50,23 +38,27 @@ struct Medium {
     bool			mRho0ScalarFlag;
     float			mRho0Scalar;			/* kg / m^3 */
 
-	KMatrix<double> mRho0;
+	KMatrix<float> mRho0;
 
     bool			mC0ScalarFlag;
-    float			mC0Scalar;				/* m/s */
+    bool			mS0ScalarFlag;
 
-	KMatrix<double> mC0;
+    float			mC0Scalar;				/* m/s */
+    float			mS0Scalar;				/* m/s */
+
+	KMatrix<float> mC0;
+	KMatrix<float> mS0;
 
 	/* derivate */
     float			mRho0SgxScalar;
     float			mRho0SgyScalar;
     float			mRho0SgzScalar;
 
-	KMatrix<double> mRho0Sgx;
-	KMatrix<double> mRho0Sgy;
-	KMatrix<double> mRho0Sgz;
+	KMatrix<float> mRho0Sgx;
+	KMatrix<float> mRho0Sgy;
+	KMatrix<float> mRho0Sgz;
 	
-	double			mCref;
+	float			mCref;
 
 	Medium();
 };
@@ -83,7 +75,7 @@ struct Sensor {
 	KMatrix<size_t> mMask;
 
 	/* derivate */
-	std::vector<size_t> mSensorMaskIndex;
+	KMatrix<size_t> mSensorMaskIndex;
 
 	Sensor();
 };
@@ -93,7 +85,7 @@ struct Source {
 
     size_t			mPressureSourceFlag;
     size_t			mInitialPressureSourceFlag;
-	KMatrix<double> mInitialPressureSourceInput;
+	KMatrix<float> mInitialPressureSourceInput;
     size_t			mTransducerSourceFlag;
 	
 	/* derivate */
@@ -116,10 +108,12 @@ struct KPml {
 	size_t			mPmlXSize;
 	size_t			mPmlYSize;
 	size_t			mPmlZSize;
-	double			mPmlXAlpha;
-	double			mPmlYAlpha;
-	double			mPmlZAlpha;
 
+	float			mPmlXAlpha;
+	float			mPmlYAlpha;
+	float			mPmlZAlpha;
+
+	float			mMultiAxialPmlRatio;
     AbsorptionType	mAbsorbingFlag;
 
 	KPml();
@@ -130,7 +124,7 @@ public:
 	KConfig();
 	virtual ~KConfig() {};
 
-	KConfig(const KConfig &) = default;
+	KConfig(KConfig &) = default;
 	KConfig& operator=(const KConfig &) = default;
 
 	virtual void preProcessing() = 0;
@@ -141,6 +135,7 @@ public:
 		k2D,
 		k3D
 	};
+
 
 	size_t			mElasticFlag;
     size_t			mNonLinearFlag;
@@ -158,7 +153,9 @@ public:
 
 class KFluidConfig : public KConfig {
 public:
-	KFluidConfig(const KFluidConfig &) = default; 
+	KFluidConfig(const KFluidConfig &config) { *this = config; }; 
+	KFluidConfig& operator=(const KFluidConfig &) = default;
+	
 	KFluidConfig() { init(); };
 
 	void init();
@@ -169,7 +166,9 @@ public:
 
 class KElasticConfig: public KConfig {
 public:
-	KElasticConfig(const KElasticConfig &) = default; 
+	KElasticConfig(const KElasticConfig &config) { *this = config; }; 
+	KElasticConfig& operator=(const KElasticConfig&) = default;
+
 	KElasticConfig() {init(); };
 
 	void init();
@@ -193,8 +192,9 @@ public:
 		 mContainer[kElastic] = AutoCreateInstance<KElasticConfig>();
 	};
 
-	KConfig *CreateKConfig(KConfigType type) {
-		return mContainer[type]->clone();
+	std::shared_ptr<KConfig> AutoCreateKConfig(KConfigType type) {
+		KConfig *cfg = mContainer[type]->clone();
+		return std::shared_ptr<KConfig> (cfg);
 	};
 
 private:
@@ -203,6 +203,7 @@ private:
 
 	ContainerType mContainer;
 };
+
 
 
 #endif /* ifndef __CONFIG_INCLUDE_H__ */
