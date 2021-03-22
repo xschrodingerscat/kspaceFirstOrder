@@ -2,3 +2,4 @@ cmake-build-debug/
 .clangd/
 .DS_Store
 compile_commands.json
+.idea
