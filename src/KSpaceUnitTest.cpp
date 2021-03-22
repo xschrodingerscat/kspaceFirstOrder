@@ -66,6 +66,7 @@ TEST(KSpace, kFftXY)
 
 #else
 
+
 TEST(KSpace, kElastic)
 {
 	/* create special global configuration (default 2D)*/
