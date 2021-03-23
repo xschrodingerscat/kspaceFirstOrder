@@ -27,6 +27,7 @@
 
 #include <KSpace/KCmds.h>
 #include <KSpaceSolver/KSpaceFirstOrderSolver.h>
+#include <KSpace/KVersion.h>
 
 using KSpaceSolver = KSpaceFirstOrderSolver;
 

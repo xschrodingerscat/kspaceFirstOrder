@@ -4,6 +4,7 @@
 #ifndef __KCONFIG_INCLUDE_H__
 #define __KCONFIG_INCLUDE_H__
 
+#include <cmath>
 #include <vector>
 #include <cstdlib>
 #include <unordered_map>
@@ -137,7 +138,7 @@ public:
 
     KConfig &operator=(const KConfig &) = default;
 
-    virtual void preProcessing() = 0;
+    virtual bool preProcessing() = 0;
 
     virtual KConfig *clone() const = 0;
 
@@ -175,7 +176,7 @@ public:
 
     void init();
 
-    void preProcessing() override;
+    bool preProcessing() override;
 
     KConfig *clone() const override { return CreateInstance<KFluidConfig>(*this); };
 };
@@ -193,7 +194,7 @@ public:
 
     void init();
 
-    void preProcessing() override;
+    bool preProcessing() override;
 
     KConfig *clone() const override { return CreateInstance<KElasticConfig>(*this); };
 };

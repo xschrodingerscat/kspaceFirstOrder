@@ -35,6 +35,10 @@ TEST(KSpace, kFluid)
 
 TEST(KSpace, kElastic)
 {
+    /* version checking */
+    const auto version = getVersion();
+    std::cout << "The current version of the KSpaceSolver: " + version << std::endl;
+
     /* create special global configuration (default 2D)*/
     auto factory = AutoCreateInstance<KConfigFactory>();
     auto kcfg = factory->AutoCreateKConfig(kElastic);
@@ -87,6 +91,5 @@ TEST(KSpace, kFftXY)
 
     solver->fftTest();
 }
-
 
 

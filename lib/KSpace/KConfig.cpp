@@ -152,7 +152,7 @@ KFluidConfig::init()
 }
 
 
-void
+bool
 KFluidConfig::preProcessing()
 {
     /**
@@ -169,7 +169,7 @@ KFluidConfig::preProcessing()
     auto x_size = mKGrid.mDx * mKGrid.mNx;
     auto y_size = mKGrid.mDy * mKGrid.mNy;
 
-    auto t_end = sqrt(x_size * x_size + y_size * y_size) / c_min;
+    auto t_end = std::sqrt(x_size * x_size + y_size * y_size) / c_min;
     mKGrid.mNt = std::floor(t_end / mKGrid.mDt) + 1;
 
     /* preprocessing mCref */
@@ -199,6 +199,8 @@ KFluidConfig::preProcessing()
     /* preprocessing  density: mRho0Sgx, mRho0Sgy  */
     mMedium.mRho0Sgx = mMedium.mRho0;
     mMedium.mRho0Sgy = mMedium.mRho0;
+
+    return true;
 }
 
 void
@@ -273,9 +275,10 @@ KElasticConfig::init()
     mKPml.mMultiAxialPmlRatio = 0.1f;
 
     mKPml.mAbsorbingFlag = KPml::AbsorptionType::kLossless;
+
 }
 
-void
+bool
 KElasticConfig::preProcessing()
 {
     /**
@@ -292,7 +295,7 @@ KElasticConfig::preProcessing()
     auto x_size = mKGrid.mDx * mKGrid.mNx;
     auto y_size = mKGrid.mDy * mKGrid.mNy;
 
-    auto t_end = sqrt(x_size * x_size + y_size * y_size) / c_min;
+    auto t_end = std::sqrt(x_size * x_size + y_size * y_size) / c_min;
     mKGrid.mNt = std::floor(t_end / mKGrid.mDt) + 1;
 
     /* preprocessing mCref */
@@ -322,6 +325,8 @@ KElasticConfig::preProcessing()
     /* preprocessing  density: mRho0Sgx, mRho0Sgy  */
     mMedium.mRho0Sgx = mMedium.mRho0;
     mMedium.mRho0Sgy = mMedium.mRho0;
+
+    return true;
 }
 
 

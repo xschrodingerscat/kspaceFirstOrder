@@ -8,6 +8,7 @@
 #include <vector>
 #include <iostream>
 #include <cassert>
+#include <memory>
 
 template<typename T, typename... Args>
 T *CreateInstance(Args... args)

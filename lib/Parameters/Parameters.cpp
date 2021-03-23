@@ -286,12 +286,8 @@ Parameters::init(KConfig &kcfg, KCmds &kcmds)
 	{ 
 		mMatCached[name] = std::shared_ptr<KBaseMatrix>(mat); 
 
-		if(name == "c0") {
-
+		if(name == "c0")
 			auto &mat = *static_cast<KMatrix<float>*>(mMatCached[name].get());
-
-			std::cout << mat[0][0] << std::endl;
-		}
 	};
 
 	addMatrix("rho0", medium.mRho0.clone());
