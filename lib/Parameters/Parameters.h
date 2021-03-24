@@ -41,7 +41,7 @@
 #include <Hdf5/Hdf5FileHeader.h>
 
 #include <KSpace/KConfig.h>
-#include <KSpace/KCmds.h>
+#include <KSpace/KOutput.h>
 #include <KSpace/KMatrixCached.h>
 
 /**
@@ -248,7 +248,7 @@ class Parameters
 		 */
 		void init(int argc, char** argv);
 
-		void init(KConfig &kcfg, KCmds &kcmds);
+		void init(KConfig &kcfg, KOutput &ksampler);
 
 		/// Print the simulation setup (all parameters).
 		void printSimulatoinSetup();
@@ -328,7 +328,7 @@ class Parameters
 
 		KMatrixCached & getMatCached()           { return mMatCached; };
 
-		KCmds & getKCmds()						 { return mKCmds; };
+		KOutput & getKOutput()						 { return mOutput; };
 		/**
 		 * @brief  Get output file handle.
 		 * @return Handle to the output file.
@@ -744,7 +744,7 @@ class Parameters
 		 */
 		bool getStorePressureRawFlag()        const 
 		{ 
-			return mKConfigFlag ? mKCmds.mStorePressureRawFlag
+			return mKConfigFlag ? mOutput.mStorePressureRawFlag
 				   : mCommandLineParameters.getStorePressureRawFlag(); 
 		};
 		/**
@@ -842,7 +842,7 @@ class Parameters
 		bool		  mKConfigFlag;
 		KMatrixCached mMatCached;
 
-		KCmds		  mKCmds;
+		KOutput	      mOutput;
 
 		bool		  mElasticFlag;
 

@@ -35,11 +35,11 @@
 
 // Windows build needs to undefine macro MINMAX to support std::limits
 #ifdef _WIN64
-  #ifndef NOMINMAX
-    # define NOMINMAX
-  #endif
+#ifndef NOMINMAX
+# define NOMINMAX
+#endif
 
-  #include <windows.h>
+#include <windows.h>
 #endif
 
 #include <OutputStreams/BaseOutputStream.h>
@@ -52,18 +52,18 @@
 /**
  * Constructor - there is no sensor mask by default!
  */
-BaseOutputStream::BaseOutputStream(Hdf5File&            file,
-                                   const MatrixName&    rootObjectName,
-                                   const RealMatrix&    sourceMatrix,
+BaseOutputStream::BaseOutputStream(Hdf5File &file,
+                                   const MatrixName &rootObjectName,
+                                   const RealMatrix &sourceMatrix,
                                    const ReduceOperator reduceOp,
-                                   float*               bufferToReuse)
-  : mFile(file),
-    mRootObjectName(rootObjectName),
-    mSourceMatrix(sourceMatrix),
-    mReduceOp(reduceOp),
-    mBufferReuse(bufferToReuse != nullptr),
-    mBufferSize(0),
-    mStoreBuffer(bufferToReuse)
+                                   float *bufferToReuse)
+        : mFile(file),
+          mRootObjectName(rootObjectName),
+          mSourceMatrix(sourceMatrix),
+          mReduceOp(reduceOp),
+          mBufferReuse(bufferToReuse != nullptr),
+          mBufferSize(0),
+          mStoreBuffer(bufferToReuse)
 {
 
 }// end of BaseOutputStream
@@ -74,39 +74,39 @@ BaseOutputStream::BaseOutputStream(Hdf5File&            file,
  */
 void BaseOutputStream::postProcess()
 {
-  switch (mReduceOp)
-  {
-    case ReduceOperator::kNone:
+    switch (mReduceOp)
     {
-      // Do nothing
-      break;
-    }
+        case ReduceOperator::kNone:
+        {
+            // Do nothing
+            break;
+        }
 
-    case ReduceOperator::kRms:
-    {
-      const float scalingCoeff = 1.0f / (Parameters::getInstance().getNt() -
-                                         Parameters::getInstance().getSamplingStartTimeIndex());
+        case ReduceOperator::kRms:
+        {
+            const float scalingCoeff = 1.0f / (Parameters::getInstance().getNt() -
+                                               Parameters::getInstance().getSamplingStartTimeIndex());
 
-      #pragma omp parallel for simd schedule(simd:static)
-      for (size_t i = 0; i < mBufferSize; i++)
-      {
-        mStoreBuffer[i] = sqrt(mStoreBuffer[i] * scalingCoeff);
-      }
-      break;
-    }
+#pragma omp parallel for simd schedule(simd:static)
+            for (size_t i = 0; i < mBufferSize; i++)
+            {
+                mStoreBuffer[i] = sqrt(mStoreBuffer[i] * scalingCoeff);
+            }
+            break;
+        }
 
-    case ReduceOperator::kMax:
-    {
-      // Do nothing
-      break;
-    }
+        case ReduceOperator::kMax:
+        {
+            // Do nothing
+            break;
+        }
 
-    case ReduceOperator::kMin:
-    {
-      // Do nothing
-      break;
-    }
-  }// switch
+        case ReduceOperator::kMin:
+        {
+            // Do nothing
+            break;
+        }
+    }// switch
 }// end of postProcess
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -119,60 +119,60 @@ void BaseOutputStream::postProcess()
  */
 void BaseOutputStream::allocateMemory()
 {
-  mStoreBuffer = (float*) _mm_malloc(mBufferSize * sizeof(float), kDataAlignment);
+    mStoreBuffer = (float *) _mm_malloc(mBufferSize * sizeof(float), kDataAlignment);
 
-  if (!mStoreBuffer)
-  {
-    throw std::bad_alloc();
-  }
-
-  // We need different initialization for different reduction ops.
-  switch (mReduceOp)
-  {
-    case ReduceOperator::kNone:
+    if (!mStoreBuffer)
     {
-      // Zero the matrix
-      #pragma omp parallel for simd schedule(simd:static)
-      for (size_t i = 0; i < mBufferSize; i++)
-      {
-        mStoreBuffer[i] = 0.0f;
-      }
-      break;
-    }// kNone
+        throw std::bad_alloc();
+    }
 
-    case ReduceOperator::kRms:
+    // We need different initialization for different reduction ops.
+    switch (mReduceOp)
     {
-      // Zero the matrix
-      #pragma omp parallel for simd schedule(simd:static)
-      for (size_t i = 0; i < mBufferSize; i++)
-      {
-        mStoreBuffer[i] = 0.0f;
-      }
-      break;
-    }// kRms
+        case ReduceOperator::kNone:
+        {
+            // Zero the matrix
+#pragma omp parallel for simd schedule(simd:static)
+            for (size_t i = 0; i < mBufferSize; i++)
+            {
+                mStoreBuffer[i] = 0.0f;
+            }
+            break;
+        }// kNone
 
-    case ReduceOperator::kMax:
-    {
-      // Set the values to the highest negative float value
-      #pragma omp parallel for simd schedule(simd:static)
-      for (size_t i = 0; i < mBufferSize; i++)
-      {
-        mStoreBuffer[i] = -1.0f * std::numeric_limits<float>::max();
-      }
-      break;
-    }// kMax
+        case ReduceOperator::kRms:
+        {
+            // Zero the matrix
+#pragma omp parallel for simd schedule(simd:static)
+            for (size_t i = 0; i < mBufferSize; i++)
+            {
+                mStoreBuffer[i] = 0.0f;
+            }
+            break;
+        }// kRms
 
-    case ReduceOperator::kMin:
-    {
-      // Set the values to the highest float value
-      #pragma omp parallel for simd schedule(simd:static)
-      for (size_t i = 0; i < mBufferSize; i++)
-      {
-        mStoreBuffer[i] = std::numeric_limits<float>::max();
-      }
-      break;
-    }//kMin
-  }// switch
+        case ReduceOperator::kMax:
+        {
+            // Set the values to the highest negative float value
+#pragma omp parallel for simd schedule(simd:static)
+            for (size_t i = 0; i < mBufferSize; i++)
+            {
+                mStoreBuffer[i] = -1.0f * std::numeric_limits<float>::max();
+            }
+            break;
+        }// kMax
+
+        case ReduceOperator::kMin:
+        {
+            // Set the values to the highest float value
+#pragma omp parallel for simd schedule(simd:static)
+            for (size_t i = 0; i < mBufferSize; i++)
+            {
+                mStoreBuffer[i] = std::numeric_limits<float>::max();
+            }
+            break;
+        }//kMin
+    }// switch
 }// end of allocateMemory
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -181,12 +181,14 @@ void BaseOutputStream::allocateMemory()
  */
 void BaseOutputStream::freeMemory()
 {
-  if (mStoreBuffer)
-  {
-    _mm_free(mStoreBuffer);
-    mStoreBuffer = nullptr;
-  }
-}// end of freeMemory
+    if (mStoreBuffer)
+    {
+        _mm_free(mStoreBuffer);
+        mStoreBuffer = nullptr;
+    }
+}
+
+// end of freeMemory
 //----------------------------------------------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------------------------------------------//

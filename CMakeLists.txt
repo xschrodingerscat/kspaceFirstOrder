@@ -54,7 +54,7 @@ set(APP_SOURCE
         lib/KSpace/KSpaceSolverElastic.cpp
         lib/KSpace/KMatrixUnitTest.cpp
         src/KSpaceUnitTest.cpp
-        lib/KSpace/KSampler.cpp lib/KSpace/KSampler.h lib/KSpace/KVersion.h)
+        lib/KSpace/KVersion.h lib/KSpace/KOutput.cpp lib/KSpace/KOutput.h lib/KSpace/KIndexOutputStream.cpp lib/KSpace/KIndexOutputStream.h)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -ggdb -ffast-math -fassociative-math")
 

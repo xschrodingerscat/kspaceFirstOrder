@@ -480,7 +480,7 @@ using MatrixName = std::string;
  */
 class Hdf5File
 {
-  public:
+public:
     /**
      * @enum    MatrixDataType
      * @brief   HDF5 matrix data type (float or uint64).
@@ -488,10 +488,10 @@ class Hdf5File
      */
     enum class MatrixDataType
     {
-      /// The matrix is stored in floating point 32b wide format.
-      kFloat = 0,
-      /// The matrix is stored in fixed point point 64b wide format.
-      kIndex = 1
+        /// The matrix is stored in floating point 32b wide format.
+        kFloat = 0,
+        /// The matrix is stored in fixed point point 64b wide format.
+        kIndex = 1
     };
 
     /**
@@ -501,21 +501,23 @@ class Hdf5File
      */
     enum class MatrixDomainType
     {
-      /// The matrix is defined on real domain.
-      kReal    = 0,
-      /// The matrix is defined on complex domain.
-      kComplex = 1
+        /// The matrix is defined on real domain.
+        kReal = 0,
+        /// The matrix is defined on complex domain.
+        kComplex = 1
     };
 
     /// Constructor of the class.
     Hdf5File();
+
     /// Copy constructor not allowed.
-    Hdf5File(const Hdf5File&) = delete;
+    Hdf5File(const Hdf5File &) = delete;
+
     /// Destructor.
     virtual ~Hdf5File();
 
     /// Operator = not allowed.
-    Hdf5File& operator=(const Hdf5File&) = delete;
+    Hdf5File &operator=(const Hdf5File &) = delete;
 
     //------------------------------------------- Basic file operations ----------------------------------------------//
     /**
@@ -527,8 +529,9 @@ class Hdf5File
      * @param [in] flags    - How to create the file, by default overwrite existing file.
      * @throw ios:failure   - If error happened (file is open or cannot be created).
      */
-    void create(const std::string& fileName,
-                unsigned int       flags = H5F_ACC_TRUNC);
+    void create(const std::string &fileName,
+                unsigned int flags = H5F_ACC_TRUNC);
+
     /**
      * @brief   Open the HDF5 file.
      * @details The file is opened in read only mode by default. Other HDF5 flags are set to default.
@@ -538,14 +541,16 @@ class Hdf5File
      * @throw ios:failure   - If error happened (file not found, file is not an HDF5 file, file is already open).
      *
      */
-    void open(const std::string& fileName,
-              unsigned int       flags  = H5F_ACC_RDONLY);
+    void open(const std::string &fileName,
+              unsigned int flags = H5F_ACC_RDONLY);
+
     /**
      * @brief   Is the file opened?
      * @details Is the file opened?
      * @return  true - If the file is opened.
      */
     bool isOpen() const { return mFile != H5I_BADID; };
+
     /**
      * @brief   Can I access the file.
      * @details Can the code access the file, e.g., does it exist, do we have enough privileges, etc.
@@ -553,7 +558,8 @@ class Hdf5File
      * @param  [in] fileName - Name of the file.
      * @return true          - If it is possible to access the file.
      */
-    static bool canAccess(const std::string& fileName);
+    static bool canAccess(const std::string &fileName);
+
     /**
      * @brief Close the HDF5 file.
      * @throw ios::failure - If an error happens.
@@ -570,8 +576,9 @@ class Hdf5File
      * @return A handle to the new group.
      * @throw ios::failure      - If error happens.
      */
-    hid_t createGroup(const hid_t       parentGroup,
-                      const MatrixName& groupName);
+    hid_t createGroup(const hid_t parentGroup,
+                      const MatrixName &groupName);
+
     /**
      * @brief   Open an HDF5 group at a specified place in the file tree.
      * @details Other HDF5 flags are set to default.
@@ -581,13 +588,15 @@ class Hdf5File
      * @return A handle to the group.
      * @throw ios::failure     - If error happens.
      */
-    hid_t openGroup(const hid_t       parentGroup,
-                    const MatrixName& groupName);
+    hid_t openGroup(const hid_t parentGroup,
+                    const MatrixName &groupName);
+
     /**
      * @brief Close a group.
      * @param [in] group - Group to close.
      */
     void closeGroup(const hid_t group);
+
     /**
      * @brief   Get handle to the root group of the file.
      * @details Get handle to the root group of the file.
@@ -609,12 +618,13 @@ class Hdf5File
      * @return A handle to the new dataset.
      * @throw  ios::failure         - If error happens.
      */
-    hid_t createDataset(const hid_t           parentGroup,
-                        const MatrixName&     datasetName,
-                        const DimensionSizes& dimensionSizes,
-                        const DimensionSizes& chunkSizes,
-                        const MatrixDataType  matrixDataType,
-                        const size_t          compressionLevel);
+    hid_t createDataset(const hid_t parentGroup,
+                        const MatrixName &datasetName,
+                        const DimensionSizes &dimensionSizes,
+                        const DimensionSizes &chunkSizes,
+                        const MatrixDataType matrixDataType,
+                        const size_t compressionLevel);
+
     /**
      * @brief   Open a dataset at a specified place in the file tree.
      * @details Other HDF5 flags are set to default.
@@ -624,13 +634,14 @@ class Hdf5File
      * @return A handle to open dataset.
      * @throw ios::failure     - If error happens.
      */
-    hid_t openDataset(const hid_t       parentGroup,
-                      const MatrixName& datasetName);
+    hid_t openDataset(const hid_t parentGroup,
+                      const MatrixName &datasetName);
+
     /**
      * @brief Close dataset.
      * @param [in] dataset - Dataset to close.
      */
-    void  closeDataset(const hid_t dataset);
+    void closeDataset(const hid_t dataset);
 
     //---------------------------------------- Dataset Read/Write operations -----------------------------------------//
     /**
@@ -645,10 +656,11 @@ class Hdf5File
      * @warning Limited to float and size_t data types.
      */
     template<class T>
-    void writeHyperSlab(const hid_t           dataset,
-                        const DimensionSizes& position,
-                        const DimensionSizes& size,
-                        const T*              data);
+    void writeHyperSlab(const hid_t dataset,
+                        const DimensionSizes &position,
+                        const DimensionSizes &size,
+                        const T *data);
+
     /**
      * @brief   Write a cuboid selected within the matrixData into a hyperslab.
      * @details The routine writes a 3D cuboid into a 4D dataset (only intended for output raw time series).
@@ -661,12 +673,13 @@ class Hdf5File
      * @param [in] matrixData        - C array of matrix data.
      * @throw ios::failure           - If error happens.
      */
-    void writeCuboidToHyperSlab(const hid_t           dataset,
-                                const DimensionSizes& hyperslabPosition,
-                                const DimensionSizes& cuboidPosition,
-                                const DimensionSizes& cuboidSize,
-                                const DimensionSizes& matrixDimensions,
-                                const float*          matrixData);
+    void writeCuboidToHyperSlab(const hid_t dataset,
+                                const DimensionSizes &hyperslabPosition,
+                                const DimensionSizes &cuboidPosition,
+                                const DimensionSizes &cuboidSize,
+                                const DimensionSizes &matrixDimensions,
+                                const float *matrixData);
+
     /**
      * @brief   Write sensor data selected by the sensor mask.
      * @details The routine picks elements from the MatixData based on the sensor mask and stores them into a single
@@ -681,12 +694,13 @@ class Hdf5File
      * @warning Very slow at this version of HDF5 for orthogonal planes-> DO NOT USE.
      * @throw ios::failure           - If error happens.
      */
-    void writeSensorByMaskToHyperSlab(const hid_t           dataset,
-                                      const DimensionSizes& hyperslabPosition,
-                                      const size_t          indexSensorSize,
-                                      const size_t*         indexSensorData,
-                                      const DimensionSizes& matrixDimensions,
-                                      const float*          matrixData);
+    void writeSensorByMaskToHyperSlab(const hid_t dataset,
+                                      const DimensionSizes &hyperslabPosition,
+                                      const size_t indexSensorSize,
+                                      const size_t *indexSensorData,
+                                      const DimensionSizes &matrixDimensions,
+                                      const float *matrixData);
+
     /**
      * @brief   Write a scalar value at a specified place in the file tree.
      * @details No chunks and no compression is used.
@@ -699,9 +713,9 @@ class Hdf5File
      * @warning Limited to float and size_t data types.
      */
     template<class T>
-    void writeScalarValue(const hid_t       parentGroup,
-                          const MatrixName& datasetName,
-                          const T           value);
+    void writeScalarValue(const hid_t parentGroup,
+                          const MatrixName &datasetName,
+                          const T value);
 
     /**
      * @brief Read a scalar value at a specified place in the file tree.
@@ -714,9 +728,10 @@ class Hdf5File
      * @warning Limited to float and size_t data types.
      */
     template<class T>
-    void readScalarValue(const hid_t       parentGroup,
-                         const MatrixName& datasetName,
-                         T&                value);
+    void readScalarValue(const hid_t parentGroup,
+                         const MatrixName &datasetName,
+                         T &value);
+
     /**
      * @brief Read data from the dataset at a specified place in the file tree.
      *
@@ -728,10 +743,10 @@ class Hdf5File
      * @throw ios::failure         - If error happens.
      */
     template<class T>
-    void readCompleteDataset(const hid_t           parentGroup,
-                             const MatrixName&     datasetName,
-                             const DimensionSizes& dimensionSizes,
-                             T*                    data);
+    void readCompleteDataset(const hid_t parentGroup,
+                             const MatrixName &datasetName,
+                             const DimensionSizes &dimensionSizes,
+                             T *data);
 
     //---------------------------------------- Dataset sizes and dimensions ------------------------------------------//
     /**
@@ -742,8 +757,9 @@ class Hdf5File
      * @return Dimension sizes of the dataset.
      * @throw ios::failure     - If error happens.
      */
-    DimensionSizes getDatasetDimensionSizes(const hid_t       parentGroup,
-                                            const MatrixName& datasetName);
+    DimensionSizes getDatasetDimensionSizes(const hid_t parentGroup,
+                                            const MatrixName &datasetName);
+
     /**
      * @brief Get number of dimensions of the dataset at a specified place in the file tree.
      *
@@ -752,8 +768,9 @@ class Hdf5File
      * @return Number of dimensions.
      * @throw ios::failure     - If error happens.
      */
-    size_t getDatasetNumberOfDimensions(const hid_t       parentGroup,
-                                        const MatrixName& datasetName);
+    size_t getDatasetNumberOfDimensions(const hid_t parentGroup,
+                                        const MatrixName &datasetName);
+
     /**
      * @brief Get dataset element count at a specified place in the file tree.
      *
@@ -762,8 +779,8 @@ class Hdf5File
      * @return Number of elements.
      * @throw ios::failure     - If error happens.
      */
-    size_t getDatasetSize(const hid_t       parentGroup,
-                          const MatrixName& datasetName);
+    size_t getDatasetSize(const hid_t parentGroup,
+                          const MatrixName &datasetName);
 
     //--------------------------------------- Attributes Read/Write operations ---------------------------------------//
     /**
@@ -774,9 +791,10 @@ class Hdf5File
      * @param [in] matrixDataType - Matrix data type in the file.
      * @throw ios::failure        - If error happens.
      */
-    void writeMatrixDataType (const hid_t           parentGroup,
-                              const MatrixName&     datasetName,
-                              const MatrixDataType& matrixDataType);
+    void writeMatrixDataType(const hid_t parentGroup,
+                             const MatrixName &datasetName,
+                             const MatrixDataType &matrixDataType);
+
     /**
      * @brief  Write matrix domain type into the dataset at a specified place in the file tree.
      *
@@ -785,9 +803,9 @@ class Hdf5File
      * @param [in] matrixDomainType - Matrix domain type.
      * @throw ios::failure          - If error happens.
      */
-    void writeMatrixDomainType(const hid_t             parentGroup,
-                               const MatrixName&       datasetName,
-                               const MatrixDomainType& matrixDomainType);
+    void writeMatrixDomainType(const hid_t parentGroup,
+                               const MatrixName &datasetName,
+                               const MatrixDomainType &matrixDomainType);
 
     /**
      * @brief Read matrix data type from the dataset at a specified place in the file tree.
@@ -797,8 +815,9 @@ class Hdf5File
      * @return Matrix data type.
      * @throw ios::failure     - If error happens.
      */
-    MatrixDataType   readMatrixDataType(const hid_t       parentGroup,
-                                        const MatrixName& datasetName);
+    MatrixDataType readMatrixDataType(const hid_t parentGroup,
+                                      const MatrixName &datasetName);
+
     /**
      * @brief Read matrix dataset domain type at a specified place in the file tree.
      *
@@ -807,8 +826,8 @@ class Hdf5File
      * @return Matrix domain type.
      * @throw ios::failure      - If error happens.
      */
-    MatrixDomainType readMatrixDomainType(const hid_t       parentGroup,
-                                          const MatrixName& datasetName);
+    MatrixDomainType readMatrixDomainType(const hid_t parentGroup,
+                                          const MatrixName &datasetName);
 
     /**
      * @brief Write string attribute into the dataset at a specified place in the file tree.
@@ -819,10 +838,11 @@ class Hdf5File
      * @param [in] value         - Data to write.
      * @throw ios::failure       - If error happens.
      */
-    void writeStringAttribute(const hid_t        parentGroup,
-                              const MatrixName&  datasetName,
-                              const MatrixName&  attributeName,
-                              const std::string& value);
+    void writeStringAttribute(const hid_t parentGroup,
+                              const MatrixName &datasetName,
+                              const MatrixName &attributeName,
+                              const std::string &value);
+
     /**
      * @brief Read string attribute from the dataset at a specified place in the file tree.
      *
@@ -832,28 +852,28 @@ class Hdf5File
      * @return Attribute value.
      * @throw ios::failure       - If error happens.
      */
-    std::string readStringAttribute(const hid_t       parentGroup,
-                                    const MatrixName& datasetName,
-                                    const MatrixName& attributeName);
+    std::string readStringAttribute(const hid_t parentGroup,
+                                    const MatrixName &datasetName,
+                                    const MatrixName &attributeName);
 
-  protected:
+protected:
 
-  private:
+private:
     /// String representation of the Domain type in the HDF5 file.
     static const std::string kMatrixDomainTypeName;
     /// String representation of the Data type in the HDF5 file.
     static const std::string kMatrixDataTypeName;
 
     /// Map for data type names.
-    static std::map<MatrixDataType, std::string>   sMatrixDataTypeNames;
+    static std::map<MatrixDataType, std::string> sMatrixDataTypeNames;
     /// Map for domain type names.
     static std::map<MatrixDomainType, std::string> sMatrixDomainTypeNames;
 
     /// HDF file handle.
-    hid_t  mFile;
+    hid_t mFile;
     /// File name.
     std::string mFileName;
 };// Hdf5File
 //----------------------------------------------------------------------------------------------------------------------
 
-#endif	/* HDF5_FILE_H */
+#endif    /* HDF5_FILE_H */

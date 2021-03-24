@@ -30,8 +30,12 @@ KSpaceSolverFluid::loadInputData()
 
     Hdf5File &outputFile = mParameters.getOutputFile();
 
-    std::string filename = "example_output.h5";
-    outputFile.create(filename);
+    auto & ksampler = mParameters.getKOutput();
+    auto filename = ksampler.getOutputFileName();
+
+    if (!filename.empty() && !outputFile.canAccess(filename))
+        outputFile.create(filename);
+
     mOutputStreamContainer.createStreams();
 }
 

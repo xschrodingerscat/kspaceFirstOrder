@@ -161,11 +161,11 @@ Parameters& Parameters::getInstance()
 //----------------------------------------------------------------------------------------------------------------------
 //
 void 
-Parameters::init(KConfig &kcfg, KCmds &kcmds)
+Parameters::init(KConfig &kcfg, KOutput &ksampler)
 {
 	mKConfigFlag = true;
 
-	mKCmds = kcmds;
+    mOutput = ksampler;
 
 	DimensionSizes scalarSizes(1, 1, 1);
 

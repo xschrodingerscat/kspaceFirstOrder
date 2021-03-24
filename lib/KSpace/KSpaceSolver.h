@@ -25,7 +25,7 @@
 #include <OutputStreams/BaseOutputStream.h>
 #include <Utils/TimeMeasure.h>
 
-#include <KSpace/KCmds.h>
+#include <KSpace/KOutput.h>
 #include <KSpaceSolver/KSpaceFirstOrderSolver.h>
 #include <KSpace/KVersion.h>
 
@@ -57,13 +57,13 @@ public:
 
     ~KSpaceSolverElastic() override = default;
 
-    void fftTest();
+    void fftwVerify();
 
     void allocateMemory() override;
 
     void loadInputData() override;
 
-    void freeMemory() override { KSpaceSolver::freeMemory(); }
+//    void freeMemory() override { KSpaceSolver::freeMemory(); }
 
     void compute() override;
 
@@ -109,6 +109,12 @@ public:
             bool alphaCoefScalarFlag>
     void computePressure();
 
+    /* local function member */
+    /// Post processing and closing the output streams.
+    void postProcessing();
+
+    /// Store sensor data.
+    void storeSensorInfo();
 
 private:
     using ComputeElasticFunc = std::function<void(KSpaceSolverElastic &)>;

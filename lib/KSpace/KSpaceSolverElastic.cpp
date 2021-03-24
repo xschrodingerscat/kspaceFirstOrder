@@ -41,8 +41,12 @@ KSpaceSolverElastic::loadInputData()
 
     Hdf5File &outputFile = mParameters.getOutputFile();
 
-    std::string filename = "example_output.h5";
-    outputFile.create(filename);
+    auto & koutput = mParameters.getKOutput();
+    auto filename = koutput.getOutputFileName();
+
+    if (koutput.isOutputToFileFlag() && !outputFile.canAccess(filename))
+        outputFile.create(filename);
+
     mOutputStreamContainer.createStreams();
 }
 
@@ -76,9 +80,7 @@ KSpaceSolverElastic::compute()
 
     postProcessing();
 
-    writeOutputDataInfo();
 
-    mParameters.getOutputFile().close();
 }
 
 template<Parameters::SimulationDimension simulationDimension,
@@ -839,11 +841,57 @@ KSpaceSolverElastic::generatePml()
     }
 }
 
-void
-KSpaceSolverElastic::fftTest()
+
+void KSpaceSolverElastic::storeSensorInfo()
 {
-    initializeFftwPlans();
-    generateDerivativeOperators();
+
+    // Unless the time for sampling has come, exit.
+    if (mParameters.getTimeIndex() >= mParameters.getSamplingStartTimeIndex())
+    {
+        if (mParameters.getStoreVelocityNonStaggeredRawFlag())
+        {
+            if (mParameters.isSimulation3D())
+            {
+                computeShiftedVelocity<SD::k3D>();
+            }
+            else
+            {
+                computeShiftedVelocity<SD::k2D>();
+            }
+        }
+        mOutputStreamContainer.sampleStreams();
+    }
+}
+
+void KSpaceSolverElastic::postProcessing()
+{
+
+    auto & params = mParameters;
+    auto koutput = params.getKOutput();
+
+    if (koutput.isOutputToFileFlag()) {
+        if (mParameters.getStorePressureFinalAllFlag())
+        {
+            getRealMatrix(MI::kP).writeData(mParameters.getOutputFile(),
+                                            mOutputStreamContainer.getStreamHdf5Name(OI::kFinalPressure),
+                                            mParameters.getCompressionLevel());
+        }// p_final
+        // Apply post-processing and close
+        mOutputStreamContainer.postProcessStreams();
+        mOutputStreamContainer.closeStreams();
+
+        writeOutputDataInfo();
+        params.getOutputFile().close();
+    }
+
+}
+
+
+void
+KSpaceSolverElastic::fftwVerify()
+{
+//    initializeFftwPlans();
+//    generateDerivativeOperators();
 
 #if 0
     FloatComplex *fftx = getComplexData(MI::kTmpFftwXXdx);
@@ -990,7 +1038,5 @@ KSpaceSolverElastic::fftTest()
     //std::cout << fftx[2 + 128] << std::endl;
 #endif
 }
-
-
 
 

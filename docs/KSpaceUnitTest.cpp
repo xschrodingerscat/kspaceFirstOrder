@@ -1,125 +1,76 @@
 
-#include <exception>
 
-#include <KSpaceSolver/KSpaceFirstOrderSolver.h>
-#include <Logger/Logger.h>
+
 #include <gtest/gtest.h>
+#include <KSpace/KSpaceSolver.h>
 
-using std::string;
 
-TEST(KSpace, Trivial01)
+TEST(KSpace, kFluid)
 {
-	// Create k-Space solver
-	KSpaceFirstOrderSolver kSpaceSolver;
+    /* version checking */
+    const auto version = getVersion();
+    std::cout << "The current version of the KSpaceSolver: " + version << std::endl;
 
-	// Print header
-	Logger::log(Logger::LogLevel::kBasic, kOutFmtFirstSeparator);
-	Logger::log(Logger::LogLevel::kBasic, kOutFmtCodeName, kSpaceSolver.getCodeName().c_str());
-	Logger::log(Logger::LogLevel::kBasic, kOutFmtSeparator);
+    /* create special global configuration (default 2D)*/
+    auto factory = AutoCreateInstance<KConfigFactory>();
+    auto kcfg = factory->AutoCreateKConfig(kFluid);
 
-	// Create parameters and parse command line
-	Parameters& parameters = Parameters::getInstance();
+    auto koutput = AutoCreateInstance<KOutput>();
 
-	//-------------------------------------------- Initialize simulation -----------------------------------------------//
-	int argc = 1;
-	char *argv[1] = {"KSpace"};
-	try
-	{
-		// Initialize parameters by parsing the command line and reading input file scalars
-		parameters.init(argc, argv);
+    koutput->mOutputFileName = "kspace_fluid_output.h5";
+    /* preprocessing */
+    kcfg->preProcessing();
 
-		// When we know the GPU, we can print out the code version
-		if (parameters.isPrintVersionOnly())
-		{
-			kSpaceSolver.printFullCodeNameAndLicense();
-			exit(EXIT_SUCCESS);
-		}
-	}
-	catch (const std::exception& e)
-	{
-		Logger::log(Logger::LogLevel::kBasic, kOutFmtFailed);
-		Logger::log(Logger::LogLevel::kBasic, kOutFmtLastSeparator);
-		Logger::errorAndTerminate(Logger::wordWrapString(e.what(),kErrFmtPathDelimiters, 9));
-	}
+    /* initialize param object with preprocessed config */
+    auto &params = Parameters::getInstance();
+    params.init(*kcfg, *koutput);
 
-	// Print simulation setup
-	parameters.printSimulatoinSetup();
+    /* create first order PDE solver*/
+    auto solver = AutoCreateInstance<KSpaceSolverFluid>();
 
-	Logger::log(Logger::LogLevel::kBasic, kOutFmtInitializationHeader);
+    /* allocate memory for its container (such as matrix) */
+    solver->allocateMemory();
 
-	//------------------------------------------------ Allocate memory -------------------------------------------------//
-	try
-	{
-		kSpaceSolver.allocateMemory();
-	}
-	catch (const std::bad_alloc& e)
-	{
-		Logger::log(Logger::LogLevel::kBasic, kOutFmtFailed);
-		Logger::log(Logger::LogLevel::kBasic, kOutFmtLastSeparator);
-		// 9 = Indentation of Error:
-		Logger::errorAndTerminate(Logger::wordWrapString(kErrFmtOutOfMemory," ", 9));
-	}
-	catch (const std::exception& e)
-	{
-		Logger::log(Logger::LogLevel::kBasic, kOutFmtFailed);
-		Logger::log(Logger::LogLevel::kBasic, kOutFmtLastSeparator);
+    /* load data from kconfig */
+    solver->loadInputData();
 
-		const string errorMessage = string(kErrFmtUnknownError) + e.what();
-		Logger::errorAndTerminate(Logger::wordWrapString(errorMessage, kErrFmtPathDelimiters, 9));
-	}
+    /* solve the PDEs system*/
+    solver->compute();
 
-	//------------------------------------------------ Load input data -------------------------------------------------//
-	try
-	{
-		kSpaceSolver.loadInputData();
-	}
-	catch (const std::ios::failure& e)
-	{
-		Logger::log(Logger::LogLevel::kBasic, kOutFmtFailed);
-		Logger::log(Logger::LogLevel::kBasic, kOutFmtLastSeparator);
-		// 9 = Indentation of Error:
-		Logger::errorAndTerminate(Logger::wordWrapString(e.what(), kErrFmtPathDelimiters, 9));
-	}
-	catch (const std::exception& e)
-	{
-		Logger::log(Logger::LogLevel::kBasic, kOutFmtFailed);
-		Logger::log(Logger::LogLevel::kBasic, kOutFmtLastSeparator);
+}
 
-		const string errorMessage = string(kErrFmtUnknownError) + e.what();
-		Logger::errorAndTerminate(Logger::wordWrapString(errorMessage, kErrFmtPathDelimiters, 9));
-	}
+TEST(KSpace, kElastic)
+{
+    /* version checking */
+    const auto version = getVersion();
+    std::cout << "The current version of the KSpaceSolver: " + version << std::endl;
 
-	// Did we recover from checkpoint?
-	if (parameters.getTimeIndex() > 0)
-	{
-		Logger::log(Logger::LogLevel::kBasic, kOutFmtSeparator);
-		Logger::log(Logger::LogLevel::kBasic, kOutFmtRecoveredFrom, parameters.getTimeIndex());
-	}
+    /* create special global configuration (default 2D)*/
+    auto factory = AutoCreateInstance<KConfigFactory>();
+    auto kcfg = factory->AutoCreateKConfig(kElastic);
 
-	//-------------------------------------------------- Simulation ----------------------------------------------------//
-	Logger::log(Logger::LogLevel::kBasic, kOutFmtSeparator);
-	// Exception are caught inside due to different log formats
-	kSpaceSolver.compute();
+    /* preprocessing */
+    kcfg->preProcessing();
 
-	//----------------------------------------------------- Summary ----------------------------------------------------//
-	Logger::log(Logger::LogLevel::kBasic, kOutFmtSummaryHeader);
-	Logger::log(Logger::LogLevel::kBasic, kOutFmtMemoryUsage, kSpaceSolver.getMemoryUsage());
+    /* set control parameters */
+    auto ksampler = AutoCreateInstance<KOutput>();
+    ksampler->mOutputFileName = "kspace_elastic_output.h5";
 
-	Logger::log(Logger::LogLevel::kBasic, kOutFmtSeparator);
+    /* initialize param object with preprocessed config */
+    auto &params = Parameters::getInstance();
+    params.init(*kcfg, *ksampler);
 
-	// Elapsed Time time
-	if (kSpaceSolver.getCumulatedTotalTime() != kSpaceSolver.getTotalTime())
-	{
-		Logger::log(Logger::LogLevel::kBasic, kOutFmtLegExecutionTime, kSpaceSolver.getTotalTime());
-	}
-	Logger::log(Logger::LogLevel::kBasic, kOutFmtTotalExecutionTime, kSpaceSolver.getCumulatedTotalTime());
+    /* create first order PDE solver*/
+    auto solver = AutoCreateInstance<KSpaceSolverElastic>();
 
-	Logger::log(Logger::LogLevel::kBasic, kOutFmtEndOfSimulation);
+    /* allocate memory for its container (such as matrix) */
+    solver->allocateMemory();
 
-}// end of main
+    /* load data from kconfig */
+    solver->loadInputData();
 
-//----------------------------------------------------------------------------------------------------------------------
-
-
+    /* solve the PDEs system*/
+    solver->compute();
+}
 
 
