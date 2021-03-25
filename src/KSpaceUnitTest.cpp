@@ -1,9 +1,7 @@
 
 
-
 #include <gtest/gtest.h>
 #include <KSpace/KSpaceSolver.h>
-
 
 TEST(KSpace, kElastic)
 {
