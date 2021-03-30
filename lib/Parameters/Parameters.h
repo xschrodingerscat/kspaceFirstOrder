@@ -328,7 +328,7 @@ class Parameters
 
 		KMatrixCached & getMatCached()           { return mMatCached; };
 
-		KOutput & getKOutput()						 { return mOutput; };
+		KOutput & getKOutput()						 { return *mOutput; };
 		/**
 		 * @brief  Get output file handle.
 		 * @return Handle to the output file.
@@ -744,7 +744,7 @@ class Parameters
 		 */
 		bool getStorePressureRawFlag()        const 
 		{ 
-			return mKConfigFlag ? mOutput.mStorePressureRawFlag
+			return mKConfigFlag ? mOutput->mStorePressureRawFlag
 				   : mCommandLineParameters.getStorePressureRawFlag(); 
 		};
 		/**
@@ -842,7 +842,7 @@ class Parameters
 		bool		  mKConfigFlag;
 		KMatrixCached mMatCached;
 
-		KOutput	      mOutput;
+		KOutput	      *mOutput;
 
 		bool		  mElasticFlag;
 

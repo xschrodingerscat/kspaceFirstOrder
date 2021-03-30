@@ -45,12 +45,12 @@ public:
 
     explicit KMatrix(const KMatrixType<T> &base) { mBase = base; };
 
-    size_t rowSize()
+    size_t rowSize() const
     {
         return mBase.size();
     };
 
-    size_t colSize()
+    size_t colSize() const
     {
         if (mBase.empty()) return 0;
         return mBase.front().size();
@@ -68,14 +68,17 @@ public:
         return r;
     };
 
-    friend KMatrix operator*(T lhs, const KMatrix &rhs)
+    friend KMatrix operator*(T lhs, KMatrix &rhs)
     {
         KMatrix<T> r = rhs;
 
         size_t i = 0;
         for (auto &elem: r.mBase)
+        {
             std::transform(rhs.mBase[i].begin(), rhs.mBase[i].end(),
-                           elem.begin(), [&](T &e) { return e * lhs; });
+                           elem.begin(), [=](T &e) { return e * lhs; });
+            ++i;
+        }
         return r;
     }
 
@@ -102,6 +105,19 @@ public:
         return ret;
     }
 
+    KMatrix operator+(KMatrix<T> &&kmat)
+    {
+        size_t i = 0;
+        for (auto &elem: kmat.mBase)
+        {
+            std::transform(kmat.mBase[i].begin(), kmat.mBase[i].end(),
+                           mBase[i].begin(), elem.begin(), std::plus<T>{});
+            i++;
+        }
+
+        return kmat;
+    }
+
     KMatrix *clone() { return CreateInstance<KMatrix>(*this); }
 
     std::vector<T> &operator[](int i)
@@ -119,6 +135,11 @@ public:
 
     static KMatrix Rect(size_t r, size_t c, size_t left, size_t top,
                         size_t right, size_t bottom);
+
+    static void FillDisc(KMatrix<float> &kmat, size_t x, size_t y, size_t radius, T val);
+
+    template<typename F>
+    static void Fill(KMatrix<float> &kmat, F lambda);
 
     static std::vector<T> Max(KMatrix &mat);
 
@@ -243,6 +264,25 @@ KMatrix<T>::Print(KMatrix<T> kmat)
                       [](T e) { std::cout << e << " "; });
         std::cout << std::endl;
     }
+}
+
+template<typename T>
+void
+KMatrix<T>::FillDisc(KMatrix<float> &kmat, size_t x, size_t y, size_t radius, T val)
+{
+    for (size_t i = 0; i < kmat.rowSize(); ++ i)
+        for (size_t j = 0; j < kmat.colSize(); ++ j)
+            if ((i - x) * (i - x) + (j - y) * (j - y) < radius * radius)
+                kmat[i][j] = val;
+}
+
+template<typename T>
+template<typename F>
+void KMatrix<T>::Fill(KMatrix<float> &kmat, F lambda)
+{
+    for (size_t i = 0; i < kmat.rowSize(); ++ i)
+        for (size_t j = 0; j < kmat.colSize(); ++ j)
+            lambda(kmat[i][j], i, j);
 }
 
 #endif /* ifndef __KMATRIX_H_INCLUDE__ */

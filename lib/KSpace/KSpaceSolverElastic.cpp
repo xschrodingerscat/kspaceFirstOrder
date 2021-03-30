@@ -76,7 +76,7 @@ KSpaceSolverElastic::compute()
             (*this);
 
     /* Post processing phase */
-    mPostProcessingTime.start();
+    // mPostProcessingTime.start();
 
     postProcessing();
 
@@ -102,7 +102,9 @@ KSpaceSolverElastic::computeElastic()
     // Progress header
     Logger::log(Logger::LogLevel::kBasic, kOutFmtSimulationHeader);
 
+
     mIterationTime.start();
+    params.setTimeIndex(0);
 
     // Execute main loop
     while (params.getTimeIndex() < params.getNt()

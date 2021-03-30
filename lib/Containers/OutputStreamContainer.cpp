@@ -410,16 +410,13 @@ void OutputStreamContainer::addOutputStreamMemory(const OutputStreamContainer::O
         if (params.getSensorMaskType() == Parameters::SensorMaskType::kIndex)
         {
             auto koutput = params.getKOutput();
-            if (koutput.isOutputToFileFlag())
-            {
-                mContainer[streamIdx] = new KIndexOutputStream(params.getOutputFile(),
-                                                               sOutputStreamHdf5Names[streamIdx],
-                                                               matrixContainer.getMatrix<RealMatrix>(sampledMatrixIdx),
-                                                               matrixContainer.getMatrix<IndexMatrix>(
-                                                                       MI::kSensorMaskIndex),
-                                                               reduceOp,
-                                                               bufferToReuse);
-            }
+            mContainer[streamIdx] = new KIndexOutputStream(params.getOutputFile(),
+                                                           sOutputStreamHdf5Names[streamIdx],
+                                                           matrixContainer.getMatrix<RealMatrix>(sampledMatrixIdx),
+                                                           matrixContainer.getMatrix<IndexMatrix>(
+                                                                   MI::kSensorMaskIndex),
+                                                           reduceOp,
+                                                           bufferToReuse);
         }
     }
 }

@@ -33,6 +33,8 @@ void KIndexOutputStream::create()
     auto & params = Parameters::getInstance();
     auto & koutput = params.getKOutput();
 
+    mBufferSize = mSensorMask.size();
+
     KMatrixType<float> elem;
     for (size_t i = 0; i < mBufferSize; ++ i)
     {

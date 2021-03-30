@@ -5,10 +5,10 @@ clearvars;
 % =========================================================================
 
 % create the computational grid
-Nx = 128;  % number of grid points in the x (row) direction
-Ny = 256;  % number of grid points in the y (column) direction
-dx = 0.1e-3;            % grid point spacing in the x direction [m]
-dy = 0.1e-3;            % grid point spacing in the y direction [m]
+Nx = 128;  % number of grid points in the mX (row) direction
+Ny = 256;  % number of grid points in the mY (column) direction
+dx = 0.1e-3;            % grid point spacing in the mX direction [m]
+dy = 0.1e-3;            % grid point spacing in the mY direction [m]
 
 
 % define the properties of the upper layer of the propagation medium
@@ -46,7 +46,7 @@ kgrid.Nx = Nx;
 kgrid.Ny = Ny;
 kgrid.dim = 2;
 
-% assign the grid parameters for the x and y spatial directions
+% assign the grid parameters for the mX and mY spatial directions
 kgrid.kx_vec = makeDim(kgrid.Nx, kgrid.dx);
 kgrid.ky_vec = makeDim(kgrid.Ny, kgrid.dy);
 
@@ -68,8 +68,8 @@ kgrid.y_size = kgrid.dy * kgrid.Ny;
 kgrid.kx = repmat(kgrid.kx_vec, [1, kgrid.Ny]);
 kgrid.ky = repmat(kgrid.ky_vec.', [kgrid.Nx, 1]);
 
-kgrid.x = kgrid.x_size .* kgrid.kx .* kgrid.dx ./ (2 .* pi);
-kgrid.y = kgrid.y_size .* kgrid.ky .* kgrid.dy ./ (2 .* pi);
+kgrid.mX = kgrid.x_size .* kgrid.kx .* kgrid.dx ./ (2 .* pi);
+kgrid.mY = kgrid.y_size .* kgrid.ky .* kgrid.dy ./ (2 .* pi);
 
 kgrid.x_vec = kgrid.x_size .* kgrid.kx_vec .* kgrid.dx ./ (2 .* pi);
 kgrid.y_vec = kgrid.y_size .* kgrid.ky_vec .* kgrid.dy ./ (2 .* pi);
@@ -113,8 +113,8 @@ lambda = medium.sound_speed_compression.^2 .* medium.density - 2*mu;
 
 
 % rho0 is heterogeneous and staggered grids are used
-%rho0_sgx = interpn(kgrid.x, kgrid.y, rho0, kgrid.x + kgrid.dx/2, kgrid.y,              '*linear');
-%rho0_sgy = interpn(kgrid.x, kgrid.y, rho0, kgrid.x,              kgrid.y + kgrid.dy/2, '*linear');
+%rho0_sgx = interpn(kgrid.mX, kgrid.mY, rho0, kgrid.mX + kgrid.dx/2, kgrid.mY,              '*linear');
+%rho0_sgy = interpn(kgrid.mX, kgrid.mY, rho0, kgrid.mX,              kgrid.mY + kgrid.dy/2, '*linear');
 
 % set values outside of the interpolation range to original values 
 %rho0_sgx(isnan(rho0_sgx)) = rho0(isnan(rho0_sgx));
@@ -132,7 +132,7 @@ rho0_sgy_inv = 1./rho0_sgy;
 clear rho0_sgx rho0_sgy
 
 % mu is heterogeneous and staggered grids are used
-% mu_sgxy  = 1./interpn(kgrid.x, kgrid.y, 1./mu, kgrid.x + kgrid.dx/2, kgrid.y + kgrid.dy/2, '*linear');
+% mu_sgxy  = 1./interpn(kgrid.mX, kgrid.mY, 1./mu, kgrid.mX + kgrid.dx/2, kgrid.mY + kgrid.dy/2, '*linear');
 mu_sgxy = mu;
 
 % set values outside of the interpolation range to original values 
@@ -366,21 +366,21 @@ function pml = getPML(Nx, dx, dt, c, pml_size, pml_alpha, staggered, dimension, 
         axisymmetric = false;
     end
 
-    % define x-axis
-    x = 1:pml_size;
+    % define mX-axis
+    mX = 1:pml_size;
 
     % create absorption profile
     if staggered
 
         % calculate the varying components of the pml using a staggered grid
-        pml_left  = pml_alpha * (c / dx) * ( ((x + 0.5) - pml_size - 1) ./ (0 - pml_size) ).^4; 
-        pml_right = pml_alpha * (c / dx) * ( (x + 0.5) ./ pml_size ).^4;
+        pml_left  = pml_alpha * (c / dx) * ( ((mX + 0.5) - pml_size - 1) ./ (0 - pml_size) ).^4;
+        pml_right = pml_alpha * (c / dx) * ( (mX + 0.5) ./ pml_size ).^4;
 
     else
 
         % calculate the varying components of the pml using a regular grid
-        pml_left  = pml_alpha * (c / dx) * ( (x - pml_size - 1) ./ (0 - pml_size) ).^4;
-        pml_right = pml_alpha * (c / dx) * ( x ./ pml_size ).^4;
+        pml_left  = pml_alpha * (c / dx) * ( (mX - pml_size - 1) ./ (0 - pml_size) ).^4;
+        pml_right = pml_alpha * (c / dx) * ( mX ./ pml_size ).^4;
 
     end
 
@@ -406,7 +406,7 @@ function pml = getPML(Nx, dx, dt, c, pml_size, pml_alpha, staggered, dimension, 
 
 end
 
-% function y = sinck(x)
-%     zero_vals = (x == 0);
-%     y = sin(x + pi * zero_vals) ./ (x + zero_vals) + zero_vals;
+% function mY = sinck(mX)
+%     zero_vals = (mX == 0);
+%     mY = sin(mX + pi * zero_vals) ./ (mX + zero_vals) + zero_vals;
 % end

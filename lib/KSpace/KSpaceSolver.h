@@ -63,7 +63,7 @@ public:
 
     void loadInputData() override;
 
-//    void freeMemory() override { KSpaceSolver::freeMemory(); }
+    void freeMemory() override { KSpaceSolver::freeMemory(); }
 
     void compute() override;
 

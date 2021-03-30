@@ -11,6 +11,7 @@
 #include <functional>
 
 #include <KSpace/KMatrix.h>
+#include <ostream>
 
 
 struct KGrid
@@ -29,8 +30,11 @@ struct KGrid
 
     float mDt;
 
+    friend std::ostream &operator<<(std::ostream &os, const KGrid &grid);
+
     /* derivative */
     size_t mNt;
+    float mTimeEnd;
 
     KGrid();
 };
@@ -51,6 +55,8 @@ struct Medium
 
     KMatrix<float> mC0;
     KMatrix<float> mS0;
+
+    friend std::ostream &operator<<(std::ostream &os, const Medium &medium);
 
     /* derivative */
     float mRho0SgxScalar;
@@ -83,6 +89,8 @@ struct Sensor
     KMatrix<size_t> mSensorMaskIndex;
 
     Sensor();
+
+    friend std::ostream &operator<<(std::ostream &os, const Sensor &sensor);
 };
 
 
@@ -100,6 +108,8 @@ struct Source
     // size_t			mVelocityZSourceFlag;
 
     Source();
+
+    friend std::ostream &operator<<(std::ostream &os, const Source &source);
 };
 
 
@@ -125,6 +135,8 @@ struct KPml
     AbsorptionType mAbsorbingFlag;
 
     KPml();
+
+    friend std::ostream &operator<<(std::ostream &os, const KPml &pml);
 };
 
 class KConfig
@@ -141,6 +153,9 @@ public:
     virtual bool preProcessing() = 0;
 
     virtual KConfig *clone() const = 0;
+
+    friend std::ostream &operator<<(std::ostream &os, const KConfig &config);
+
 
 public:
 //	enum class SimulationDimension {
