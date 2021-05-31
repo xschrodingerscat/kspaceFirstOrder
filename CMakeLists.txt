@@ -68,7 +68,7 @@ target_link_libraries(${PROJECT_NAME}
         gtest_main
         hdf5
         hdf5_hl
-        fftw3f
+        fftw3
         )
 
 #add_test(NAME path_finder_test COMMAND path_finder)

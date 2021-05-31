@@ -49,7 +49,7 @@ public:
         return mOutputFileName;
     }
 
-    const KMatrix<float> &getPressureRaw() const
+    const KMatrix<double> &getPressureRaw() const
     {
         return mPressureRaw;
     }
@@ -88,7 +88,7 @@ public:
     bool mOutputToFileFlag;
 
 
-    KMatrix<float> mPressureRaw;
+    KMatrix<double> mPressureRaw;
 };
 
 

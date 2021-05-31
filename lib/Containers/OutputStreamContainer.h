@@ -202,14 +202,14 @@ protected:
                          const MatrixContainer::MatrixIdx sampledMatrixIdx,
                          const BaseOutputStream::ReduceOperator reduceOp,
                          const bool present = true,
-                         float *bufferToReuse = nullptr);
+                         double *bufferToReuse = nullptr);
 
     void addOutputStreamMemory(const OutputStreamIdx streamIdx,
                          const MatrixContainer &matrixContainer,
                          const MatrixContainer::MatrixIdx sampledMatrixIdx,
                          const BaseOutputStream::ReduceOperator reduceOp,
                          const bool present = true,
-                         float *bufferToReuse = nullptr);
+                         double *bufferToReuse = nullptr);
 
     /**
      * @brief Add a new whole domain output stream into the container.

@@ -212,11 +212,11 @@ KFluidConfig::init()
     /* Medium */
     auto density = 1000;
     mMedium.mRho0ScalarFlag = false;
-    mMedium.mRho0 = density * KMatrix<float>::Ones(Nx, Ny);
+    mMedium.mRho0 = density * KMatrix<double>::Ones(Nx, Ny);
 
     auto sound_speed = 1500;
     mMedium.mC0ScalarFlag = false;
-    mMedium.mC0 = sound_speed * KMatrix<float>::Ones(Nx, Ny);
+    mMedium.mC0 = sound_speed * KMatrix<double>::Ones(Nx, Ny);
 
     /* Sensor */
     mSensor.mSensorMaskType = Sensor::SensorMaskType::kIndex;
@@ -237,7 +237,7 @@ KFluidConfig::init()
     auto disc_radius = 8;
 
     mSource.mInitialPressureSourceInput = disc_magnitude
-                                          * KMatrix<float>::Disc(Nx, Ny, disc_x_pos, disc_y_pos, disc_radius);
+                                          * KMatrix<double>::Disc(Nx, Ny, disc_x_pos, disc_y_pos, disc_radius);
 
     mSource.mVelocityXSourceFlag = 0;
     mSource.mVelocityYSourceFlag = 0;
@@ -265,8 +265,8 @@ KFluidConfig::preProcessing()
 
 
     /* preprocessing mCref */
-    auto v = KMatrix<float>::Min(mMedium.mC0);
-    v = KMatrix<float>::Max(mMedium.mC0);
+    auto v = KMatrix<double>::Min(mMedium.mC0);
+    v = KMatrix<double>::Max(mMedium.mC0);
     mMedium.mCref = *std::max_element(v.begin(), v.end());
 
     /* preprocessing mDt and mNt */
@@ -331,15 +331,15 @@ KElasticConfig::init()
     /* Medium */
     auto density = 1000;
     mMedium.mRho0ScalarFlag = false;
-    mMedium.mRho0 = density * KMatrix<float>::Ones(Nx, Ny);
+    mMedium.mRho0 = density * KMatrix<double>::Ones(Nx, Ny);
 
     auto cs_sound_speed = 1500;
     mMedium.mC0ScalarFlag = false;
-    mMedium.mC0 = cs_sound_speed * KMatrix<float>::Ones(Nx, Ny);
+    mMedium.mC0 = cs_sound_speed * KMatrix<double>::Ones(Nx, Ny);
 
     auto ss_sound_speed = 500;
     mMedium.mS0ScalarFlag = false;
-    mMedium.mS0 = ss_sound_speed * KMatrix<float>::Ones(Nx, Ny);
+    mMedium.mS0 = ss_sound_speed * KMatrix<double>::Ones(Nx, Ny);
 
     /* Sensor */
     mSensor.mSensorMaskType = Sensor::SensorMaskType::kIndex;
@@ -359,7 +359,7 @@ KElasticConfig::init()
     auto line_start = 29;
     auto line_end = 97;
 
-    auto initPressure = line_magnitude * KMatrix<float>::Line(Nx, Ny, line_y, line_start, line_end);
+    auto initPressure = line_magnitude * KMatrix<double>::Line(Nx, Ny, line_y, line_start, line_end);
     mSource.mInitialPressureSourceInput = initPressure;
 
     mSource.mVelocityXSourceFlag = 0;
@@ -389,8 +389,8 @@ KElasticConfig::preProcessing()
      */
 
     /* preprocessing mCref */
-    auto v = KMatrix<float>::Min(mMedium.mC0);
-    v = KMatrix<float>::Max(mMedium.mC0);
+    auto v = KMatrix<double>::Min(mMedium.mC0);
+    v = KMatrix<double>::Max(mMedium.mC0);
     mMedium.mCref = *std::max_element(v.begin(), v.end());
 
     /* preprocessing mDt and mNt */

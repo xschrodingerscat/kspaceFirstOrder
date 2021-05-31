@@ -268,23 +268,23 @@ class FftwComplexMatrix : public ComplexMatrix
     static const unsigned kFftMeasureFlag  = FFTW_MEASURE;
 
     /// FFTW plan for the 2D/3D Real-to-Complex transform.
-    fftwf_plan mR2CFftPlanND;
+    fftw_plan mR2CFftPlanND;
     /// FFTW plan for the 2D/3D Complex-to-Real transform.
-    fftwf_plan mC2RFftPlanND;
+    fftw_plan mC2RFftPlanND;
 
     /// FFTW plan for the 1D Real-to-Complex transform in the x dimension.
-    fftwf_plan mR2CFftPlan1DX;
+    fftw_plan mR2CFftPlan1DX;
     /// FFTW plan for the 1D Real-to-Complex transform in the y dimension.
-    fftwf_plan mR2CFftPlan1DY;
+    fftw_plan mR2CFftPlan1DY;
     /// FFTW plan for the 1D Real-to-Complex transform in the z dimension.
-    fftwf_plan mR2CFftPlan1DZ;
+    fftw_plan mR2CFftPlan1DZ;
 
     /// FFTW plan for the 1D Complex-to-Real transform in the x dimension.
-    fftwf_plan mC2RFftPlan1DX;
+    fftw_plan mC2RFftPlan1DX;
     /// FFTW plan for the 1D Complex-to-Real transform in the y dimension.
-    fftwf_plan mC2RFftPlan1DY;
+    fftw_plan mC2RFftPlan1DY;
     /// FFTW plan for the 1D Complex-to-Real transform in the z dimension.
-    fftwf_plan mC2RFftPlan1DZ;
+    fftw_plan mC2RFftPlan1DZ;
 
   private:
 

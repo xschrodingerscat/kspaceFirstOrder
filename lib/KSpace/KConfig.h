@@ -24,17 +24,17 @@ struct KGrid
     size_t mNy;
     size_t mNz;
 
-    float mDx;
-    float mDy;
-    float mDz;
+    double mDx;
+    double mDy;
+    double mDz;
 
-    float mDt;
+    double mDt;
 
     friend std::ostream &operator<<(std::ostream &os, const KGrid &grid);
 
     /* derivative */
     size_t mNt;
-    float mTimeEnd;
+    double mTimeEnd;
 
     KGrid();
 };
@@ -43,31 +43,31 @@ struct Medium
 {
 
     bool mRho0ScalarFlag;
-    float mRho0Scalar;            /* kg / m^3 */
+    double mRho0Scalar;            /* kg / m^3 */
 
-    KMatrix<float> mRho0;
+    KMatrix<double> mRho0;
 
     bool mC0ScalarFlag;
     bool mS0ScalarFlag;
 
-    float mC0Scalar;                /* m/s */
-    float mS0Scalar;                /* m/s */
+    double mC0Scalar;                /* m/s */
+    double mS0Scalar;                /* m/s */
 
-    KMatrix<float> mC0;
-    KMatrix<float> mS0;
+    KMatrix<double> mC0;
+    KMatrix<double> mS0;
 
     friend std::ostream &operator<<(std::ostream &os, const Medium &medium);
 
     /* derivative */
-    float mRho0SgxScalar;
-    float mRho0SgyScalar;
-    // float			mRho0SgzScalar;
+    double mRho0SgxScalar;
+    double mRho0SgyScalar;
+    // double			mRho0SgzScalar;
 
-    KMatrix<float> mRho0Sgx;
-    KMatrix<float> mRho0Sgy;
-    // KMatrix<float> mRho0Sgz;
+    KMatrix<double> mRho0Sgx;
+    KMatrix<double> mRho0Sgy;
+    // KMatrix<double> mRho0Sgz;
 
-    float mCref;
+    double mCref;
 
     Medium();
 };
@@ -99,7 +99,7 @@ struct Source
 
     size_t mPressureSourceFlag;
     size_t mInitialPressureSourceFlag;
-    KMatrix<float> mInitialPressureSourceInput;
+    KMatrix<double> mInitialPressureSourceInput;
     size_t mTransducerSourceFlag;
 
     /* derivative */
@@ -127,11 +127,11 @@ struct KPml
     size_t mPmlYSize;
     // size_t		mPmlZSize;
 
-    float mPmlXAlpha;
-    float mPmlYAlpha;
-    // float			mPmlZAlpha;
+    double mPmlXAlpha;
+    double mPmlYAlpha;
+    // double			mPmlZAlpha;
 
-    float mMultiAxialPmlRatio;
+    double mMultiAxialPmlRatio;
     AbsorptionType mAbsorbingFlag;
 
     KPml();

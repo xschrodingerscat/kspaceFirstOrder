@@ -82,7 +82,7 @@ class BaseOutputStream
                      const MatrixName&    rootObjectName,
                      const RealMatrix&    sourceMatrix,
                      const ReduceOperator reduceOp,
-                     float*               bufferToReuse = nullptr);
+                     double*               bufferToReuse = nullptr);
 
     /// Copy constructor not allowed.
     BaseOutputStream(const BaseOutputStream&) = delete;
@@ -140,7 +140,7 @@ class BaseOutputStream
     /// Buffer size.
     size_t mBufferSize;
     /// Temporary buffer for store data - only if Buffer Reuse = false!
-    float* mStoreBuffer;
+    double* mStoreBuffer;
 };// end of BaseOutputStream
 //----------------------------------------------------------------------------------------------------------------------
 

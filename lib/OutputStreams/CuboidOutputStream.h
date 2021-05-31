@@ -67,7 +67,7 @@ class CuboidOutputStream : public BaseOutputStream
                        const RealMatrix&    sourceMatrix,
                        const IndexMatrix&   sensorMask,
                        const ReduceOperator reduceOp,
-                       float*               bufferToReuse = nullptr);
+                       double*               bufferToReuse = nullptr);
 
     /// Copy constructor not allowed.
     CuboidOutputStream(const CuboidOutputStream&) = delete;

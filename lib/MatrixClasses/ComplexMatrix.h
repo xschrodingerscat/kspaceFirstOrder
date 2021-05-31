@@ -40,12 +40,12 @@
 #include <Utils/DimensionSizes.h>
 
 /// Datatype for complex single precision numbers.
-using FloatComplex = std::complex<float>;
+using FloatComplex = std::complex<double>;
 
 /**
  * @class   ComplexMatrix
  * @brief   The class for complex matrices.
- * @details The class for complex matrices. The elements are stored as std::complex<float>.
+ * @details The class for complex matrices. The elements are stored as std::complex<double>.
  */
 class ComplexMatrix : public BaseFloatMatrix
 {

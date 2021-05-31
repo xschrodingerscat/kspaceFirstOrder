@@ -16,7 +16,7 @@ TEST(KSpace, kFluid)
 
     /* set fluid (default elastic) */
     kcfg->mMedium.mS0ScalarFlag = false;
-    kcfg->mMedium.mS0 = KMatrix<float>::Zero(kcfg->mKGrid.mNx, kcfg->mKGrid.mNy);
+    kcfg->mMedium.mS0 = KMatrix<double>::Zero(kcfg->mKGrid.mNx, kcfg->mKGrid.mNy);
 
     /* preprocessing */
     kcfg->preProcessing();
@@ -78,7 +78,6 @@ TEST(KSpace, kElastic)
     /* set control parameters */
     auto koutput = AutoCreateInstance<KOutput>();
 
-
     std::string filename = "kspace_elastic_output.h5";
     koutput->setOutputFileName(filename);
     koutput->setOutputToFileFlag(false);
@@ -125,9 +124,9 @@ TEST(KSpace, kMixture)
     kcfg->mKGrid.mNy = Ny;
 
     /* wedge mask */
-    auto r1_mask = KMatrix<float>::Rect(Nx, Ny, 0, 0, Ny - 1, Nx / 2 - 1);
+    auto r1_mask = KMatrix<double>::Rect(Nx, Ny, 0, 0, Ny - 1, Nx / 2 - 1);
     /* part mask */
-    auto r2_mask = KMatrix<float>::Rect(Nx, Ny, 0, Nx / 2, Ny - 1, Nx - 1);
+    auto r2_mask = KMatrix<double>::Rect(Nx, Ny, 0, Nx / 2, Ny - 1, Nx - 1);
 
     /* wedge */
     auto c1_magnitude = 2700.f;
@@ -198,17 +197,17 @@ TEST(KSpace, kMixtureWithFlaws)
     kcfg->mKGrid.mNy = Ny;
 
     /* wedge mask */
-    auto r1_mask = KMatrix<float>::Rect(Nx, Ny, 0, 0, Ny - 1, Nx / 2 - 1);
+    auto r1_mask = KMatrix<double>::Rect(Nx, Ny, 0, 0, Ny - 1, Nx / 2 - 1);
     /* part mask */
-    auto r2_mask = KMatrix<float>::Rect(Nx, Ny, 0, Nx / 2, Ny - 1, Nx - 1);
+    auto r2_mask = KMatrix<double>::Rect(Nx, Ny, 0, Nx / 2, Ny - 1, Nx - 1);
 
     /* flaws definition */
     class PrdFillDisc
     {
     public:
         PrdFillDisc(size_t x, size_t y, size_t radius) : mX(x), mY(y), mRadius(radius), mVal(0) {}
-        void setVal(float val) { mVal = val; }
-        void operator()(float &e, size_t i, size_t j)
+        void setVal(double val) { mVal = val; }
+        void operator()(double &e, size_t i, size_t j)
         {
             if ((mX - i) * (mX - i) + (mY - j) * (mY - j) < mRadius * mRadius)
                 e = mVal;
@@ -217,8 +216,8 @@ TEST(KSpace, kMixtureWithFlaws)
     private:
         size_t mX;
         size_t mY;
-        float mVal;
-        float mRadius;
+        double mVal;
+        double mRadius;
     };
 
     /* wedge */
@@ -244,15 +243,15 @@ TEST(KSpace, kMixtureWithFlaws)
     /* medium */
     kcfg->mMedium.mC0 = c1_magnitude * r1_mask + c2_magnitude * r2_mask;
     fillDisc.setVal(flaw_c0_magnitude);
-    KMatrix<float>::Fill(kcfg->mMedium.mC0, fillDisc);
+    KMatrix<double>::Fill(kcfg->mMedium.mC0, fillDisc);
 
     kcfg->mMedium.mS0 = s1_magnitude * r1_mask + s2_magnitude * r2_mask;
     fillDisc.setVal(flaw_s0_magnitude);
-    KMatrix<float>::Fill(kcfg->mMedium.mS0, fillDisc);
+    KMatrix<double>::Fill(kcfg->mMedium.mS0, fillDisc);
 
     kcfg->mMedium.mRho0 = rho1 * r1_mask + rho2 * r2_mask;
     fillDisc.setVal(flaw_rho0);
-    KMatrix<float>::Fill(kcfg->mMedium.mRho0, fillDisc);
+    KMatrix<double>::Fill(kcfg->mMedium.mRho0, fillDisc);
 
     /* preprocessing */
     kcfg->preProcessing();
@@ -265,7 +264,7 @@ TEST(KSpace, kMixtureWithFlaws)
     /* save output data to hdf5file */
     std::string filename = "kspace_mixture_with_flaws_output.h5";
     koutput->setOutputFileName(filename);
-    koutput->setOutputToFileFlag(false);
+    koutput->setOutputToFileFlag(true);
 
     /* initialize param object with preprocessed config */
     auto &params = Parameters::getInstance();

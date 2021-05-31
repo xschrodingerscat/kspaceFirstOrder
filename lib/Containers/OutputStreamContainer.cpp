@@ -128,9 +128,9 @@ void OutputStreamContainer::init(const MatrixContainer &matrixContainer)
     // Stream present always
     constexpr bool kAlways = true;
 
-    float *tempBuffX = matrixContainer.getMatrix<RealMatrix>(MI::kTemp1RealND).getData();
-    float *tempBuffY = matrixContainer.getMatrix<RealMatrix>(MI::kTemp2RealND).getData();
-    float *tempBuffZ = (isSimulation3D) ? matrixContainer.getMatrix<RealMatrix>(MI::kTemp3RealND).getData() : nullptr;
+    double *tempBuffX = matrixContainer.getMatrix<RealMatrix>(MI::kTemp1RealND).getData();
+    double *tempBuffY = matrixContainer.getMatrix<RealMatrix>(MI::kTemp2RealND).getData();
+    double *tempBuffZ = (isSimulation3D) ? matrixContainer.getMatrix<RealMatrix>(MI::kTemp3RealND).getData() : nullptr;
 
     //-------------------------------------------------- pressure ------------------------------------------------------//
     if (params.getStorePressureRawFlag())
@@ -343,7 +343,7 @@ void OutputStreamContainer::addOutputStream(const OutputStreamIdx streamIdx,
                                             const MatrixContainer::MatrixIdx sampledMatrixIdx,
                                             const BaseOutputStream::ReduceOperator reduceOp,
                                             const bool present,
-                                            float *bufferToReuse)
+                                            double *bufferToReuse)
 {
     using MI = MatrixContainer::MatrixIdx;
 
@@ -398,7 +398,7 @@ void OutputStreamContainer::addOutputStreamMemory(const OutputStreamContainer::O
                                                   const MatrixContainer &matrixContainer,
                                                   const MatrixContainer::MatrixIdx sampledMatrixIdx,
                                                   const BaseOutputStream::ReduceOperator reduceOp, const bool present,
-                                                  float *bufferToReuse)
+                                                  double *bufferToReuse)
 {
 
     using MI = MatrixContainer::MatrixIdx;

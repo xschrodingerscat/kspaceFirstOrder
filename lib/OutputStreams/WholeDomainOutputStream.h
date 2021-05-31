@@ -58,7 +58,7 @@ class WholeDomainOutputStream : public BaseOutputStream
                             const MatrixName&    datasetName,
                             const RealMatrix&    sourceMatrix,
                             const ReduceOperator reduceOp,
-                            float*               bufferToReuse = nullptr);
+                            double*               bufferToReuse = nullptr);
 
     /// Copy constructor not allowed.
     WholeDomainOutputStream(const WholeDomainOutputStream&) = delete;

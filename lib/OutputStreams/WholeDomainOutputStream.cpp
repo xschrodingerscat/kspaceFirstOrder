@@ -46,7 +46,7 @@ WholeDomainOutputStream::WholeDomainOutputStream(Hdf5File&            file,
                                                  const MatrixName&    datasetName,
                                                  const RealMatrix&    sourceMatrix,
                                                  const ReduceOperator reduceOp,
-                                                 float*               bufferToReuse)
+                                                 double*               bufferToReuse)
   : BaseOutputStream(file, datasetName, sourceMatrix, reduceOp, bufferToReuse),
     mDataset(H5I_BADID),
     mSampledTimeStep(0)
@@ -146,7 +146,7 @@ void WholeDomainOutputStream::reopen()
  */
 void WholeDomainOutputStream::sample()
 {
-  const float* sourceData = mSourceMatrix.getData();
+  const double* sourceData = mSourceMatrix.getData();
 
   switch (mReduceOp)
   {

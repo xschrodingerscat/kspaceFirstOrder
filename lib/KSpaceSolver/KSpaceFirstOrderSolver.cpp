@@ -573,7 +573,7 @@ size_t KSpaceFirstOrderSolver::getFileUsage()
 			: fileUsage + 2 * mParameters.getSensorMaskCornersSize() * 6;
 	}
 
-	return float(fileUsage) / float(1024 * 1024 / 4);
+	return double(fileUsage) / double(1024 * 1024 / 4);
 
 }// end of getFileUsage
 //----------------------------------------------------------------------------------------------------------------------
@@ -777,8 +777,8 @@ void KSpaceFirstOrderSolver::initializeFftwPlans()
 {
 	// Initialization of FFTW library
 #ifdef _OPENMP
-	fftwf_init_threads();
-	fftwf_plan_with_nthreads(mParameters.getNumberOfThreads());
+	fftw_init_threads();
+	fftw_plan_with_nthreads(mParameters.getNumberOfThreads());
 #endif
 
 	// Shall we recover from previous state - if checkpointing is enabled and the checkpoint file exists
@@ -788,7 +788,7 @@ void KSpaceFirstOrderSolver::initializeFftwPlans()
 	// If the GCC compiler with FFTW is used, try to import wisdom
 #if (defined(__GNUC__) || defined(__GNUG__)) && !(defined(__clang__) || defined(__INTEL_COMPILER))
 	// Import system wide wisdom
-	fftwf_import_system_wisdom();
+	fftw_import_system_wisdom();
 
 	if (recoverFromPrevState)
 	{
@@ -1384,13 +1384,13 @@ void KSpaceFirstOrderSolver::computePressureGradient()
 {
 	const DimensionSizes& reducedDimensionSizes= mParameters.getReducedDimensionSizes();
 
-	const float divider = 1.0f / float(mParameters.getFullDimensionSizes().nElements());
+	const double divider = 1.0f / double(mParameters.getFullDimensionSizes().nElements());
 
 	const FloatComplex* ddxKShiftPos = getComplexData(MI::kDdxKShiftPosR);
 	const FloatComplex* ddyKShiftPos = getComplexData(MI::kDdyKShiftPos);
 	const FloatComplex* ddzKShiftPos = getComplexData(MI::kDdzKShiftPos, simulationDimension == SD::k3D);
 
-	const float*  kappa = getRealData(MI::kKappa);
+	const double*  kappa = getRealData(MI::kKappa);
 
 	FloatComplex* ifftX = getComplexData(MI::kTempFftwX);
 	FloatComplex* ifftY = getComplexData(MI::kTempFftwY);
@@ -1442,11 +1442,11 @@ void KSpaceFirstOrderSolver::computePressureGradientAS()
 	const DimensionSizes& reducedDimensionSizes = mParameters.getReducedDimensionSizes();
 
 	// DCT and DST of type 2,3,4 uses scaling factor 2 * Ny, the FFT adds Nx, yielding 2 * Ny * Nx
-	const float divider = 1.0f / (2.0f * float(mParameters.getFullDimensionSizes().nElements()));
+	const double divider = 1.0f / (2.0f * double(mParameters.getFullDimensionSizes().nElements()));
 
 	const FloatComplex* ddxKShiftPos = getComplexData(MI::kDdxKShiftPosR);
-	const float*        ddyKWswa     = getRealData(MI::kDdyKWswa);
-	const float*        kappa        = getRealData(MI::kKappa);
+	const double*        ddyKWswa     = getRealData(MI::kDdyKWswa);
+	const double*        kappa        = getRealData(MI::kKappa);
 
 	FloatComplex* ifftX = getComplexData(MI::kTempFftwX);
 	FloatComplex* ifftY = getComplexData(MI::kTempFftwY);
@@ -1509,20 +1509,20 @@ void KSpaceFirstOrderSolver::computeVelocityUniform()
 {
 	const DimensionSizes& dimensionSizes = mParameters.getFullDimensionSizes();
 
-	const float  dtRho0SgxScalar = (rho0ScalarFlag) ? mParameters.getDtRho0SgxScalar() : 0.0f;
-	const float  dtRho0SgyScalar = (rho0ScalarFlag) ? mParameters.getDtRho0SgyScalar() : 0.0f;
+	const double  dtRho0SgxScalar = (rho0ScalarFlag) ? mParameters.getDtRho0SgxScalar() : 0.0f;
+	const double  dtRho0SgyScalar = (rho0ScalarFlag) ? mParameters.getDtRho0SgyScalar() : 0.0f;
 
-	const float* dtRho0SgxMatrix = (rho0ScalarFlag) ? nullptr : getRealData(MI::kDtRho0Sgx);
-	const float* dtRho0SgyMatrix = (rho0ScalarFlag) ? nullptr : getRealData(MI::kDtRho0Sgy);
+	const double* dtRho0SgxMatrix = (rho0ScalarFlag) ? nullptr : getRealData(MI::kDtRho0Sgx);
+	const double* dtRho0SgyMatrix = (rho0ScalarFlag) ? nullptr : getRealData(MI::kDtRho0Sgy);
 
-	const float* ifftX = getRealData(MI::kTemp1RealND);
-	const float* ifftY = getRealData(MI::kTemp2RealND);
+	const double* ifftX = getRealData(MI::kTemp1RealND);
+	const double* ifftY = getRealData(MI::kTemp2RealND);
 
-	const float* pmlX  = getRealData(MI::kPmlXSgx);
-	const float* pmlY  = getRealData(MI::kPmlYSgy);
+	const double* pmlX  = getRealData(MI::kPmlXSgx);
+	const double* pmlY  = getRealData(MI::kPmlYSgy);
 
-	float* uxSgx = getRealData(MI::kUxSgx);
-	float* uySgy = getRealData(MI::kUySgy);
+	double* uxSgx = getRealData(MI::kUxSgx);
+	double* uySgy = getRealData(MI::kUySgy);
 
 	// Long loops are replicated for every dimension to save SIMD registers
 #pragma omp parallel for schedule(static) if (simulationDimension == SD::k3D)
@@ -1535,7 +1535,7 @@ void KSpaceFirstOrderSolver::computeVelocityUniform()
 			for (size_t x = 0; x < dimensionSizes.nx; x++)
 			{
 				const size_t i = get1DIndex(z, y, x, dimensionSizes);
-				const float dtRho0Sgx = (rho0ScalarFlag) ? dtRho0SgxScalar : dtRho0SgxMatrix[i];
+				const double dtRho0Sgx = (rho0ScalarFlag) ? dtRho0SgxScalar : dtRho0SgxMatrix[i];
 
 				uxSgx[i] = (uxSgx[i] * pmlX[x] - dtRho0Sgx * ifftX[i]) * pmlX[x];
 			}// x
@@ -1552,7 +1552,7 @@ void KSpaceFirstOrderSolver::computeVelocityUniform()
 			for (size_t x = 0; x < dimensionSizes.nx; x++)
 			{
 				const size_t i = get1DIndex(z, y, x, dimensionSizes);
-				const float dtRho0Sgy = (rho0ScalarFlag) ? dtRho0SgyScalar : dtRho0SgyMatrix[i];
+				const double dtRho0Sgy = (rho0ScalarFlag) ? dtRho0SgyScalar : dtRho0SgyMatrix[i];
 
 				uySgy[i] = (uySgy[i] * pmlY[y] - dtRho0Sgy * ifftY[i]) * pmlY[y];
 			}// x
@@ -1561,13 +1561,13 @@ void KSpaceFirstOrderSolver::computeVelocityUniform()
 
 	if (simulationDimension == SD::k3D)
 	{
-		const float  dtRho0SgzScalar = (rho0ScalarFlag) ? mParameters.getDtRho0SgzScalar(): 0.0f;
-		const float* dtRho0SgzMatrix = (rho0ScalarFlag) ? nullptr : getRealData(MI::kDtRho0Sgz);
+		const double  dtRho0SgzScalar = (rho0ScalarFlag) ? mParameters.getDtRho0SgzScalar(): 0.0f;
+		const double* dtRho0SgzMatrix = (rho0ScalarFlag) ? nullptr : getRealData(MI::kDtRho0Sgz);
 
-		const float* ifftZ = getRealData(MI::kTemp3RealND);
-		const float* pmlZ  = getRealData(MI::kPmlZSgz);
+		const double* ifftZ = getRealData(MI::kTemp3RealND);
+		const double* pmlZ  = getRealData(MI::kPmlZSgz);
 
-		float* uzSgz = getRealData(MI::kUzSgz);
+		double* uzSgz = getRealData(MI::kUzSgz);
 
 #pragma omp parallel for schedule(static)
 		for (size_t z = 0; z < dimensionSizes.nz; z++)
@@ -1578,7 +1578,7 @@ void KSpaceFirstOrderSolver::computeVelocityUniform()
 				for (size_t x = 0; x < dimensionSizes.nx; x++)
 				{
 					const size_t i = get1DIndex(z, y, x, dimensionSizes);
-					const float dtRho0Sgz = (rho0ScalarFlag) ? dtRho0SgzScalar : dtRho0SgzMatrix[i];
+					const double dtRho0Sgz = (rho0ScalarFlag) ? dtRho0SgzScalar : dtRho0SgzMatrix[i];
 
 					uzSgz[i] = (uzSgz[i] * pmlZ[z] - dtRho0Sgz * ifftZ[i]) * pmlZ[z];
 				}// x
@@ -1596,25 +1596,25 @@ void KSpaceFirstOrderSolver::computeVelocityHomogeneousNonuniform()
 {
 	const DimensionSizes& dimensionSizes = mParameters.getFullDimensionSizes();
 
-	const float dtRho0Sgx  = mParameters.getDtRho0SgxScalar();
-	const float dtRho0Sgy  = mParameters.getDtRho0SgyScalar();
-	const float dtRho0Sgz  = (simulationDimension == SD::k3D) ? mParameters.getDtRho0SgzScalar(): 1.0f;
+	const double dtRho0Sgx  = mParameters.getDtRho0SgxScalar();
+	const double dtRho0Sgy  = mParameters.getDtRho0SgyScalar();
+	const double dtRho0Sgz  = (simulationDimension == SD::k3D) ? mParameters.getDtRho0SgzScalar(): 1.0f;
 
-	const float* dxudxnSgx = getRealData(MI::kDxudxnSgx);
-	const float* dyudynSgy = getRealData(MI::kDyudynSgy);
-	const float* dzudznSgz = getRealData(MI::kDzudznSgz, simulationDimension == SD::k3D);
+	const double* dxudxnSgx = getRealData(MI::kDxudxnSgx);
+	const double* dyudynSgy = getRealData(MI::kDyudynSgy);
+	const double* dzudznSgz = getRealData(MI::kDzudznSgz, simulationDimension == SD::k3D);
 
-	const float* ifftX = getRealData(MI::kTemp1RealND);
-	const float* ifftY = getRealData(MI::kTemp2RealND);
-	const float* ifftZ = getRealData(MI::kTemp3RealND, simulationDimension == SD::k3D);
+	const double* ifftX = getRealData(MI::kTemp1RealND);
+	const double* ifftY = getRealData(MI::kTemp2RealND);
+	const double* ifftZ = getRealData(MI::kTemp3RealND, simulationDimension == SD::k3D);
 
-	const float* pmlX  = getRealData(MI::kPmlXSgx);
-	const float* pmlY  = getRealData(MI::kPmlYSgy);
-	const float* pmlZ  = getRealData(MI::kPmlZSgz, simulationDimension == SD::k3D);
+	const double* pmlX  = getRealData(MI::kPmlXSgx);
+	const double* pmlY  = getRealData(MI::kPmlYSgy);
+	const double* pmlZ  = getRealData(MI::kPmlZSgz, simulationDimension == SD::k3D);
 
-	float* uxSgx = getRealData(MI::kUxSgx);
-	float* uySgy = getRealData(MI::kUySgy);
-	float* uzSgz = getRealData(MI::kUzSgz, simulationDimension == SD::k3D);
+	double* uxSgx = getRealData(MI::kUxSgx);
+	double* uySgy = getRealData(MI::kUySgy);
+	double* uzSgz = getRealData(MI::kUzSgz, simulationDimension == SD::k3D);
 
 	// Long loops are replicated for every dimension to save SIMD registers
 #pragma omp parallel for schedule(static) if (simulationDimension == SD::k3D)
@@ -1687,10 +1687,10 @@ void KSpaceFirstOrderSolver::computeShiftedVelocity()
 	zShiftDims.nz = (simulationDimension == SD::k3D) ? zShiftDims.nz / 2 + 1 : 1;
 
 	// Normalization constants for FFTs
-	const float dividerX = 1.0f / float(mParameters.getFullDimensionSizes().nx);
-	const float dividerY = 1.0f / float(mParameters.getFullDimensionSizes().ny);
+	const double dividerX = 1.0f / double(mParameters.getFullDimensionSizes().nx);
+	const double dividerY = 1.0f / double(mParameters.getFullDimensionSizes().ny);
 	// This remains 1 for 2D simulation
-	const float dividerZ = 1.0f / float(mParameters.getFullDimensionSizes().nz);
+	const double dividerZ = 1.0f / double(mParameters.getFullDimensionSizes().nz);
 
 	const FloatComplex* xShiftNegR  = getComplexData(MI::kXShiftNegR);
 	const FloatComplex* yShiftNegR  = getComplexData(MI::kYShiftNegR);
@@ -1771,13 +1771,13 @@ void KSpaceFirstOrderSolver::computeVelocityGradient()
 {
 	const DimensionSizes& reducedDimensionSizes = mParameters.getReducedDimensionSizes();
 
-	const float divider = 1.0f / float(mParameters.getFullDimensionSizes().nElements());
+	const double divider = 1.0f / double(mParameters.getFullDimensionSizes().nElements());
 
 	const FloatComplex* ddxKShiftNeg = getComplexData(MI::kDdxKShiftNegR);
 	const FloatComplex* ddyKShiftNeg = getComplexData(MI::kDdyKShiftNeg);
 	const FloatComplex* ddzKShiftNeg = getComplexData(MI::kDdzKShiftNeg, simulationDimension == SD::k3D);
 
-	const float*  kappa    = getRealData(MI::kKappa);
+	const double*  kappa    = getRealData(MI::kKappa);
 
 	FloatComplex* tempFftX = getComplexData(MI::kTempFftwX);
 	FloatComplex* tempFftY = getComplexData(MI::kTempFftwY);
@@ -1802,7 +1802,7 @@ void KSpaceFirstOrderSolver::computeVelocityGradient()
 			for (size_t x = 0; x < reducedDimensionSizes.nx; x++)
 			{
 				const size_t i = get1DIndex(z, y, x, reducedDimensionSizes);
-				const float  eKappa = divider * kappa[i];
+				const double  eKappa = divider * kappa[i];
 
 				tempFftX[i] *=  ddxKShiftNeg[x] * eKappa;
 				tempFftY[i] *=  ddyKShiftNeg[y] * eKappa;
@@ -1827,13 +1827,13 @@ void KSpaceFirstOrderSolver::computeVelocityGradient()
 	{
 		const DimensionSizes& dimensionSizes = mParameters.getFullDimensionSizes();
 
-		const float* duxdxn = getRealData(MI::kDxudxn);
-		const float* duydyn = getRealData(MI::kDyudyn);
-		const float* duzdzn = getRealData(MI::kDzudzn, simulationDimension == SD::k3D);
+		const double* duxdxn = getRealData(MI::kDxudxn);
+		const double* duydyn = getRealData(MI::kDyudyn);
+		const double* duzdzn = getRealData(MI::kDzudzn, simulationDimension == SD::k3D);
 
-		float* duxdx = getRealData(MI::kDuxdx);
-		float* duydy = getRealData(MI::kDuydy);
-		float* duzdz = getRealData(MI::kDuzdz, simulationDimension == SD::k3D);
+		double* duxdx = getRealData(MI::kDuxdx);
+		double* duydy = getRealData(MI::kDuydy);
+		double* duzdz = getRealData(MI::kDuzdz, simulationDimension == SD::k3D);
 
 #pragma omp parallel for schedule(static) if (simulationDimension == SD::k3D)
 		for (size_t z = 0; z < dimensionSizes.nz; z++)
@@ -1870,14 +1870,14 @@ void  KSpaceFirstOrderSolver::computeVelocityGradientAS()
 	const DimensionSizes& dimensionSizes        = mParameters.getFullDimensionSizes();
 	const DimensionSizes& reducedDimensionSizes = mParameters.getReducedDimensionSizes();
 
-	const float divider = 1.0f / (2.0f * float(dimensionSizes.nElements()));
+	const double divider = 1.0f / (2.0f * double(dimensionSizes.nElements()));
 
 	const FloatComplex* ddxKShiftNeg = getComplexData(MI::kDdxKShiftNegR);
 
-	const float*  kappa    = getRealData(MI::kKappa);
-	const float*  uySgy    = getRealData(MI::kUySgy);
-	const float*  yVecSg   = getRealData(MI::kYVecSg);
-	const float*  ddyKHahs = getRealData(MI::kDdyKHahs);
+	const double*  kappa    = getRealData(MI::kKappa);
+	const double*  uySgy    = getRealData(MI::kUySgy);
+	const double*  yVecSg   = getRealData(MI::kYVecSg);
+	const double*  ddyKHahs = getRealData(MI::kDdyKHahs);
 
 	FloatComplex* tempFftX = getComplexData(MI::kTempFftwX);
 	FloatComplex* tempFftY = getComplexData(MI::kTempFftwY);
@@ -1917,7 +1917,7 @@ void  KSpaceFirstOrderSolver::computeVelocityGradientAS()
 
 
 	// fft(dtt1D(bsxfun(@times, 1./y_vec_sg, uy_sgy), DCT4, 2), [], 1)
-	float* uyDivYVec = getRealData(MI::kTemp2RealND);
+	double* uyDivYVec = getRealData(MI::kTemp2RealND);
 
 #pragma omp parallel for schedule(static)
 	for (size_t y = 0; y < dimensionSizes.ny; y++)
@@ -1954,11 +1954,11 @@ void  KSpaceFirstOrderSolver::computeVelocityGradientAS()
 	//------------------------------------------------- Non linear grid ------------------------------------------------//
 	if (mParameters.getNonUniformGridFlag() != 0)
 	{
-		const float* duxdxn = getRealData(MI::kDxudxn);
-		const float* duydyn = getRealData(MI::kDyudyn);
+		const double* duxdxn = getRealData(MI::kDxudxn);
+		const double* duydyn = getRealData(MI::kDyudyn);
 
-		float* duxdx = getRealData(MI::kDuxdx);
-		float* duydy = getRealData(MI::kDuydy);
+		double* duxdx = getRealData(MI::kDuxdx);
+		double* duydy = getRealData(MI::kDuydy);
 
 #pragma omp parallel for schedule(static)
 		for (size_t y = 0; y < dimensionSizes.ny; y++)
@@ -1984,22 +1984,22 @@ void KSpaceFirstOrderSolver::computeDensityNonliner()
 {
 	const DimensionSizes& dimensionSizes = mParameters.getFullDimensionSizes();
 
-	const float dt  = mParameters.getDt();
+	const double dt  = mParameters.getDt();
 
-	const float* pmlX  = getRealData(MI::kPmlX);
-	const float* pmlY  = getRealData(MI::kPmlY);
-	const float* pmlZ  = getRealData(MI::kPmlZ, simulationDimension == SD::k3D);
+	const double* pmlX  = getRealData(MI::kPmlX);
+	const double* pmlY  = getRealData(MI::kPmlY);
+	const double* pmlZ  = getRealData(MI::kPmlZ, simulationDimension == SD::k3D);
 
-	const float* duxdx = getRealData(MI::kDuxdx);
-	const float* duydy = getRealData(MI::kDuydy);
-	const float* duzdz = getRealData(MI::kDuzdz, simulationDimension == SD::k3D);
+	const double* duxdx = getRealData(MI::kDuxdx);
+	const double* duydy = getRealData(MI::kDuydy);
+	const double* duzdz = getRealData(MI::kDuzdz, simulationDimension == SD::k3D);
 
-	const float  rho0Scalar = (rho0ScalarFlag) ? mParameters.getRho0Scalar() : 0.0f;
-	const float* rho0Matrix = (rho0ScalarFlag) ? nullptr : getRealData(MI::kRho0);
+	const double  rho0Scalar = (rho0ScalarFlag) ? mParameters.getRho0Scalar() : 0.0f;
+	const double* rho0Matrix = (rho0ScalarFlag) ? nullptr : getRealData(MI::kRho0);
 
-	float* rhoX  = getRealData(MI::kRhoX);
-	float* rhoY  = getRealData(MI::kRhoY);
-	float* rhoZ  = getRealData(MI::kRhoZ, simulationDimension == SD::k3D);
+	double* rhoX  = getRealData(MI::kRhoX);
+	double* rhoY  = getRealData(MI::kRhoY);
+	double* rhoZ  = getRealData(MI::kRhoZ, simulationDimension == SD::k3D);
 
 #pragma omp parallel for schedule(static) if (simulationDimension == SD::k3D)
 	for (size_t z = 0; z < dimensionSizes.nz; z++)
@@ -2012,11 +2012,11 @@ void KSpaceFirstOrderSolver::computeDensityNonliner()
 			{
 				const size_t i = get1DIndex(z, y, x, dimensionSizes);
 
-				const float rho0      = (rho0ScalarFlag) ? rho0Scalar : rho0Matrix[i];
+				const double rho0      = (rho0ScalarFlag) ? rho0Scalar : rho0Matrix[i];
 				// 3D and 2D summation
-				const float sumRhos   = (simulationDimension == SD::k3D) ? (rhoX[i] + rhoY[i] + rhoZ[i])
+				const double sumRhos   = (simulationDimension == SD::k3D) ? (rhoX[i] + rhoY[i] + rhoZ[i])
 					: (rhoX[i] + rhoY[i]);
-				const float sumRhosDt = (2.0f * sumRhos + rho0) * dt;
+				const double sumRhosDt = (2.0f * sumRhos + rho0) * dt;
 
 				rhoX[i] = pmlX[x] * ((pmlX[x] * rhoX[i]) - sumRhosDt * duxdx[i]);
 				rhoY[i] = pmlY[y] * ((pmlY[y] * rhoY[i]) - sumRhosDt * duydy[i]);
@@ -2039,22 +2039,22 @@ void KSpaceFirstOrderSolver::computeDensityLinear()
 {
 	const DimensionSizes& dimensionSizes = mParameters.getFullDimensionSizes();
 
-	const float dt = mParameters.getDt();
+	const double dt = mParameters.getDt();
 
-	const float* pmlX  = getRealData(MI::kPmlX);
-	const float* pmlY  = getRealData(MI::kPmlY);
-	const float* pmlZ  = getRealData(MI::kPmlZ, simulationDimension == SD::k3D);
+	const double* pmlX  = getRealData(MI::kPmlX);
+	const double* pmlY  = getRealData(MI::kPmlY);
+	const double* pmlZ  = getRealData(MI::kPmlZ, simulationDimension == SD::k3D);
 
-	const float* duxdx = getRealData(MI::kDuxdx);
-	const float* duydy = getRealData(MI::kDuydy);
-	const float* duzdz = getRealData(MI::kDuzdz, simulationDimension == SD::k3D);
+	const double* duxdx = getRealData(MI::kDuxdx);
+	const double* duydy = getRealData(MI::kDuydy);
+	const double* duzdz = getRealData(MI::kDuzdz, simulationDimension == SD::k3D);
 
-	const float  dtRho0Scalar = (rho0ScalarFlag) ? dt * mParameters.getRho0Scalar() : 0.0f;
-	const float* rho0Matrix   = (rho0ScalarFlag) ? nullptr : getRealData(MI::kRho0);
+	const double  dtRho0Scalar = (rho0ScalarFlag) ? dt * mParameters.getRho0Scalar() : 0.0f;
+	const double* rho0Matrix   = (rho0ScalarFlag) ? nullptr : getRealData(MI::kRho0);
 
-	float* rhoX  = getRealData(MI::kRhoX);
-	float* rhoY  = getRealData(MI::kRhoY);
-	float* rhoZ  = getRealData(MI::kRhoZ, simulationDimension == SD::k3D);
+	double* rhoX  = getRealData(MI::kRhoX);
+	double* rhoY  = getRealData(MI::kRhoY);
+	double* rhoZ  = getRealData(MI::kRhoZ, simulationDimension == SD::k3D);
 
 #pragma omp parallel for schedule(static) if (simulationDimension == SD::k3D)
 	for (size_t z = 0; z < dimensionSizes.nz; z++)
@@ -2067,7 +2067,7 @@ void KSpaceFirstOrderSolver::computeDensityLinear()
 			{
 				const size_t i     = get1DIndex(z, y, x, dimensionSizes);
 
-				const float dtRho0 = (rho0ScalarFlag) ? dtRho0Scalar : dt * rho0Matrix[i];
+				const double dtRho0 = (rho0ScalarFlag) ? dtRho0Scalar : dt * rho0Matrix[i];
 
 				rhoX[i] = pmlX[x] * (((pmlX[x] * rhoX[i]) - (dtRho0 * duxdx[i])));
 				rhoY[i] = pmlY[y] * (((pmlY[y] * rhoY[i]) - (dtRho0 * duydy[i])));
@@ -2155,30 +2155,30 @@ void KSpaceFirstOrderSolver::sumPressureTermsNonlinearLossless()
 {
 	const size_t nElements = mParameters.getFullDimensionSizes().nElements();
 
-	const float* rhoX = getRealData(MI::kRhoX);
-	const float* rhoY = getRealData(MI::kRhoY);
-	const float* rhoZ = getRealData(MI::kRhoZ, simulationDimension == SD::k3D);
+	const double* rhoX = getRealData(MI::kRhoX);
+	const double* rhoY = getRealData(MI::kRhoY);
+	const double* rhoZ = getRealData(MI::kRhoZ, simulationDimension == SD::k3D);
 
-	const float  c2Scalar   = (c0ScalarFlag) ? mParameters.getC2Scalar() : 0.0f;
-	const float* c2Matrix   = (c0ScalarFlag) ? nullptr : getRealData(MI::kC2);
+	const double  c2Scalar   = (c0ScalarFlag) ? mParameters.getC2Scalar() : 0.0f;
+	const double* c2Matrix   = (c0ScalarFlag) ? nullptr : getRealData(MI::kC2);
 
-	const float  bOnAScalar = (bOnAScalarFlag) ? mParameters.getBOnAScalar(): 0.0f;
-	const float* bOnAMatrix = (bOnAScalarFlag) ? nullptr : getRealData(MI::kBOnA);
+	const double  bOnAScalar = (bOnAScalarFlag) ? mParameters.getBOnAScalar(): 0.0f;
+	const double* bOnAMatrix = (bOnAScalarFlag) ? nullptr : getRealData(MI::kBOnA);
 
-	const float  rho0Scalar = (rho0ScalarFlag) ? mParameters.getRho0Scalar() : 0.0f;
-	const float* rho0Matrix = (rho0ScalarFlag) ? nullptr : getRealData(MI::kRho0);
+	const double  rho0Scalar = (rho0ScalarFlag) ? mParameters.getRho0Scalar() : 0.0f;
+	const double* rho0Matrix = (rho0ScalarFlag) ? nullptr : getRealData(MI::kRho0);
 
-	float* p = getRealData(MI::kP);
+	double* p = getRealData(MI::kP);
 
 #pragma omp parallel for simd schedule(simd:static) \
 	aligned(rhoX, rhoY, rhoZ, c2Matrix, bOnAMatrix, rho0Matrix, p : kDataAlignment)
 	for (size_t i = 0; i < nElements; i++)
 	{
-		const float c2   = (c0ScalarFlag)   ? c2Scalar   : c2Matrix[i];
-		const float bOnA = (bOnAScalarFlag) ? bOnAScalar : bOnAMatrix[i];
-		const float rho0 = (rho0ScalarFlag) ? rho0Scalar : rho0Matrix[i];
+		const double c2   = (c0ScalarFlag)   ? c2Scalar   : c2Matrix[i];
+		const double bOnA = (bOnAScalarFlag) ? bOnAScalar : bOnAMatrix[i];
+		const double rho0 = (rho0ScalarFlag) ? rho0Scalar : rho0Matrix[i];
 
-		const float sumDensity = (simulationDimension == SD::k3D) ? (rhoX[i] + rhoY[i] + rhoZ[i]) : (rhoX[i] + rhoY[i]);
+		const double sumDensity = (simulationDimension == SD::k3D) ? (rhoX[i] + rhoY[i] + rhoZ[i]) : (rhoX[i] + rhoY[i]);
 
 		p[i] = c2 * (sumDensity + (bOnA * (sumDensity * sumDensity) / (2.0f * rho0)));
 	}
@@ -2232,40 +2232,40 @@ void KSpaceFirstOrderSolver::sumPressureTermsNonlinearStokes()
 {
 	const size_t nElements = mParameters.getFullDimensionSizes().nElements();
 
-	const float* rhoX  = getRealData(MI::kRhoX);
-	const float* rhoY  = getRealData(MI::kRhoY);
-	const float* rhoZ  = getRealData(MI::kRhoZ, simulationDimension == SD::k3D);
+	const double* rhoX  = getRealData(MI::kRhoX);
+	const double* rhoY  = getRealData(MI::kRhoY);
+	const double* rhoZ  = getRealData(MI::kRhoZ, simulationDimension == SD::k3D);
 
-	const float* duxdx = getRealData(MI::kDuxdx);
-	const float* duydy = getRealData(MI::kDuydy);
-	const float* duzdz = getRealData(MI::kDuzdz, simulationDimension == SD::k3D);
+	const double* duxdx = getRealData(MI::kDuxdx);
+	const double* duydy = getRealData(MI::kDuydy);
+	const double* duzdz = getRealData(MI::kDuzdz, simulationDimension == SD::k3D);
 
-	const float  c2Scalar        = (c0ScalarFlag)        ? mParameters.getC2Scalar() : 0.0f;
-	const float* c2Matrix        = (c0ScalarFlag)        ? nullptr : getRealData(MI::kC2);
+	const double  c2Scalar        = (c0ScalarFlag)        ? mParameters.getC2Scalar() : 0.0f;
+	const double* c2Matrix        = (c0ScalarFlag)        ? nullptr : getRealData(MI::kC2);
 
-	const float  rho0Scalar      = (rho0ScalarFlag)      ? mParameters.getRho0Scalar() : 0.0f;
-	const float* rho0Matrix      = (rho0ScalarFlag)      ? nullptr : getRealData(MI::kRho0);
+	const double  rho0Scalar      = (rho0ScalarFlag)      ? mParameters.getRho0Scalar() : 0.0f;
+	const double* rho0Matrix      = (rho0ScalarFlag)      ? nullptr : getRealData(MI::kRho0);
 
-	const float  bOnAScalar      = (bOnAScalarFlag)      ? mParameters.getBOnAScalar() : 0.0f;
-	const float* bOnAMatrix      = (bOnAScalarFlag)      ? nullptr : getRealData(MI::kBOnA);
+	const double  bOnAScalar      = (bOnAScalarFlag)      ? mParameters.getBOnAScalar() : 0.0f;
+	const double* bOnAMatrix      = (bOnAScalarFlag)      ? nullptr : getRealData(MI::kBOnA);
 
-	const float  absorbTauScalar = (absorbTauScalarFlag) ? mParameters.getAbsorbTauScalar() : 0.0f;
-	const float* absorbTauMatrix = (absorbTauScalarFlag) ? nullptr : getRealData(MI::kAbsorbTau);
+	const double  absorbTauScalar = (absorbTauScalarFlag) ? mParameters.getAbsorbTauScalar() : 0.0f;
+	const double* absorbTauMatrix = (absorbTauScalarFlag) ? nullptr : getRealData(MI::kAbsorbTau);
 
-	float* p = getRealData(MI::kP);
+	double* p = getRealData(MI::kP);
 
 #pragma omp parallel for simd schedule(simd:static) \
 	aligned(rhoX, rhoY, rhoZ, duxdx, duydy, duzdz, \
 			c2Matrix, rho0Matrix, bOnAMatrix, absorbTauMatrix, p : kDataAlignment)
 	for (size_t i = 0; i < nElements; i++)
 	{
-		const float c2        = (c0ScalarFlag)        ? c2Scalar        : c2Matrix[i];
-		const float rho0      = (rho0ScalarFlag)      ? rho0Scalar      : rho0Matrix[i];
-		const float bOnA      = (bOnAScalarFlag)      ? bOnAScalar      : bOnAMatrix[i];
-		const float absorbTau = (absorbTauScalarFlag) ? absorbTauScalar : absorbTauMatrix[i];
+		const double c2        = (c0ScalarFlag)        ? c2Scalar        : c2Matrix[i];
+		const double rho0      = (rho0ScalarFlag)      ? rho0Scalar      : rho0Matrix[i];
+		const double bOnA      = (bOnAScalarFlag)      ? bOnAScalar      : bOnAMatrix[i];
+		const double absorbTau = (absorbTauScalarFlag) ? absorbTauScalar : absorbTauMatrix[i];
 
-		const float rhoSum = (simulationDimension == SD::k3D) ? rhoX[i]  + rhoY[i]  + rhoZ[i]  : rhoX[i]  + rhoY[i];
-		const float duSum  = (simulationDimension == SD::k3D) ? duxdx[i] + duydy[i] + duzdz[i] : duxdx[i] + duydy[i];
+		const double rhoSum = (simulationDimension == SD::k3D) ? rhoX[i]  + rhoY[i]  + rhoZ[i]  : rhoX[i]  + rhoY[i];
+		const double duSum  = (simulationDimension == SD::k3D) ? duxdx[i] + duydy[i] + duzdz[i] : duxdx[i] + duydy[i];
 
 		p[i] = c2 * (rhoSum + absorbTau * rho0 * duSum + ((bOnA * rhoSum * rhoSum) / (2.0f * rho0)));
 	}
@@ -2281,21 +2281,21 @@ void KSpaceFirstOrderSolver::sumPressureTermsLinearLossless()
 {
 	const size_t nElements = mParameters.getFullDimensionSizes().nElements();
 
-	const float* rhoX = getRealData(MI::kRhoX);
-	const float* rhoY = getRealData(MI::kRhoY);
-	const float* rhoZ = getRealData(MI::kRhoZ, simulationDimension == SD::k3D);
+	const double* rhoX = getRealData(MI::kRhoX);
+	const double* rhoY = getRealData(MI::kRhoY);
+	const double* rhoZ = getRealData(MI::kRhoZ, simulationDimension == SD::k3D);
 
-	const float  c2Scalar = (c0ScalarFlag) ? mParameters.getC2Scalar() : 0.0f;
-	const float* c2Matrix = (c0ScalarFlag) ? nullptr : getRealData(MI::kC2);
+	const double  c2Scalar = (c0ScalarFlag) ? mParameters.getC2Scalar() : 0.0f;
+	const double* c2Matrix = (c0ScalarFlag) ? nullptr : getRealData(MI::kC2);
 
-	float* p  = getRealData(MI::kP);
+	double* p  = getRealData(MI::kP);
 
 #pragma omp parallel for simd schedule(simd:static) aligned(rhoX, rhoY, rhoZ, c2Matrix, p : kDataAlignment)
 	for (size_t i = 0; i < nElements; i++)
 	{
-		const float c2      = (c0ScalarFlag) ?  c2Scalar : c2Matrix[i];
+		const double c2      = (c0ScalarFlag) ?  c2Scalar : c2Matrix[i];
 
-		const float sumRhos = (simulationDimension == SD::k3D) ? (rhoX[i] + rhoY[i] + rhoZ[i]) : (rhoX[i] + rhoY[i]);
+		const double sumRhos = (simulationDimension == SD::k3D) ? (rhoX[i] + rhoY[i] + rhoZ[i]) : (rhoX[i] + rhoY[i]);
 
 		p[i] = c2 * sumRhos;
 	}
@@ -2344,35 +2344,35 @@ void KSpaceFirstOrderSolver::sumPressureTermsLinearStokes()
 {
 	const size_t nElements = mParameters.getFullDimensionSizes().nElements();
 
-	const float* rhoX  = getRealData(MI::kRhoX);
-	const float* rhoY  = getRealData(MI::kRhoY);
-	const float* rhoZ  = getRealData(MI::kRhoZ, simulationDimension == SD::k3D);
+	const double* rhoX  = getRealData(MI::kRhoX);
+	const double* rhoY  = getRealData(MI::kRhoY);
+	const double* rhoZ  = getRealData(MI::kRhoZ, simulationDimension == SD::k3D);
 
-	const float* duxdx = getRealData(MI::kDuxdx);
-	const float* duydy = getRealData(MI::kDuydy);
-	const float* duzdz = getRealData(MI::kDuzdz, simulationDimension == SD::k3D);
+	const double* duxdx = getRealData(MI::kDuxdx);
+	const double* duydy = getRealData(MI::kDuydy);
+	const double* duzdz = getRealData(MI::kDuzdz, simulationDimension == SD::k3D);
 
-	const float  c2Scalar        = (c0ScalarFlag)        ? mParameters.getC2Scalar() : 0.0f;
-	const float* c2Matrix        = (c0ScalarFlag)        ? nullptr : getRealData(MI::kC2);
+	const double  c2Scalar        = (c0ScalarFlag)        ? mParameters.getC2Scalar() : 0.0f;
+	const double* c2Matrix        = (c0ScalarFlag)        ? nullptr : getRealData(MI::kC2);
 
-	const float  rho0Scalar      = (rho0ScalarFlag)      ? mParameters.getRho0Scalar() : 0.0f;
-	const float* rho0Matrix      = (rho0ScalarFlag)      ? nullptr : getRealData(MI::kRho0);
+	const double  rho0Scalar      = (rho0ScalarFlag)      ? mParameters.getRho0Scalar() : 0.0f;
+	const double* rho0Matrix      = (rho0ScalarFlag)      ? nullptr : getRealData(MI::kRho0);
 
-	const float  absorbTauScalar = (absorbTauScalarFlag) ? mParameters.getAbsorbTauScalar() : 0.0f;
-	const float* absorbTauMatrix = (absorbTauScalarFlag) ? nullptr : getRealData(MI::kAbsorbTau);
+	const double  absorbTauScalar = (absorbTauScalarFlag) ? mParameters.getAbsorbTauScalar() : 0.0f;
+	const double* absorbTauMatrix = (absorbTauScalarFlag) ? nullptr : getRealData(MI::kAbsorbTau);
 
-	float* p = getRealData(MI::kP);
+	double* p = getRealData(MI::kP);
 
 #pragma omp parallel for simd schedule(simd:static) \
 	aligned(rhoX, rhoY, rhoZ, duxdx, duydy, duzdz, c2Matrix, rho0Matrix, absorbTauMatrix, p : kDataAlignment)
 	for (size_t i = 0; i < nElements; i++)
 	{
-		const float c2        = (c0ScalarFlag)        ? c2Scalar        : c2Matrix[i];
-		const float rho0      = (rho0ScalarFlag)      ? rho0Scalar      : rho0Matrix[i];
-		const float absorbTau = (absorbTauScalarFlag) ? absorbTauScalar : absorbTauMatrix[i];
+		const double c2        = (c0ScalarFlag)        ? c2Scalar        : c2Matrix[i];
+		const double rho0      = (rho0ScalarFlag)      ? rho0Scalar      : rho0Matrix[i];
+		const double absorbTau = (absorbTauScalarFlag) ? absorbTauScalar : absorbTauMatrix[i];
 
-		const float rhoSum = (simulationDimension == SD::k3D) ? rhoX[i]  + rhoY[i]  + rhoZ[i]  : rhoX[i]  + rhoY[i];
-		const float duSum  = (simulationDimension == SD::k3D) ? duxdx[i] + duydy[i] + duzdz[i] : duxdx[i] + duydy[i];
+		const double rhoSum = (simulationDimension == SD::k3D) ? rhoX[i]  + rhoY[i]  + rhoZ[i]  : rhoX[i]  + rhoY[i];
+		const double duSum  = (simulationDimension == SD::k3D) ? duxdx[i] + duydy[i] + duzdz[i] : duxdx[i] + duydy[i];
 
 		p[i] = c2 * (rhoSum + absorbTau * rho0 * duSum);
 	}
@@ -2391,35 +2391,35 @@ void KSpaceFirstOrderSolver::computePressureTermsNonlinearPowerLaw(RealMatrix& d
 {
 	const size_t nElements = mParameters.getFullDimensionSizes().nElements();
 
-	const float* rhoX = getRealData(MI::kRhoX);
-	const float* rhoY = getRealData(MI::kRhoY);
-	const float* rhoZ = getRealData(MI::kRhoZ, simulationDimension == SD::k3D);
+	const double* rhoX = getRealData(MI::kRhoX);
+	const double* rhoY = getRealData(MI::kRhoY);
+	const double* rhoZ = getRealData(MI::kRhoZ, simulationDimension == SD::k3D);
 
-	const float* duxdx = getRealData(MI::kDuxdx);
-	const float* duydy = getRealData(MI::kDuydy);
-	const float* duzdz = getRealData(MI::kDuzdz, simulationDimension == SD::k3D);
+	const double* duxdx = getRealData(MI::kDuxdx);
+	const double* duydy = getRealData(MI::kDuydy);
+	const double* duzdz = getRealData(MI::kDuzdz, simulationDimension == SD::k3D);
 
-	const float  bOnAScalar     = (bOnAScalarFlag) ? mParameters.getBOnAScalar() : 0.0f;
-	const float* bOnAMatrix     = (bOnAScalarFlag) ? nullptr : getRealData(MI::kBOnA);
+	const double  bOnAScalar     = (bOnAScalarFlag) ? mParameters.getBOnAScalar() : 0.0f;
+	const double* bOnAMatrix     = (bOnAScalarFlag) ? nullptr : getRealData(MI::kBOnA);
 
-	const float  rho0Scalar     = (rho0ScalarFlag) ? mParameters.getRho0Scalar() : 0.0f;
-	const float* rho0Matrix     = (rho0ScalarFlag) ? nullptr : getRealData(MI::kRho0);
+	const double  rho0Scalar     = (rho0ScalarFlag) ? mParameters.getRho0Scalar() : 0.0f;
+	const double* rho0Matrix     = (rho0ScalarFlag) ? nullptr : getRealData(MI::kRho0);
 
 	// Pointer to raw data of the output matrices
-	float* pDensitySum          = densitySum.getData();
-	float* pNonlinearTerm       = nonlinearTerm.getData();
-	float* pVelocityGradientSum = velocityGradientSum.getData();
+	double* pDensitySum          = densitySum.getData();
+	double* pNonlinearTerm       = nonlinearTerm.getData();
+	double* pVelocityGradientSum = velocityGradientSum.getData();
 
 #pragma omp parallel for simd schedule(simd:static) \
 	aligned(rhoX, rhoY, rhoZ, duxdx, duydy, duzdz, bOnAMatrix, rho0Matrix, \
 			pDensitySum, pNonlinearTerm, pVelocityGradientSum : kDataAlignment)
 	for (size_t i = 0; i < nElements ; i++)
 	{
-		const float rhoSum = (simulationDimension == SD::k3D) ? (rhoX[i]  + rhoY[i]  + rhoZ[i])  : (rhoX[i]  + rhoY[i]);
-		const float duSum  = (simulationDimension == SD::k3D) ? (duxdx[i] + duydy[i] + duzdz[i]) : (duxdx[i] + duydy[i]);
+		const double rhoSum = (simulationDimension == SD::k3D) ? (rhoX[i]  + rhoY[i]  + rhoZ[i])  : (rhoX[i]  + rhoY[i]);
+		const double duSum  = (simulationDimension == SD::k3D) ? (duxdx[i] + duydy[i] + duzdz[i]) : (duxdx[i] + duydy[i]);
 
-		const float bOnA   = (bOnAScalarFlag) ? bOnAScalar : bOnAMatrix[i];
-		const float rho0   = (rho0ScalarFlag) ? rho0Scalar : rho0Matrix[i];
+		const double bOnA   = (bOnAScalarFlag) ? bOnAScalar : bOnAMatrix[i];
+		const double rho0   = (rho0ScalarFlag) ? rho0Scalar : rho0Matrix[i];
 
 		pDensitySum[i]          = rhoSum;
 		pNonlinearTerm[i]       = (bOnA * rhoSum * rhoSum) / (2.0f * rho0) + rhoSum;
@@ -2438,19 +2438,19 @@ void KSpaceFirstOrderSolver::computePressureTermsLinearPowerLaw(RealMatrix& dens
 {
 	const size_t size = mParameters.getFullDimensionSizes().nElements();
 
-	const float* rhoX = getRealData(MI::kRhoX);
-	const float* rhoY = getRealData(MI::kRhoY);
-	const float* rhoZ = getRealData(MI::kRhoZ, simulationDimension == SD::k3D);
+	const double* rhoX = getRealData(MI::kRhoX);
+	const double* rhoY = getRealData(MI::kRhoY);
+	const double* rhoZ = getRealData(MI::kRhoZ, simulationDimension == SD::k3D);
 
-	const float* duxdx = getRealData(MI::kDuxdx);
-	const float* duydy = getRealData(MI::kDuydy);
-	const float* duzdz = getRealData(MI::kDuzdz, simulationDimension == SD::k3D);
+	const double* duxdx = getRealData(MI::kDuxdx);
+	const double* duydy = getRealData(MI::kDuydy);
+	const double* duzdz = getRealData(MI::kDuzdz, simulationDimension == SD::k3D);
 
-	const float  rho0Scalar = (rho0ScalarFlag) ? mParameters.getRho0Scalar() : 0.0f;
-	const float* rho0Matrix = (rho0ScalarFlag) ? nullptr : getRealData(MI::kRho0);
+	const double  rho0Scalar = (rho0ScalarFlag) ? mParameters.getRho0Scalar() : 0.0f;
+	const double* rho0Matrix = (rho0ScalarFlag) ? nullptr : getRealData(MI::kRho0);
 
-	float* pDensitySum          = densitySum.getData();
-	float* pVelocityGradientSum = velocityGradientSum.getData();
+	double* pDensitySum          = densitySum.getData();
+	double* pVelocityGradientSum = velocityGradientSum.getData();
 
 #pragma omp parallel for simd schedule(simd:static) aligned(rhoX, rhoY, rhoZ,pDensitySum : kDataAlignment)
 	for (size_t i = 0; i < size; i++)
@@ -2462,8 +2462,8 @@ void KSpaceFirstOrderSolver::computePressureTermsLinearPowerLaw(RealMatrix& dens
 	aligned (duxdx, duydy, duzdz, rho0Matrix, pVelocityGradientSum : kDataAlignment)
 	for (size_t i = 0; i < size; i++)
 	{
-		const float rho0  = (rho0ScalarFlag) ? rho0Scalar : rho0Matrix[i];
-		const float duSum = (simulationDimension == SD::k3D) ? (duxdx[i] + duydy[i] + duzdz[i]) : (duxdx[i] + duydy[i]);
+		const double rho0  = (rho0ScalarFlag) ? rho0Scalar : rho0Matrix[i];
+		const double duSum = (simulationDimension == SD::k3D) ? (duxdx[i] + duydy[i] + duzdz[i]) : (duxdx[i] + duydy[i]);
 
 		pVelocityGradientSum[i] = rho0 * duSum;
 	}
@@ -2478,8 +2478,8 @@ void KSpaceFirstOrderSolver::computePowerLawAbsorbtionTerm(FftwComplexMatrix& ff
 {
 	const size_t nElements    = mParameters.getReducedDimensionSizes().nElements();
 
-	const float* absorbNabla1 = getRealData(MI::kAbsorbNabla1);
-	const float* absorbNabla2 = getRealData(MI::kAbsorbNabla2);
+	const double* absorbNabla1 = getRealData(MI::kAbsorbNabla1);
+	const double* absorbNabla2 = getRealData(MI::kAbsorbNabla2);
 
 	FloatComplex* pFftPart1 = fftPart1.getComplexData();
 	FloatComplex* pFftPart2 = fftPart2.getComplexData();
@@ -2504,30 +2504,30 @@ void KSpaceFirstOrderSolver::sumPressureTermsNonlinearPowerLaw(const RealMatrix&
 		const RealMatrix& nonlinearTerm)
 {
 	const size_t nElements = mParameters.getFullDimensionSizes().nElements();
-	const float  divider   = 1.0f / float(nElements);
+	const double  divider   = 1.0f / double(nElements);
 
-	const float  c2Scalar  = (c0ScalarFlag) ? mParameters.getC2Scalar() : 0.0f;
-	const float* c2Matrix  = (c0ScalarFlag) ? nullptr : getRealData(MI::kC2);
+	const double  c2Scalar  = (c0ScalarFlag) ? mParameters.getC2Scalar() : 0.0f;
+	const double* c2Matrix  = (c0ScalarFlag) ? nullptr : getRealData(MI::kC2);
 
-	const float  absorbTauScalar = (tauAndEtaScalarFlag) ? mParameters.getAbsorbTauScalar() : 0.0f;
-	const float* absorbTauMatrix = (tauAndEtaScalarFlag) ? nullptr : getRealData(MI::kAbsorbTau);
+	const double  absorbTauScalar = (tauAndEtaScalarFlag) ? mParameters.getAbsorbTauScalar() : 0.0f;
+	const double* absorbTauMatrix = (tauAndEtaScalarFlag) ? nullptr : getRealData(MI::kAbsorbTau);
 
-	const float  absorbEtaScalar = (tauAndEtaScalarFlag) ? mParameters.getAbsorbEtaScalar() : 0.0f;
-	const float* absorbEtaMatrix = (tauAndEtaScalarFlag) ? nullptr : getRealData(MI::kAbsorbEta);
+	const double  absorbEtaScalar = (tauAndEtaScalarFlag) ? mParameters.getAbsorbEtaScalar() : 0.0f;
+	const double* absorbEtaMatrix = (tauAndEtaScalarFlag) ? nullptr : getRealData(MI::kAbsorbEta);
 
-	const float* pAbsorbTauTerm  = absorbTauTerm.getData();
-	const float* pAbsorbEtaTerm  = absorbEtaTerm.getData();
-	const float* bOnA            = nonlinearTerm.getData();
+	const double* pAbsorbTauTerm  = absorbTauTerm.getData();
+	const double* pAbsorbEtaTerm  = absorbEtaTerm.getData();
+	const double* bOnA            = nonlinearTerm.getData();
 
-	float* p = getRealData(MI::kP);
+	double* p = getRealData(MI::kP);
 
 #pragma omp parallel for simd schedule(simd:static) \
 	aligned(c2Matrix, absorbTauMatrix, absorbEtaMatrix, pAbsorbTauTerm, pAbsorbEtaTerm, bOnA, p : kDataAlignment)
 	for (size_t i = 0; i < nElements; i++)
 	{
-		const float c2        = (c0ScalarFlag) ?        c2Scalar        : c2Matrix[i];
-		const float absorbTau = (tauAndEtaScalarFlag) ? absorbTauScalar : absorbTauMatrix[i];
-		const float absorbEta = (tauAndEtaScalarFlag) ? absorbEtaScalar : absorbEtaMatrix[i];
+		const double c2        = (c0ScalarFlag) ?        c2Scalar        : c2Matrix[i];
+		const double absorbTau = (tauAndEtaScalarFlag) ? absorbTauScalar : absorbTauMatrix[i];
+		const double absorbEta = (tauAndEtaScalarFlag) ? absorbEtaScalar : absorbEtaMatrix[i];
 
 		p[i] = c2 * (bOnA[i] + (divider * ((pAbsorbTauTerm[i] * absorbTau) - (pAbsorbEtaTerm[i] * absorbEta))));
 	}
@@ -2544,31 +2544,31 @@ void KSpaceFirstOrderSolver::sumPressureTermsLinear(const RealMatrix& absorbTauT
 		const RealMatrix& densitySum)
 {
 	const size_t nElements = mParameters.getFullDimensionSizes().nElements();
-	const float  divider = 1.0f / float(nElements);
+	const double  divider = 1.0f / double(nElements);
 
-	const float  c2Scalar = (c0ScalarFlag) ? mParameters.getC2Scalar() : 0.0f;
-	const float* c2Matrix = (c0ScalarFlag) ? nullptr : getRealData(MI::kC2);
+	const double  c2Scalar = (c0ScalarFlag) ? mParameters.getC2Scalar() : 0.0f;
+	const double* c2Matrix = (c0ScalarFlag) ? nullptr : getRealData(MI::kC2);
 
-	const float  absorbTauScalar = (tauAndEtaScalarFlag) ? mParameters.getAbsorbTauScalar() : 0.0f;
-	const float* absorbTauMatrix = (tauAndEtaScalarFlag) ? nullptr : getRealData(MI::kAbsorbTau);
+	const double  absorbTauScalar = (tauAndEtaScalarFlag) ? mParameters.getAbsorbTauScalar() : 0.0f;
+	const double* absorbTauMatrix = (tauAndEtaScalarFlag) ? nullptr : getRealData(MI::kAbsorbTau);
 
-	const float  absorbEtaScalar = (tauAndEtaScalarFlag) ? mParameters.getAbsorbEtaScalar() : 0.0f;
-	const float* absorbEtaMatrix = (tauAndEtaScalarFlag) ? nullptr : getRealData(MI::kAbsorbEta);
+	const double  absorbEtaScalar = (tauAndEtaScalarFlag) ? mParameters.getAbsorbEtaScalar() : 0.0f;
+	const double* absorbEtaMatrix = (tauAndEtaScalarFlag) ? nullptr : getRealData(MI::kAbsorbEta);
 
-	const float* pAbsorbTauTerm  = absorbTauTerm.getData();
-	const float* pAbsorbEtaTerm  = absorbEtaTerm.getData();
-	const float* pDenistySum     = densitySum.getData();
+	const double* pAbsorbTauTerm  = absorbTauTerm.getData();
+	const double* pAbsorbEtaTerm  = absorbEtaTerm.getData();
+	const double* pDenistySum     = densitySum.getData();
 
-	float* p = getRealData(MI::kP);
+	double* p = getRealData(MI::kP);
 
 #pragma omp parallel for simd schedule(simd:static) \
 	aligned(c2Matrix, absorbTauMatrix, absorbEtaMatrix, \
 			pAbsorbTauTerm, pAbsorbEtaTerm, pDenistySum, p : kDataAlignment)
 	for (size_t i = 0; i < nElements; i++)
 	{
-		const float c2        = (c0ScalarFlag) ?        c2Scalar        : c2Matrix[i];
-		const float absorbTau = (tauAndEtaScalarFlag) ? absorbTauScalar : absorbTauMatrix[i];
-		const float absorbEta = (tauAndEtaScalarFlag) ? absorbEtaScalar : absorbEtaMatrix[i];
+		const double c2        = (c0ScalarFlag) ?        c2Scalar        : c2Matrix[i];
+		const double absorbTau = (tauAndEtaScalarFlag) ? absorbTauScalar : absorbTauMatrix[i];
+		const double absorbEta = (tauAndEtaScalarFlag) ? absorbEtaScalar : absorbEtaMatrix[i];
 
 		p[i] = c2 * (pDenistySum[i] + (divider * ((pAbsorbTauTerm[i] * absorbTau) - (pAbsorbEtaTerm[i] * absorbEta))));
 	}
@@ -2589,12 +2589,12 @@ void KSpaceFirstOrderSolver::addPressureSource()
 		const size_t sourceSize  = getIndexMatrix(MI::kPressureSourceIndex).size();
 		const size_t index2D     = (isManyFlag) ? timeIndex * sourceSize : timeIndex;
 
-		const float*  sourceInput = getRealData(MI::kPressureSourceInput);
+		const double*  sourceInput = getRealData(MI::kPressureSourceInput);
 		const size_t* sourceIndex = getIndexData(MI::kPressureSourceIndex);
 
-		float* rhox = getRealData(MI::kRhoX);
-		float* rhoy = getRealData(MI::kRhoY);
-		float* rhoz = getRealData(MI::kRhoZ, simulationDimension == SD::k3D);
+		double* rhox = getRealData(MI::kRhoX);
+		double* rhoy = getRealData(MI::kRhoY);
+		double* rhoz = getRealData(MI::kRhoZ, simulationDimension == SD::k3D);
 
 		// Different pressure sources
 		switch (mParameters.getPressureSourceMode())
@@ -2643,11 +2643,11 @@ void KSpaceFirstOrderSolver::addPressureSource()
 
 					const size_t  nElementsFull    = mParameters.getFullDimensionSizes().nElements();
 					const size_t  nElementsReduced = mParameters.getReducedDimensionSizes().nElements();
-					const float   divider          = (mParameters.isSimulationAS()) ? 1.0f / float(nElementsFull * 2)
-						: 1.0f / float(nElementsFull);
+					const double   divider          = (mParameters.isSimulationAS()) ? 1.0f / double(nElementsFull * 2)
+						: 1.0f / double(nElementsFull);
 
-					float*        pScaledSource = getRealData(MI::kTemp1RealND);
-					float*        pSourceKappa  = getRealData(MI::kSourceKappa);
+					double*        pScaledSource = getRealData(MI::kTemp1RealND);
+					double*        pSourceKappa  = getRealData(MI::kSourceKappa);
 					FloatComplex* pFftMatrix    = getComplexData(MI::kTempFftwX);
 
 					// Clear scaledSource the matrix
@@ -2726,9 +2726,9 @@ void KSpaceFirstOrderSolver::addTransducerSource()
 
 	const size_t* velocitySourceIndex   = getIndexData(MI::kVelocitySourceIndex);
 	const size_t* delayMask             = getIndexData(MI::kDelayMask);
-	const float*  transducerSourceInput = getRealData(MI::kTransducerSourceInput);
+	const double*  transducerSourceInput = getRealData(MI::kTransducerSourceInput);
 
-	float* uxSgx = getRealData(MI::kUxSgx);
+	double* uxSgx = getRealData(MI::kUxSgx);
 
 #pragma omp parallel for schedule(static) if (sourceSize > 16384)
 	for (size_t i = 0; i < sourceSize; i++)
@@ -2787,10 +2787,10 @@ void KSpaceFirstOrderSolver::computeVelocitySourceTerm(RealMatrix&        veloci
 	const size_t sourceSize = velocitySourceIndex.size();
 	const size_t index2D    = (isManyFlag) ? timeIndex * sourceSize : timeIndex;
 
-	const float*  sourceInput = velocitySourceInput.getData();
+	const double*  sourceInput = velocitySourceInput.getData();
 	const size_t* sourceIndex = velocitySourceIndex.getData();
 
-	float* pVelocityMatrix = velocityMatrix.getData();
+	double* pVelocityMatrix = velocityMatrix.getData();
 
 	switch (mParameters.getVelocitySourceMode())
 	{
@@ -2826,10 +2826,10 @@ void KSpaceFirstOrderSolver::computeVelocitySourceTerm(RealMatrix&        veloci
 
 				const size_t  nElementsFull    = mParameters.getFullDimensionSizes().nElements();
 				const size_t  nElementsReduced = mParameters.getReducedDimensionSizes().nElements();
-				const float   divider          = (mParameters.isSimulationAS()) ? 1.0f / float(nElementsFull * 2)
-					: 1.0f / float(nElementsFull);
-				float*        pScaledSource = getRealData(MI::kTemp1RealND);
-				float*        pSourceKappa  = getRealData(MI::kSourceKappa);
+				const double   divider          = (mParameters.isSimulationAS()) ? 1.0f / double(nElementsFull * 2)
+					: 1.0f / double(nElementsFull);
+				double*        pScaledSource = getRealData(MI::kTemp1RealND);
+				double*        pSourceKappa  = getRealData(MI::kSourceKappa);
 				FloatComplex* pFftMatrix    = getComplexData(MI::kTempFftwX);
 
 				// Clear scaledSource the matrix
@@ -2918,23 +2918,23 @@ template<SD   simulationDimension,
 void KSpaceFirstOrderSolver::addInitialPressureSource()
 {
 	const size_t nElements        = mParameters.getFullDimensionSizes().nElements();
-	const float  dimScalingFactor = (simulationDimension == SD::k3D) ? 3.0f : 2.0f;
+	const double  dimScalingFactor = (simulationDimension == SD::k3D) ? 3.0f : 2.0f;
 
-	const float* sourceInput = getRealData(MI::kInitialPressureSourceInput);
+	const double* sourceInput = getRealData(MI::kInitialPressureSourceInput);
 
-	const float  c2Scalar    = (c0ScalarFlag) ? mParameters.getC2Scalar() : 0.0f;
-	const float* c2Matrix    = (c0ScalarFlag) ? nullptr : getRealData(MI::kC2);
+	const double  c2Scalar    = (c0ScalarFlag) ? mParameters.getC2Scalar() : 0.0f;
+	const double* c2Matrix    = (c0ScalarFlag) ? nullptr : getRealData(MI::kC2);
 
-	float* rhoX = getRealData(MI::kRhoX);
-	float* rhoY = getRealData(MI::kRhoY);
-	float* rhoZ = getRealData(MI::kRhoZ, simulationDimension == SD::k3D);
+	double* rhoX = getRealData(MI::kRhoX);
+	double* rhoY = getRealData(MI::kRhoY);
+	double* rhoZ = getRealData(MI::kRhoZ, simulationDimension == SD::k3D);
 
 	getRealMatrix(MI::kP).copyData(getRealMatrix(MI::kInitialPressureSourceInput));
 
 #pragma omp parallel for simd schedule(simd:static)
 	for (size_t i = 0; i < nElements; i++)
 	{
-		const float tmp = sourceInput[i] / (dimScalingFactor * ((c0ScalarFlag) ? c2Scalar : c2Matrix[i]));
+		const double tmp = sourceInput[i] / (dimScalingFactor * ((c0ScalarFlag) ? c2Scalar : c2Matrix[i]));
 
 		rhoX[i] = tmp;
 		rhoY[i] = tmp;
@@ -2975,25 +2975,25 @@ void KSpaceFirstOrderSolver::computeInitialVelocityUniform()
 {
 	const size_t nElements = mParameters.getFullDimensionSizes().nElements();
 
-	const float  dtRho0SgxScalar = (rho0ScalarFlag) ? 0.5f * mParameters.getDtRho0SgxScalar() : 0.0f;
-	const float  dtRho0SgyScalar = (rho0ScalarFlag) ? 0.5f * mParameters.getDtRho0SgyScalar() : 0.0f;
+	const double  dtRho0SgxScalar = (rho0ScalarFlag) ? 0.5f * mParameters.getDtRho0SgxScalar() : 0.0f;
+	const double  dtRho0SgyScalar = (rho0ScalarFlag) ? 0.5f * mParameters.getDtRho0SgyScalar() : 0.0f;
 
-	const float* dtRho0SgxMatrix = (rho0ScalarFlag) ? nullptr : getRealData(MI::kDtRho0Sgx);
-	const float* dtRho0SgyMatrix = (rho0ScalarFlag) ? nullptr : getRealData(MI::kDtRho0Sgy);
+	const double* dtRho0SgxMatrix = (rho0ScalarFlag) ? nullptr : getRealData(MI::kDtRho0Sgx);
+	const double* dtRho0SgyMatrix = (rho0ScalarFlag) ? nullptr : getRealData(MI::kDtRho0Sgy);
 
-	const float* dpdxSgx = getRealData(MI::kTemp1RealND);
-	const float* dpdySgy = getRealData(MI::kTemp2RealND);
+	const double* dpdxSgx = getRealData(MI::kTemp1RealND);
+	const double* dpdySgy = getRealData(MI::kTemp2RealND);
 
-	float* uxSgx = getRealData(MI::kUxSgx);
-	float* uySgy = getRealData(MI::kUySgy);
+	double* uxSgx = getRealData(MI::kUxSgx);
+	double* uySgy = getRealData(MI::kUySgy);
 
 	// x and y dimensions
 #pragma omp parallel for simd schedule(simd:static) \
 	aligned(dtRho0SgxMatrix, dtRho0SgyMatrix, dpdxSgx, dpdySgy, uxSgx, uySgy : kDataAlignment)
 	for (size_t i = 0; i < nElements; i++)
 	{
-		const float dtRho0Sgx = (rho0ScalarFlag) ? dtRho0SgxScalar : 0.5f * dtRho0SgxMatrix[i];
-		const float dtRho0Sgy = (rho0ScalarFlag) ? dtRho0SgyScalar : 0.5f * dtRho0SgyMatrix[i];
+		const double dtRho0Sgx = (rho0ScalarFlag) ? dtRho0SgxScalar : 0.5f * dtRho0SgxMatrix[i];
+		const double dtRho0Sgy = (rho0ScalarFlag) ? dtRho0SgyScalar : 0.5f * dtRho0SgyMatrix[i];
 
 		uxSgx[i] = dpdxSgx[i] * dtRho0Sgx;
 		uySgy[i] = dpdySgy[i] * dtRho0Sgy;
@@ -3002,17 +3002,17 @@ void KSpaceFirstOrderSolver::computeInitialVelocityUniform()
 	// z dimension if needed
 	if (simulationDimension == SD::k3D)
 	{
-		const float  dtRho0SgzScalar = (rho0ScalarFlag) ? 0.5f * mParameters.getDtRho0SgzScalar() : 0.0f;
-		const float* dtRho0SgzMatrix = (rho0ScalarFlag) ? nullptr : getRealData(MI::kDtRho0Sgz);
+		const double  dtRho0SgzScalar = (rho0ScalarFlag) ? 0.5f * mParameters.getDtRho0SgzScalar() : 0.0f;
+		const double* dtRho0SgzMatrix = (rho0ScalarFlag) ? nullptr : getRealData(MI::kDtRho0Sgz);
 
-		const float* dpdzSgz = getRealData(MI::kTemp3RealND);
+		const double* dpdzSgz = getRealData(MI::kTemp3RealND);
 
-		float* uzSgz = getRealData(MI::kUzSgz);
+		double* uzSgz = getRealData(MI::kUzSgz);
 
 #pragma omp parallel for simd schedule(simd:static) aligned(dtRho0SgzMatrix, dpdzSgz, uzSgz : kDataAlignment)
 		for (size_t i = 0; i < nElements; i++)
 		{
-			const float dtRho0Sgz = (rho0ScalarFlag) ? dtRho0SgzScalar : 0.5f * dtRho0SgzMatrix[i];
+			const double dtRho0Sgz = (rho0ScalarFlag) ? dtRho0SgzScalar : 0.5f * dtRho0SgzMatrix[i];
 
 			uzSgz[i] = dpdzSgz[i] * dtRho0Sgz;
 		}
@@ -3028,21 +3028,21 @@ void KSpaceFirstOrderSolver::computeInitialVelocityHomogeneousNonuniform()
 {
 	const DimensionSizes& dimensionSizes = mParameters.getFullDimensionSizes();
 
-	const float dtRho0Sgx  = 0.5f * mParameters.getDtRho0SgxScalar();
-	const float dtRho0Sgy  = 0.5f * mParameters.getDtRho0SgyScalar();
-	const float dtRho0Sgz  = (simulationDimension == SD::k3D) ? 0.5f * mParameters.getDtRho0SgzScalar() : 0.0f;
+	const double dtRho0Sgx  = 0.5f * mParameters.getDtRho0SgxScalar();
+	const double dtRho0Sgy  = 0.5f * mParameters.getDtRho0SgyScalar();
+	const double dtRho0Sgz  = (simulationDimension == SD::k3D) ? 0.5f * mParameters.getDtRho0SgzScalar() : 0.0f;
 
-	const float* dxudxnSgx = getRealData(MI::kDxudxnSgx);
-	const float* dyudynSgy = getRealData(MI::kDyudynSgy);
-	const float* dzudznSgz = getRealData(MI::kDzudznSgz, simulationDimension == SD::k3D);
+	const double* dxudxnSgx = getRealData(MI::kDxudxnSgx);
+	const double* dyudynSgy = getRealData(MI::kDyudynSgy);
+	const double* dzudznSgz = getRealData(MI::kDzudznSgz, simulationDimension == SD::k3D);
 
-	const float* dpdxSgx   = getRealData(MI::kTemp1RealND);
-	const float* dpdySgy   = getRealData(MI::kTemp2RealND);
-	const float* dpdzSgz   = getRealData(MI::kTemp3RealND, simulationDimension == SD::k3D);
+	const double* dpdxSgx   = getRealData(MI::kTemp1RealND);
+	const double* dpdySgy   = getRealData(MI::kTemp2RealND);
+	const double* dpdzSgz   = getRealData(MI::kTemp3RealND, simulationDimension == SD::k3D);
 
-	float* uxSgx = getRealData(MI::kUxSgx);
-	float* uySgy = getRealData(MI::kUySgy);
-	float* uzSgz = getRealData(MI::kUzSgz, simulationDimension == SD::k3D);
+	double* uxSgx = getRealData(MI::kUxSgx);
+	double* uySgy = getRealData(MI::kUySgy);
+	double* uzSgz = getRealData(MI::kUzSgz, simulationDimension == SD::k3D);
 
 #pragma omp parallel for schedule(static) if (simulationDimension == SD::k3D)
 	for (size_t z = 0; z < dimensionSizes.nz; z++)
@@ -3075,15 +3075,15 @@ void KSpaceFirstOrderSolver::generateInitialDenisty()
 {
 	const DimensionSizes& dimensionSizes = mParameters.getFullDimensionSizes();
 
-	const float dt = mParameters.getDt();
+	const double dt = mParameters.getDt();
 
-	const float* duxdxnSgx = getRealData(MI::kDxudxnSgx);
-	const float* duydynSgy = getRealData(MI::kDyudynSgy);
-	const float* duzdznSgz = getRealData(MI::kDzudznSgz, simulationDimension == SD::k3D);
+	const double* duxdxnSgx = getRealData(MI::kDxudxnSgx);
+	const double* duydynSgy = getRealData(MI::kDyudynSgy);
+	const double* duzdznSgz = getRealData(MI::kDzudznSgz, simulationDimension == SD::k3D);
 
-	float* dtRho0Sgx = getRealData(MI::kDtRho0Sgx);
-	float* dtRho0Sgy = getRealData(MI::kDtRho0Sgy);
-	float* dtRho0Sgz = getRealData(MI::kDtRho0Sgz, simulationDimension == SD::k3D);
+	double* dtRho0Sgx = getRealData(MI::kDtRho0Sgx);
+	double* dtRho0Sgy = getRealData(MI::kDtRho0Sgy);
+	double* dtRho0Sgz = getRealData(MI::kDtRho0Sgz, simulationDimension == SD::k3D);
 
 #pragma omp parallel for schedule(static) if (simulationDimension == SD::k3D)
 	for (size_t z = 0; z < dimensionSizes.nz; z++)
@@ -3116,44 +3116,44 @@ void KSpaceFirstOrderSolver::generateKappa()
 {
 	const DimensionSizes& reducedDimensionSizes = mParameters.getReducedDimensionSizes();
 
-	const float dx2Rec = 1.0f / (mParameters.getDx() * mParameters.getDx());
-	const float dy2Rec = 1.0f / (mParameters.getDy() * mParameters.getDy());
+	const double dx2Rec = 1.0f / (mParameters.getDx() * mParameters.getDx());
+	const double dy2Rec = 1.0f / (mParameters.getDy() * mParameters.getDy());
 	// For 2D simulation set dz to 0
-	const float dz2Rec = (mParameters.isSimulation3D()) ? 1.0f / (mParameters.getDz() * mParameters.getDz()) : 0.0f;
+	const double dz2Rec = (mParameters.isSimulation3D()) ? 1.0f / (mParameters.getDz() * mParameters.getDz()) : 0.0f;
 
-	const float cRefDtPi = mParameters.getCRef() * mParameters.getDt() * float(M_PI);
+	const double cRefDtPi = mParameters.getCRef() * mParameters.getDt() * double(M_PI);
 
-	const float nxRec = 1.0f / float(mParameters.getFullDimensionSizes().nx);
-	const float nyRec = 1.0f / float(mParameters.getFullDimensionSizes().ny);
+	const double nxRec = 1.0f / double(mParameters.getFullDimensionSizes().nx);
+	const double nyRec = 1.0f / double(mParameters.getFullDimensionSizes().ny);
 	// For 2D simulation, nzRec remains 1
-	const float nzRec = 1.0f / float(mParameters.getFullDimensionSizes().nz);
+	const double nzRec = 1.0f / double(mParameters.getFullDimensionSizes().nz);
 
-	float* kappa = getRealData(MI::kKappa);
+	double* kappa = getRealData(MI::kKappa);
 
 	// Generate wave number in given direction
-	auto kPart = [](float i, float sizeRec, float dispRec)
+	auto kPart = [](double i, double sizeRec, double dispRec)
 	{
-		float k = 0.5f - fabs(0.5f - i * sizeRec);
+		double k = 0.5f - fabs(0.5f - i * sizeRec);
 		return (k * k) * dispRec;
 	};// end of kPart
 
 #pragma omp parallel for schedule(static) if (mParameters.isSimulation3D())
 	for (size_t z = 0; z < reducedDimensionSizes.nz; z++)
 	{
-		const float kz = kPart(float(z), nzRec, dz2Rec);
+		const double kz = kPart(double(z), nzRec, dz2Rec);
 
 #pragma omp parallel for schedule(static) if (mParameters.isSimulation2D())
 		for (size_t y = 0; y < reducedDimensionSizes.ny; y++)
 		{
-			const float ky = kPart(float(y), nyRec, dy2Rec);
+			const double ky = kPart(double(y), nyRec, dy2Rec);
 
 #pragma omp simd
 			for (size_t x = 0; x < reducedDimensionSizes.nx; x++)
 			{
 				const size_t i = get1DIndex(z, y, x, reducedDimensionSizes);
 
-				const float kx = kPart(float(x), nxRec, dx2Rec);
-				const float k  = cRefDtPi * sqrt(kx + ky + kz);
+				const double kx = kPart(double(x), nxRec, dx2Rec);
+				const double k  = cRefDtPi * sqrt(kx + ky + kz);
 
 				// kappa element
 				kappa[i] = (k == 0.0f) ? 1.0f : sin(k) / k;
@@ -3170,28 +3170,28 @@ void KSpaceFirstOrderSolver::generateKappaAS()
 {
 	const DimensionSizes& reducedDimensionSizes = mParameters.getReducedDimensionSizes();
 
-	const float cRefDt = mParameters.getCRef() * mParameters.getDt() * 0.5f;
+	const double cRefDt = mParameters.getCRef() * mParameters.getDt() * 0.5f;
 
-	const float nxRec  = 1.0f / float(mParameters.getFullDimensionSizes().nx);
+	const double nxRec  = 1.0f / double(mParameters.getFullDimensionSizes().nx);
 	// Condensed version of 1/ (nx * 2 * pi)
-	const float pi2Dx  = 2.0f * float(M_PI) / (mParameters.getDx());
+	const double pi2Dx  = 2.0f * double(M_PI) / (mParameters.getDx());
 	// Condensed version of (2 * pi) / (2 * dy * nx)
-	const float piDyM  = float(M_PI) / (mParameters.getDy() * float(mParameters.getFullDimensionSizes().ny));
+	const double piDyM  = double(M_PI) / (mParameters.getDy() * double(mParameters.getFullDimensionSizes().ny));
 
-	float* kappa = getRealData(MI::kKappa);
+	double* kappa = getRealData(MI::kKappa);
 
 #pragma omp parallel for schedule(static)
 	for (size_t y = 0; y < reducedDimensionSizes.ny; y++)
 	{
-		const float ky = (float(y) + 0.5f) * piDyM;
+		const double ky = (double(y) + 0.5f) * piDyM;
 
 #pragma omp simd
 		for (size_t x = 0; x < reducedDimensionSizes.nx; x++)
 		{
 			const size_t i = get1DIndex(y, x, reducedDimensionSizes);
 
-			const float kx = (0.5f - fabs(0.5f - float(x) * nxRec)) * pi2Dx;
-			const float k  = cRefDt * sqrt(ky * ky + kx * kx);
+			const double kx = (0.5f - fabs(0.5f - double(x) * nxRec)) * pi2Dx;
+			const double k  = cRefDt * sqrt(ky * ky + kx * kx);
 
 			// kappa element
 			kappa[i] = (k == 0.0f) ? 1.0f : sin(k) / k;
@@ -3211,11 +3211,11 @@ void KSpaceFirstOrderSolver::generateDerivativeOperators()
 	constexpr FloatComplex imagUnit = FloatComplex(0, 1);
 	constexpr FloatComplex posExp   = FloatComplex(0, 1);
 	constexpr FloatComplex negExp   = FloatComplex(0,-1);
-	constexpr float        pi2      = 2.0f * float(M_PI);
+	constexpr double        pi2      = 2.0f * double(M_PI);
 
-	const float dx = mParameters.getDx();
-	const float dy = mParameters.getDy();
-	const float dz = (mParameters.isSimulation3D()) ? mParameters.getDz() : 0.0f;
+	const double dx = mParameters.getDx();
+	const double dy = mParameters.getDy();
+	const double dz = (mParameters.isSimulation3D()) ? mParameters.getDz() : 0.0f;
 
 	FloatComplex* ddxKShiftPos = getComplexData(MI::kDdxKShiftPosR);
 	FloatComplex* ddyKShiftPos = getComplexData(MI::kDdyKShiftPos);
@@ -3237,8 +3237,8 @@ void KSpaceFirstOrderSolver::generateDerivativeOperators()
 	for (size_t i = 0; i < reducedDimensionSizes.nx; i++)
 	{
 		const ptrdiff_t shift    = iFftShift(i, dimensionSizes.nx);
-		const float     kx       = (pi2 / dx) * (float(shift) / float(dimensionSizes.nx));
-		const float     exponent = kx * dx * 0.5f;
+		const double     kx       = (pi2 / dx) * (double(shift) / double(dimensionSizes.nx));
+		const double     exponent = kx * dx * 0.5f;
 
 		ddxKShiftPos[i] = imagUnit * kx * std::exp(posExp * exponent);
 		ddxKShiftNeg[i] = imagUnit * kx * std::exp(negExp * exponent);
@@ -3248,8 +3248,8 @@ void KSpaceFirstOrderSolver::generateDerivativeOperators()
 	for (size_t i = 0; i < dimensionSizes.ny; i++)
 	{
 		const ptrdiff_t shift    = iFftShift(i, dimensionSizes.ny);
-		const float     ky       = (pi2 / dy) * (float(shift) / float(dimensionSizes.ny));
-		const float     exponent = ky * dy * 0.5f;
+		const double     ky       = (pi2 / dy) * (double(shift) / double(dimensionSizes.ny));
+		const double     exponent = ky * dy * 0.5f;
 
 		ddyKShiftPos[i] = imagUnit * ky * std::exp(posExp * exponent);
 		ddyKShiftNeg[i] = imagUnit * ky * std::exp(negExp * exponent);
@@ -3261,8 +3261,8 @@ void KSpaceFirstOrderSolver::generateDerivativeOperators()
 		for (size_t i = 0; i < dimensionSizes.nz; i++)
 		{
 			const ptrdiff_t shift    = iFftShift(i, dimensionSizes.nz);
-			const float     kz       = (pi2 / dz) * (float(shift) / float(dimensionSizes.nz));
-			const float     exponent = kz * dz * 0.5f;
+			const double     kz       = (pi2 / dz) * (double(shift) / double(dimensionSizes.nz));
+			const double     exponent = kz * dz * 0.5f;
 
 			ddzKShiftPos[i] = imagUnit * kz * std::exp(posExp * exponent);
 			ddzKShiftNeg[i] = imagUnit * kz * std::exp(negExp * exponent);
@@ -3282,19 +3282,19 @@ void KSpaceFirstOrderSolver::generateDerivativeOperatorsAS()
 	constexpr FloatComplex imagUnit = FloatComplex(0, 1);
 	constexpr FloatComplex posExp   = FloatComplex(0, 1);
 	constexpr FloatComplex negExp   = FloatComplex(0,-1);
-	constexpr float        pi2      = 2.0f * float(M_PI);
+	constexpr double        pi2      = 2.0f * double(M_PI);
 
-	const float dx     = mParameters.getDx();
-	const float dy     = mParameters.getDy();
+	const double dx     = mParameters.getDx();
+	const double dy     = mParameters.getDy();
 	// Condensed version of 2 * pi / (2 * dy * ny)
-	const float dyMRec = float(M_PI) / (dy * float(dimensionSizes.ny));
+	const double dyMRec = double(M_PI) / (dy * double(dimensionSizes.ny));
 
 	FloatComplex* ddxKShiftPos = getComplexData(MI::kDdxKShiftPosR);
 	FloatComplex* ddxKShiftNeg = getComplexData(MI::kDdxKShiftNegR);
 
-	float* ddyKHahs = getRealData(MI::kDdyKHahs);
-	float* ddyKWswa = getRealData(MI::kDdyKWswa);
-	float* yVecSg   = getRealData(MI::kYVecSg);
+	double* ddyKHahs = getRealData(MI::kDdyKHahs);
+	double* ddyKWswa = getRealData(MI::kDdyKWswa);
+	double* yVecSg   = getRealData(MI::kYVecSg);
 
 	// Calculate ifft shift
 	auto iFftShift = [](ptrdiff_t i, ptrdiff_t size)
@@ -3308,9 +3308,9 @@ void KSpaceFirstOrderSolver::generateDerivativeOperatorsAS()
 	for (size_t i = 0; i < reducedDimensionSizes.nx; i++)
 	{
 		const ptrdiff_t shift    = iFftShift(i, dimensionSizes.nx);
-		const float     kx       = (pi2 / dx) * (float(shift) / float(dimensionSizes.nx));
+		const double     kx       = (pi2 / dx) * (double(shift) / double(dimensionSizes.nx));
 
-		const float     exponent = kx * dx * 0.5f;
+		const double     exponent = kx * dx * 0.5f;
 
 		ddxKShiftPos[i] = imagUnit * kx * std::exp(posExp * exponent);
 		ddxKShiftNeg[i] = imagUnit * kx * std::exp(negExp * exponent);
@@ -3319,11 +3319,11 @@ void KSpaceFirstOrderSolver::generateDerivativeOperatorsAS()
 	// Calculate ddyKHahs, ddyKWswa, yVecSg
 	for (size_t y = 0; y < reducedDimensionSizes.ny; y++)
 	{
-		const float ky = (float(y) + 0.5f) * dyMRec;
+		const double ky = (double(y) + 0.5f) * dyMRec;
 
 		ddyKHahs[y] =  ky;
 		ddyKWswa[y] = -ky;
-		yVecSg[y]   = 1.0f / ((float(y) + 0.5f) * dy);
+		yVecSg[y]   = 1.0f / ((double(y) + 0.5f) * dy);
 	}
 }// end of generateDerivativeOperatorsAS
 //----------------------------------------------------------------------------------------------------------------------
@@ -3336,41 +3336,41 @@ void KSpaceFirstOrderSolver::generateSourceKappa()
 {
 	const DimensionSizes& reducedDimensionSizes = mParameters.getReducedDimensionSizes();
 
-	const float dx2Rec = 1.0f / (mParameters.getDx() * mParameters.getDx());
-	const float dy2Rec = 1.0f / (mParameters.getDy() * mParameters.getDy());
-	const float dz2Rec = (mParameters.isSimulation3D()) ? 1.0f / (mParameters.getDz() * mParameters.getDz()) : 0.0f;
+	const double dx2Rec = 1.0f / (mParameters.getDx() * mParameters.getDx());
+	const double dy2Rec = 1.0f / (mParameters.getDy() * mParameters.getDy());
+	const double dz2Rec = (mParameters.isSimulation3D()) ? 1.0f / (mParameters.getDz() * mParameters.getDz()) : 0.0f;
 
-	const float cRefDtPi = mParameters.getCRef() * mParameters.getDt() * float(M_PI);
+	const double cRefDtPi = mParameters.getCRef() * mParameters.getDt() * double(M_PI);
 
-	const float nxRec = 1.0f / float(mParameters.getFullDimensionSizes().nx);
-	const float nyRec = 1.0f / float(mParameters.getFullDimensionSizes().ny);
-	const float nzRec = 1.0f / float(mParameters.getFullDimensionSizes().nz);
+	const double nxRec = 1.0f / double(mParameters.getFullDimensionSizes().nx);
+	const double nyRec = 1.0f / double(mParameters.getFullDimensionSizes().ny);
+	const double nzRec = 1.0f / double(mParameters.getFullDimensionSizes().nz);
 
-	float* sourceKappa = getRealData(MI::kSourceKappa);
+	double* sourceKappa = getRealData(MI::kSourceKappa);
 
 	// Generate wave number in a given direction
-	auto kPart = [](float i, float sizeRec, float dispRec)
+	auto kPart = [](double i, double sizeRec, double dispRec)
 	{
-		float k = 0.5f - fabs(0.5f - i * sizeRec);
+		double k = 0.5f - fabs(0.5f - i * sizeRec);
 		return (k * k) * dispRec;
 	};// end of kPart
 
 #pragma omp parallel for schedule(static) if (mParameters.isSimulation3D())
 	for (size_t z = 0; z < reducedDimensionSizes.nz; z++)
 	{
-		const float kz = kPart(float(z), nzRec, dz2Rec);
+		const double kz = kPart(double(z), nzRec, dz2Rec);
 
 #pragma omp parallel for schedule(static) if (mParameters.isSimulation2D())
 		for (size_t y = 0; y < reducedDimensionSizes.ny; y++)
 		{
-			const float ky = kPart(float(y), nyRec, dy2Rec);
+			const double ky = kPart(double(y), nyRec, dy2Rec);
 
 #pragma omp simd
 			for (size_t x = 0; x < reducedDimensionSizes.nx; x++)
 			{
 				const size_t i = get1DIndex(z, y, x, reducedDimensionSizes);
 
-				const float kx = kPart(float(x), nxRec, dx2Rec);
+				const double kx = kPart(double(x), nxRec, dx2Rec);
 
 				// sourceKappa element
 				sourceKappa[i] = cos(cRefDtPi * sqrt(kx + ky + kz));
@@ -3387,28 +3387,28 @@ void KSpaceFirstOrderSolver::generateSourceKappaAS()
 {
 	const DimensionSizes& reducedDimensionSizes = mParameters.getReducedDimensionSizes();
 
-	const float cRefDt = mParameters.getCRef() * mParameters.getDt() * 0.5f;
+	const double cRefDt = mParameters.getCRef() * mParameters.getDt() * 0.5f;
 
-	const float nxRec  = 1.0f / float(mParameters.getFullDimensionSizes().nx);
+	const double nxRec  = 1.0f / double(mParameters.getFullDimensionSizes().nx);
 	// Condensed version of 1/ (nx * 2 * pi)
-	const float pi2Dx  = 2.0f * float(M_PI) / (mParameters.getDx());
+	const double pi2Dx  = 2.0f * double(M_PI) / (mParameters.getDx());
 	// Condensed version of (2 * pi) / (2 * dy * nx)
-	const float piDyM  = float(M_PI) / (mParameters.getDy() * float(mParameters.getFullDimensionSizes().ny));
+	const double piDyM  = double(M_PI) / (mParameters.getDy() * double(mParameters.getFullDimensionSizes().ny));
 
-	float* sourceKappa = getRealData(MI::kSourceKappa);
+	double* sourceKappa = getRealData(MI::kSourceKappa);
 
 #pragma omp parallel for schedule(static)
 	for (size_t y = 0; y < reducedDimensionSizes.ny; y++)
 	{
-		const float ky  = (float(y) + 0.5f) * piDyM;
+		const double ky  = (double(y) + 0.5f) * piDyM;
 
 #pragma omp simd
 		for (size_t x = 0; x < reducedDimensionSizes.nx; x++)
 		{
 			const size_t i = get1DIndex(y, x, reducedDimensionSizes);
 
-			const float kx = (0.5f - fabs(0.5f - float(x) * nxRec)) * pi2Dx;
-			const float k  = cRefDt * sqrt(ky * ky + kx * kx);
+			const double kx = (0.5f - fabs(0.5f - double(x) * nxRec)) * pi2Dx;
+			const double k  = cRefDt * sqrt(ky * ky + kx * kx);
 
 			// sourceKappa element
 			sourceKappa[i] = cos(k);
@@ -3425,50 +3425,50 @@ void KSpaceFirstOrderSolver::generateKappaAndNablas()
 {
 	const DimensionSizes& reducedDimensionSizes = mParameters.getReducedDimensionSizes();
 
-	const float dxSqRec    = 1.0f / (mParameters.getDx() * mParameters.getDx());
-	const float dySqRec    = 1.0f / (mParameters.getDy() * mParameters.getDy());
-	const float dzSqRec    = (mParameters.isSimulation3D()) ? 1.0f / (mParameters.getDz() * mParameters.getDz()) : 0.0f;
+	const double dxSqRec    = 1.0f / (mParameters.getDx() * mParameters.getDx());
+	const double dySqRec    = 1.0f / (mParameters.getDy() * mParameters.getDy());
+	const double dzSqRec    = (mParameters.isSimulation3D()) ? 1.0f / (mParameters.getDz() * mParameters.getDz()) : 0.0f;
 
-	const float cRefDt2    = mParameters.getCRef() * mParameters.getDt() * 0.5f;
-	const float pi2        = float(M_PI) * 2.0f;
+	const double cRefDt2    = mParameters.getCRef() * mParameters.getDt() * 0.5f;
+	const double pi2        = double(M_PI) * 2.0f;
 
 	const size_t nx        = mParameters.getFullDimensionSizes().nx;
 	const size_t ny        = mParameters.getFullDimensionSizes().ny;
 	const size_t nz        = mParameters.getFullDimensionSizes().nz;
 
-	const float nxRec      = 1.0f / float(nx);
-	const float nyRec      = 1.0f / float(ny);
-	const float nzRec      = 1.0f / float(nz);
+	const double nxRec      = 1.0f / double(nx);
+	const double nyRec      = 1.0f / double(ny);
+	const double nzRec      = 1.0f / double(nz);
 
-	const float alphaPower = mParameters.getAlphaPower();
+	const double alphaPower = mParameters.getAlphaPower();
 
-	float* kappa           = getRealData(MI::kKappa);
-	float* absorbNabla1    = getRealData(MI::kAbsorbNabla1);
-	float* absorbNabla2    = getRealData(MI::kAbsorbNabla2);
+	double* kappa           = getRealData(MI::kKappa);
+	double* absorbNabla1    = getRealData(MI::kAbsorbNabla1);
+	double* absorbNabla2    = getRealData(MI::kAbsorbNabla2);
 
 	// Generated wave number in a given direction
-	auto kPart = [](float i, float sizeRec, float dispRec)
+	auto kPart = [](double i, double sizeRec, double dispRec)
 	{
-		float k = 0.5f - fabs(0.5f - i * sizeRec);
+		double k = 0.5f - fabs(0.5f - i * sizeRec);
 		return (k * k) * dispRec;
 	};// end of kPart
 
 #pragma omp parallel for schedule(static) if (mParameters.isSimulation3D())
 	for (size_t z = 0; z < reducedDimensionSizes.nz; z++)
 	{
-		const float kz = kPart(float(z), nzRec, dzSqRec);
+		const double kz = kPart(double(z), nzRec, dzSqRec);
 
 #pragma omp parallel for schedule(static) if (mParameters.isSimulation2D())
 		for (size_t y = 0; y < reducedDimensionSizes.ny; y++)
 		{
-			const float ky = kPart(float(y), nyRec, dySqRec);
+			const double ky = kPart(double(y), nyRec, dySqRec);
 
 #pragma omp simd
 			for (size_t x = 0; x < reducedDimensionSizes.nx; x++)
 			{
-				const float kx    = kPart(float(x), nxRec, dxSqRec);
-				const float k     = pi2 * sqrt(kx + ky + kz);
-				const float cRefK = cRefDt2 * k;
+				const double kx    = kPart(double(x), nxRec, dxSqRec);
+				const double k     = pi2 * sqrt(kx + ky + kz);
+				const double cRefK = cRefDt2 * k;
 
 				const size_t i  = get1DIndex(z, y, x, reducedDimensionSizes);
 
@@ -3477,8 +3477,8 @@ void KSpaceFirstOrderSolver::generateKappaAndNablas()
 				absorbNabla1[i] = pow(k, alphaPower - 2.0f);
 				absorbNabla2[i] = pow(k, alphaPower - 1.0f);
 
-				if (absorbNabla1[i] ==  std::numeric_limits<float>::infinity()) absorbNabla1[i] = 0.0f;
-				if (absorbNabla2[i] ==  std::numeric_limits<float>::infinity()) absorbNabla2[i] = 0.0f;
+				if (absorbNabla1[i] ==  std::numeric_limits<double>::infinity()) absorbNabla1[i] = 0.0f;
+				if (absorbNabla2[i] ==  std::numeric_limits<double>::infinity()) absorbNabla2[i] = 0.0f;
 			}// x
 		}// y
 	}// z
@@ -3492,12 +3492,12 @@ void KSpaceFirstOrderSolver::generateTauAndEta()
 {
 	if ((mParameters.getAlphaCoeffScalarFlag()) && (mParameters.getC0ScalarFlag()))
 	{ // Scalar values
-		const float alphaPower       = mParameters.getAlphaPower();
-		const float tanPi2AlphaPower = tan(float(M_PI_2) * alphaPower);
-		const float alphaNeperCoeff  = (100.0f * pow(1.0e-6f / (2.0f * float(M_PI)), alphaPower)) /
-			(20.0f * float(M_LOG10E));
+		const double alphaPower       = mParameters.getAlphaPower();
+		const double tanPi2AlphaPower = tan(double(M_PI_2) * alphaPower);
+		const double alphaNeperCoeff  = (100.0f * pow(1.0e-6f / (2.0f * double(M_PI)), alphaPower)) /
+			(20.0f * double(M_LOG10E));
 
-		const float alphaCoeff2      = 2.0f * mParameters.getAlphaCoeffScalar() * alphaNeperCoeff;
+		const double alphaCoeff2      = 2.0f * mParameters.getAlphaCoeffScalar() * alphaNeperCoeff;
 
 		mParameters.setAbsorbTauScalar((-alphaCoeff2) * pow(mParameters.getC0Scalar(), alphaPower - 1.0f));
 		mParameters.setAbsorbEtaScalar(  alphaCoeff2  * pow(mParameters.getC0Scalar(), alphaPower) * tanPi2AlphaPower);
@@ -3507,25 +3507,25 @@ void KSpaceFirstOrderSolver::generateTauAndEta()
 		const DimensionSizes& dimensionSizes = mParameters.getFullDimensionSizes();
 
 		const bool   alphaCoeffScalarFlag = mParameters.getAlphaCoeffScalarFlag();
-		const float  alphaCoeffScalar     = (alphaCoeffScalarFlag) ? mParameters.getAlphaCoeffScalar() : 0.0f;
+		const double  alphaCoeffScalar     = (alphaCoeffScalarFlag) ? mParameters.getAlphaCoeffScalar() : 0.0f;
 		// temp3 matrix holds alpha coeff matrix (used only once).
-		const float* alphaCoeffMatrix     = (alphaCoeffScalarFlag) ? nullptr : getRealData(MI::kTemp3RealND);
+		const double* alphaCoeffMatrix     = (alphaCoeffScalarFlag) ? nullptr : getRealData(MI::kTemp3RealND);
 
-		const float  alphaPower       = mParameters.getAlphaPower();
-		const float  tanPi2AlphaPower = tan(float(M_PI_2) * alphaPower);
+		const double  alphaPower       = mParameters.getAlphaPower();
+		const double  tanPi2AlphaPower = tan(double(M_PI_2) * alphaPower);
 
 		const bool   c0ScalarFlag = mParameters.getC0ScalarFlag();
-		const float  c0Scalar     = (c0ScalarFlag) ? mParameters.getC0Scalar() : 0.0f;
+		const double  c0Scalar     = (c0ScalarFlag) ? mParameters.getC0Scalar() : 0.0f;
 		// Here c2 still holds just c0!
-		const float* cOMatrix     = (c0ScalarFlag) ? nullptr : getRealData(MI::kC2);
+		const double* cOMatrix     = (c0ScalarFlag) ? nullptr : getRealData(MI::kC2);
 
 		// alpha = 100 * alpha .* (1e-6 / (2 * pi)).^y ./
 		//                        (20 * log10(exp(1)));
-		const float alphaNeperCoeff = (100.0f * pow(1.0e-6f / (2.0f * float(M_PI)), alphaPower)) /
-			(20.0f * float(M_LOG10E));
+		const double alphaNeperCoeff = (100.0f * pow(1.0e-6f / (2.0f * double(M_PI)), alphaPower)) /
+			(20.0f * double(M_LOG10E));
 
-		float* absorbTau = getRealData(MI::kAbsorbTau);
-		float* absorbEta = getRealData(MI::kAbsorbEta);
+		double* absorbTau = getRealData(MI::kAbsorbTau);
+		double* absorbEta = getRealData(MI::kAbsorbEta);
 
 #pragma omp parallel for schedule(static) if (mParameters.isSimulation3D())
 		for (size_t z = 0; z < dimensionSizes.nz; z++)
@@ -3538,7 +3538,7 @@ void KSpaceFirstOrderSolver::generateTauAndEta()
 				{
 					const size_t i = get1DIndex(z, y, x, dimensionSizes);
 
-					const float alphaCoeff2 = 2.0f * alphaNeperCoeff *
+					const double alphaCoeff2 = 2.0f * alphaNeperCoeff *
 						((alphaCoeffScalarFlag) ? alphaCoeffScalar : alphaCoeffMatrix[i]);
 
 					absorbTau[i] = (-alphaCoeff2) * pow(((c0ScalarFlag) ? c0Scalar : cOMatrix[i]), alphaPower - 1.0f);
@@ -3557,11 +3557,11 @@ void KSpaceFirstOrderSolver::generateTau()
 {
 	if ((mParameters.getAlphaCoeffScalarFlag()) && (mParameters.getC0ScalarFlag()))
 	{ // Scalar values
-		const float alphaPower       = mParameters.getAlphaPower();
-		const float alphaNeperCoeff  = (100.0f * pow(1.0e-6f / (2.0f * float(M_PI)), alphaPower)) /
-			(20.0f * float(M_LOG10E));
+		const double alphaPower       = mParameters.getAlphaPower();
+		const double alphaNeperCoeff  = (100.0f * pow(1.0e-6f / (2.0f * double(M_PI)), alphaPower)) /
+			(20.0f * double(M_LOG10E));
 
-		const float alphaCoeff2      = 2.0f * mParameters.getAlphaCoeffScalar() * alphaNeperCoeff;
+		const double alphaCoeff2      = 2.0f * mParameters.getAlphaCoeffScalar() * alphaNeperCoeff;
 
 		mParameters.setAbsorbTauScalar((-alphaCoeff2) * pow(mParameters.getC0Scalar(), alphaPower - 1.0f));
 	}
@@ -3570,23 +3570,23 @@ void KSpaceFirstOrderSolver::generateTau()
 		const DimensionSizes& dimensionSizes = mParameters.getFullDimensionSizes();
 
 		const bool   alphaCoeffScalarFlag = mParameters.getAlphaCoeffScalarFlag();
-		const float  alphaCoeffScalar     = (alphaCoeffScalarFlag) ? mParameters.getAlphaCoeffScalar() : 0.0f;
+		const double  alphaCoeffScalar     = (alphaCoeffScalarFlag) ? mParameters.getAlphaCoeffScalar() : 0.0f;
 		// temp3 matrix holds alpha coeff matrix (used only once).
-		const float* alphaCoeffMatrix     = (alphaCoeffScalarFlag) ? nullptr : getRealData(MI::kTemp3RealND);
+		const double* alphaCoeffMatrix     = (alphaCoeffScalarFlag) ? nullptr : getRealData(MI::kTemp3RealND);
 
 		const bool   c0ScalarFlag = mParameters.getC0ScalarFlag();
-		const float  c0Scalar     = (c0ScalarFlag) ? mParameters.getC0Scalar() : 0.0f;
+		const double  c0Scalar     = (c0ScalarFlag) ? mParameters.getC0Scalar() : 0.0f;
 		// Here c2 still holds just c0!
-		const float* cOMatrix     = (c0ScalarFlag) ? nullptr : getRealData(MI::kC2);
+		const double* cOMatrix     = (c0ScalarFlag) ? nullptr : getRealData(MI::kC2);
 
-		const float  alphaPower   = mParameters.getAlphaPower();
+		const double  alphaPower   = mParameters.getAlphaPower();
 
 		// alpha = 100 * alpha .* (1e-6 / (2 * pi)).^y ./
 		//                        (20 * log10(exp(1)));
-		const float alphaNeperCoeff = (100.0f * pow(1.0e-6f / (2.0f * float(M_PI)), alphaPower)) /
-			(20.0f * float(M_LOG10E));
+		const double alphaNeperCoeff = (100.0f * pow(1.0e-6f / (2.0f * double(M_PI)), alphaPower)) /
+			(20.0f * double(M_LOG10E));
 
-		float* absorbTau = getRealData(MI::kAbsorbTau);
+		double* absorbTau = getRealData(MI::kAbsorbTau);
 
 #pragma omp parallel for schedule(static) if (mParameters.isSimulation3D())
 		for (size_t z = 0; z < dimensionSizes.nz; z++)
@@ -3599,7 +3599,7 @@ void KSpaceFirstOrderSolver::generateTau()
 				{
 					const size_t i = get1DIndex(z, y, x, dimensionSizes);
 
-					const float alphaCoeff2 = 2.0f * alphaNeperCoeff *
+					const double alphaCoeff2 = 2.0f * alphaNeperCoeff *
 						((alphaCoeffScalarFlag) ? alphaCoeffScalar : alphaCoeffMatrix[i]);
 
 					absorbTau[i] = (-alphaCoeff2) * pow(((c0ScalarFlag) ? c0Scalar : cOMatrix[i]), alphaPower - 1.0f);
@@ -3621,11 +3621,11 @@ void KSpaceFirstOrderSolver::generateNonStaggeredShiftVariables()
 			dimensionSizes.nz / 2 + 1);
 
 	constexpr FloatComplex negExp = FloatComplex(0,-1);
-	constexpr float        pi2    = 2.0f * float(M_PI);
+	constexpr double        pi2    = 2.0f * double(M_PI);
 
-	const float dx = mParameters.getDx();
-	const float dy = mParameters.getDy();
-	const float dz = mParameters.getDz();
+	const double dx = mParameters.getDx();
+	const double dy = mParameters.getDy();
+	const double dz = mParameters.getDz();
 
 	FloatComplex* xShiftNeg = getComplexData(MI::kXShiftNegR);
 	FloatComplex* yShiftNeg = getComplexData(MI::kYShiftNegR);
@@ -3643,18 +3643,18 @@ void KSpaceFirstOrderSolver::generateNonStaggeredShiftVariables()
 	for (size_t i = 0; i < shiftDimensions.nx; i++)
 	{
 		const ptrdiff_t shift = iFftShift(i, dimensionSizes.nx);
-		const float     kx    = (pi2 / dx) * (float(shift) / float(dimensionSizes.nx));
+		const double     kx    = (pi2 / dx) * (double(shift) / double(dimensionSizes.nx));
 
-		xShiftNeg[i] = std::exp(negExp * kx * dx * 0.5f);
+		xShiftNeg[i] = std::exp(negExp * kx * dx * 0.5);
 	}
 
 	// yShiftNeg
 	for (size_t i = 0; i < shiftDimensions.ny; i++)
 	{
 		const ptrdiff_t shift = iFftShift(i, dimensionSizes.ny);
-		const float     ky    = (pi2 / dy) * (float(shift) / float(dimensionSizes.ny));
+		const double     ky    = (pi2 / dy) * (double(shift) / double(dimensionSizes.ny));
 
-		yShiftNeg[i] = std::exp(negExp * ky * dy * 0.5f);
+		yShiftNeg[i] = std::exp(negExp * ky * dy * 0.5);
 	}
 
 	// zShiftNeg
@@ -3663,9 +3663,9 @@ void KSpaceFirstOrderSolver::generateNonStaggeredShiftVariables()
 		for (size_t i = 0; i < shiftDimensions.nz; i++)
 		{
 			const ptrdiff_t shift = iFftShift(i, dimensionSizes.nz);
-			const float     kz    = (pi2 / dz) * (float(shift) / float(dimensionSizes.nz));
+			const double     kz    = (pi2 / dz) * (double(shift) / double(dimensionSizes.nz));
 
-			zShiftNeg[i] = std::exp(negExp * kz * dz * 0.5f);
+			zShiftNeg[i] = std::exp(negExp * kz * dz * 0.5);
 		}
 	}
 }// end of generateNonStaggeredShiftVariables
@@ -3678,25 +3678,25 @@ void KSpaceFirstOrderSolver::generatePml()
 {
 	const DimensionSizes dimensionSizes = mParameters.getFullDimensionSizes();
 
-	const float pmlXAlpha = mParameters.getPmlXAlpha();
-	const float pmlYAlpha = mParameters.getPmlYAlpha();
+	const double pmlXAlpha = mParameters.getPmlXAlpha();
+	const double pmlYAlpha = mParameters.getPmlYAlpha();
 
 	const size_t pmlXSize = mParameters.getPmlXSize();
 	const size_t pmlYSize = mParameters.getPmlYSize();
 
-	const float  cRefDx   = mParameters.getCRef() / mParameters.getDx();
-	const float  cRefDy   = mParameters.getCRef() / mParameters.getDy();
+	const double  cRefDx   = mParameters.getCRef() / mParameters.getDx();
+	const double  cRefDy   = mParameters.getCRef() / mParameters.getDy();
 
-	const float  dt2      = mParameters.getDt() * 0.5f;
+	const double  dt2      = mParameters.getDt() * 0.5f;
 
-	float* pmlX    = getRealData(MI::kPmlX);
-	float* pmlY    = getRealData(MI::kPmlY);
+	double* pmlX    = getRealData(MI::kPmlX);
+	double* pmlY    = getRealData(MI::kPmlY);
 
-	float* pmlXSgx = getRealData(MI::kPmlXSgx);
-	float* pmlYSgy = getRealData(MI::kPmlYSgy);
+	double* pmlXSgx = getRealData(MI::kPmlXSgx);
+	double* pmlYSgy = getRealData(MI::kPmlYSgy);
 
 	// Init arrays
-	auto initPml = [](float* pml, float* pmlSg, size_t size)
+	auto initPml = [](double* pml, double* pmlSg, size_t size)
 	{
 		for (size_t i = 0; i < size; i++)
 		{
@@ -3706,13 +3706,13 @@ void KSpaceFirstOrderSolver::generatePml()
 	};// end of initPml
 
 	// Calculate left value of PML exponent, for staggered use i + 0.5f, i shifted by -1 (Matlab indexing).
-	auto pmlLeft = [dt2](float i, float cRef, float pmlAlpha, float pmlSize)
+	auto pmlLeft = [dt2](double i, double cRef, double pmlAlpha, double pmlSize)
 	{
 		return exp(-dt2 * pmlAlpha * cRef * pow((i - pmlSize) / (-pmlSize), 4));
 	};// end of pmlLeft.
 
 	// Calculate right value of PML exponent, for staggered use i + 0.5f, i shifted by +1 (Matlab indexing).
-	auto pmlRight = [dt2](float i, float cRef, float pmlAlpha, float pmlSize)
+	auto pmlRight = [dt2](double i, double cRef, double pmlAlpha, double pmlSize)
 	{
 		return exp(-dt2 * pmlAlpha * cRef * pow((i + 1.0f)/ pmlSize, 4));
 	};// end of pmlRight.
@@ -3724,13 +3724,13 @@ void KSpaceFirstOrderSolver::generatePml()
 	// Too difficult for SIMD
 	for (size_t i = 0; i < pmlXSize; i++)
 	{
-		pmlX[i]    = pmlLeft(float(i),        cRefDx, pmlXAlpha, pmlXSize);
-		pmlXSgx[i] = pmlLeft(float(i) + 0.5f, cRefDx, pmlXAlpha, pmlXSize);
+		pmlX[i]    = pmlLeft(double(i),        cRefDx, pmlXAlpha, pmlXSize);
+		pmlXSgx[i] = pmlLeft(double(i) + 0.5f, cRefDx, pmlXAlpha, pmlXSize);
 
 		const size_t iR = dimensionSizes.nx - pmlXSize + i;
 
-		pmlX[iR]    = pmlRight(float(i),        cRefDx, pmlXAlpha, pmlXSize);
-		pmlXSgx[iR] = pmlRight(float(i) + 0.5f, cRefDx, pmlXAlpha, pmlXSize);
+		pmlX[iR]    = pmlRight(double(i),        cRefDx, pmlXAlpha, pmlXSize);
+		pmlXSgx[iR] = pmlRight(double(i) + 0.5f, cRefDx, pmlXAlpha, pmlXSize);
 	}
 
 	// PML in y dimension
@@ -3741,38 +3741,38 @@ void KSpaceFirstOrderSolver::generatePml()
 	{
 		if (!mParameters.isSimulationAS())
 		{ // for axisymmetric code the PML is only on the outer side
-			pmlY[i]    = pmlLeft(float(i),        cRefDy, pmlYAlpha, pmlYSize);
-			pmlYSgy[i] = pmlLeft(float(i) + 0.5f, cRefDy, pmlYAlpha, pmlYSize);
+			pmlY[i]    = pmlLeft(double(i),        cRefDy, pmlYAlpha, pmlYSize);
+			pmlYSgy[i] = pmlLeft(double(i) + 0.5f, cRefDy, pmlYAlpha, pmlYSize);
 		}
 
 		const size_t iR = dimensionSizes.ny - pmlYSize + i;
 
-		pmlY[iR]    = pmlRight(float(i),        cRefDy, pmlYAlpha, pmlYSize);
-		pmlYSgy[iR] = pmlRight(float(i) + 0.5f, cRefDy, pmlYAlpha, pmlYSize);
+		pmlY[iR]    = pmlRight(double(i),        cRefDy, pmlYAlpha, pmlYSize);
+		pmlYSgy[iR] = pmlRight(double(i) + 0.5f, cRefDy, pmlYAlpha, pmlYSize);
 	}
 
 	// PML in z dimension
 	if (mParameters.isSimulation3D())
 	{
-		const float  pmlZAlpha = mParameters.getPmlZAlpha();
+		const double  pmlZAlpha = mParameters.getPmlZAlpha();
 		const size_t pmlZSize  = mParameters.getPmlZSize();
-		const float  cRefDz    = mParameters.getCRef() / mParameters.getDz();
+		const double  cRefDz    = mParameters.getCRef() / mParameters.getDz();
 
-		float* pmlZ    = getRealData(MI::kPmlZ);
-		float* pmlZSgz = getRealData(MI::kPmlZSgz);
+		double* pmlZ    = getRealData(MI::kPmlZ);
+		double* pmlZSgz = getRealData(MI::kPmlZSgz);
 
 		initPml(pmlZ, pmlZSgz, dimensionSizes.nz);
 
 		// Too difficult for SIMD
 		for (size_t i = 0; i < pmlZSize; i++)
 		{
-			pmlZ[i]    = pmlLeft(float(i)       , cRefDz, pmlZAlpha, pmlZSize);
-			pmlZSgz[i] = pmlLeft(float(i) + 0.5f, cRefDz, pmlZAlpha, pmlZSize);
+			pmlZ[i]    = pmlLeft(double(i)       , cRefDz, pmlZAlpha, pmlZSize);
+			pmlZSgz[i] = pmlLeft(double(i) + 0.5f, cRefDz, pmlZAlpha, pmlZSize);
 
 			const size_t iR = dimensionSizes.nz - pmlZSize + i;
 
-			pmlZ[iR]    = pmlRight(float(i),        cRefDz, pmlZAlpha, pmlZSize);
-			pmlZSgz[iR] = pmlRight(float(i) + 0.5f, cRefDz, pmlZAlpha, pmlZSize);
+			pmlZ[iR]    = pmlRight(double(i),        cRefDz, pmlZAlpha, pmlZSize);
+			pmlZSgz[iR] = pmlRight(double(i) + 0.5f, cRefDz, pmlZAlpha, pmlZSize);
 		}
 	}
 }// end of generatePml
@@ -3787,7 +3787,7 @@ void KSpaceFirstOrderSolver::generateC2()
 	{ // Matrix values
 		const size_t nElements = mParameters.getFullDimensionSizes().nElements();
 
-		float* c2 = getRealData(MI::kC2);
+		double* c2 = getRealData(MI::kC2);
 
 #pragma omp parallel for simd schedule(simd:static) aligned(c2 : kDataAlignment)
 		for (size_t i = 0; i < nElements; i++)

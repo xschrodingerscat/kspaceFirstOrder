@@ -63,7 +63,7 @@ const string Hdf5File::kMatrixDataTypeName   = "data_type";
  */
 std::map<Hdf5File::MatrixDataType, std::string> Hdf5File::sMatrixDataTypeNames
 {
-  {Hdf5File::MatrixDataType::kFloat, "float"},
+  {Hdf5File::MatrixDataType::kFloat, "double"},
   {Hdf5File::MatrixDataType::kIndex, "long"},
 };// end of sMatrixDataTypeNames
 //----------------------------------------------------------------------------------------------------------------------
@@ -297,7 +297,7 @@ hid_t Hdf5File::createDataset(const hid_t                    parentGroup,
                                              compressionLevel));
   }
 
-  const hid_t datasetType = (matrixDataType == MatrixDataType::kFloat) ? H5T_NATIVE_FLOAT : H5T_STD_U64LE;
+  const hid_t datasetType = (matrixDataType == MatrixDataType::kFloat) ? H5T_NATIVE_DOUBLE : H5T_STD_U64LE;
 
   // Create dataset
   hid_t dataset = H5Dcreate(parentGroup,
@@ -347,7 +347,7 @@ void  Hdf5File::closeDataset(const hid_t dataset)
 //----------------------------------------------------------------------------------------------------------------------
 
 /**
- * Write a hyperslab into the dataset, float version.
+ * Write a hyperslab into the dataset, double version.
  */
 template<class T>
 void Hdf5File::writeHyperSlab(const hid_t           dataset,
@@ -408,9 +408,9 @@ void Hdf5File::writeHyperSlab(const hid_t           dataset,
   {
     status = H5Dwrite(dataset, H5T_STD_U64LE, memspace, filespace, H5P_DEFAULT, data);
   }
-  if (std::is_same<T, float>())
+  if (std::is_same<T, double>())
   {
-    status = H5Dwrite(dataset, H5T_NATIVE_FLOAT, memspace, filespace, H5P_DEFAULT, data);
+    status = H5Dwrite(dataset, H5T_NATIVE_DOUBLE, memspace, filespace, H5P_DEFAULT, data);
   }
 
   if (status < 0)
@@ -424,13 +424,13 @@ void Hdf5File::writeHyperSlab(const hid_t           dataset,
 //----------------------------------------------------------------------------------------------------------------------
 
 /**
- * Write a hyperslab into the dataset, float version explicit instance.
+ * Write a hyperslab into the dataset, double version explicit instance.
  */
 template
-void Hdf5File::writeHyperSlab<float>(const hid_t           dataset,
+void Hdf5File::writeHyperSlab<double>(const hid_t           dataset,
                                      const DimensionSizes& position,
                                      const DimensionSizes& size,
-                                     const float*          data);
+                                     const double*          data);
 //----------------------------------------------------------------------------------------------------------------------
 /**
  * Write a hyperslab into the dataset, index version explicit instance.
@@ -450,7 +450,7 @@ void Hdf5File::writeCuboidToHyperSlab(const hid_t           dataset,
                                       const DimensionSizes& cuboidPosition,
                                       const DimensionSizes& cuboidSize,
                                       const DimensionSizes& matrixDimensions,
-                                      const float*          matrixData)
+                                      const double*          matrixData)
 {
   herr_t status;
   hid_t  filespace, memspace;
@@ -490,7 +490,7 @@ void Hdf5File::writeCuboidToHyperSlab(const hid_t           dataset,
   }
 
   // Write the data
-  status = H5Dwrite(dataset, H5T_NATIVE_FLOAT, memspace, filespace, H5P_DEFAULT, matrixData);
+  status = H5Dwrite(dataset, H5T_NATIVE_DOUBLE, memspace, filespace, H5P_DEFAULT, matrixData);
   if (status < 0)
   {
     throw ios::failure(Logger::formatMessage(kErrFmtCannotWriteDataset, ""));
@@ -510,7 +510,7 @@ void Hdf5File::writeSensorByMaskToHyperSlab(const hid_t           dataset,
                                             const size_t          indexSensorSize,
                                             const size_t*         indexSensorData,
                                             const DimensionSizes& matrixDimensions,
-                                            const float*          matrixData)
+                                            const double*          matrixData)
 {
   herr_t status;
   hid_t  filespace, memspace;
@@ -546,7 +546,7 @@ void Hdf5File::writeSensorByMaskToHyperSlab(const hid_t           dataset,
   }
 
   // Write the data
-  status = H5Dwrite(dataset, H5T_NATIVE_FLOAT, memspace, filespace, H5P_DEFAULT, matrixData);
+  status = H5Dwrite(dataset, H5T_NATIVE_DOUBLE, memspace, filespace, H5P_DEFAULT, matrixData);
   if (status < 0)
   {
     throw ios::failure(Logger::formatMessage(kErrFmtCannotWriteDataset, ""));
@@ -574,9 +574,9 @@ void Hdf5File::writeScalarValue(const hid_t       parentGroup,
   hid_t  datatype  = H5I_INVALID_HID;
   herr_t status;
 
-  if (std::is_same<T, float>())
+  if (std::is_same<T, double>())
   {
-    datatype = H5T_NATIVE_FLOAT;
+    datatype = H5T_NATIVE_DOUBLE;
   }
 
   if (std::is_same<T, size_t>())
@@ -613,7 +613,7 @@ void Hdf5File::writeScalarValue(const hid_t       parentGroup,
     throw ios::failure(Logger::formatMessage(kErrFmtCannotWriteDataset, cDatasetName));
   }
 
-  if (std::is_same<T, float>())
+  if (std::is_same<T, double>())
   {
     writeMatrixDataType(parentGroup, datasetName, MatrixDataType::kFloat);
   }
@@ -627,13 +627,13 @@ void Hdf5File::writeScalarValue(const hid_t       parentGroup,
 //----------------------------------------------------------------------------------------------------------------------
 
 /**
- *  Write a scalar value at a specified place in the file tree, float value explicit instance.
+ *  Write a scalar value at a specified place in the file tree, double value explicit instance.
  */
 template
-void Hdf5File::writeScalarValue<float>
+void Hdf5File::writeScalarValue<double>
                                (const hid_t       parentGroup,
                                 const MatrixName& datasetName,
-                                const float       value);
+                                const double       value);
 //----------------------------------------------------------------------------------------------------------------------
 /**
  * Write a scalar value at a specified place in the file tree, index value explicit instance.
@@ -658,16 +658,16 @@ void Hdf5File::readScalarValue(const hid_t       parentGroup,
 //----------------------------------------------------------------------------------------------------------------------
 
 /**
- * Read a scalar value at a specified place in the file tree, float value, explicit instance.
+ * Read a scalar value at a specified place in the file tree, double value, explicit instance.
  */
 template
-void Hdf5File::readScalarValue<float>
+void Hdf5File::readScalarValue<double>
                              (const hid_t       parentGroup,
                               const MatrixName& datasetName,
-                              float&            value);
+                              double&            value);
 //----------------------------------------------------------------------------------------------------------------------
 /**
- * Read a scalar value at a specified place in the file tree, float value, explicit instance
+ * Read a scalar value at a specified place in the file tree, double value, explicit instance
  *
  */
 template
@@ -694,9 +694,9 @@ void Hdf5File::readCompleteDataset(const hid_t           parentGroup,
   }
 
   herr_t status = -1;
-  if (std::is_same<T, float>())
+  if (std::is_same<T, double>())
   {
-    status = H5LTread_dataset(parentGroup, cDatasetName, H5T_NATIVE_FLOAT, data);
+    status = H5LTread_dataset(parentGroup, cDatasetName, H5T_NATIVE_DOUBLE, data);
   }
   if (std::is_same<T, size_t>())
   {
@@ -711,14 +711,14 @@ void Hdf5File::readCompleteDataset(const hid_t           parentGroup,
 //----------------------------------------------------------------------------------------------------------------------
 
 /**
- * Read data from the dataset at a specified place in the file tree, float version explicit instance.
+ * Read data from the dataset at a specified place in the file tree, double version explicit instance.
  */
 template
-void Hdf5File::readCompleteDataset<float>
+void Hdf5File::readCompleteDataset<double>
                                   (const hid_t           parentGroup,
                                    const MatrixName&     datasetName,
                                    const DimensionSizes& dimensionSizes,
-                                   float*                data);
+                                   double*                data);
 //----------------------------------------------------------------------------------------------------------------------
 /**
  * Read data from the dataset at a specified place in the file tree, index version explicit instance.

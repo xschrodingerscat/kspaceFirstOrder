@@ -136,10 +136,10 @@ public:
     static KMatrix Rect(size_t r, size_t c, size_t left, size_t top,
                         size_t right, size_t bottom);
 
-    static void FillDisc(KMatrix<float> &kmat, size_t x, size_t y, size_t radius, T val);
+    static void FillDisc(KMatrix<double> &kmat, size_t x, size_t y, size_t radius, T val);
 
     template<typename F>
-    static void Fill(KMatrix<float> &kmat, F lambda);
+    static void Fill(KMatrix<double> &kmat, F lambda);
 
     static std::vector<T> Max(KMatrix &mat);
 
@@ -268,7 +268,7 @@ KMatrix<T>::Print(KMatrix<T> kmat)
 
 template<typename T>
 void
-KMatrix<T>::FillDisc(KMatrix<float> &kmat, size_t x, size_t y, size_t radius, T val)
+KMatrix<T>::FillDisc(KMatrix<double> &kmat, size_t x, size_t y, size_t radius, T val)
 {
     for (size_t i = 0; i < kmat.rowSize(); ++ i)
         for (size_t j = 0; j < kmat.colSize(); ++ j)
@@ -278,7 +278,7 @@ KMatrix<T>::FillDisc(KMatrix<float> &kmat, size_t x, size_t y, size_t radius, T 
 
 template<typename T>
 template<typename F>
-void KMatrix<T>::Fill(KMatrix<float> &kmat, F lambda)
+void KMatrix<T>::Fill(KMatrix<double> &kmat, F lambda)
 {
     for (size_t i = 0; i < kmat.rowSize(); ++ i)
         for (size_t j = 0; j < kmat.colSize(); ++ j)

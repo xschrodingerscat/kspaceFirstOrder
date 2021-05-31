@@ -47,7 +47,7 @@ CuboidOutputStream::CuboidOutputStream(Hdf5File&            file,
                                        const RealMatrix&    sourceMatrix,
                                        const IndexMatrix&   sensorMask,
                                        const ReduceOperator reduceOp,
-                                       float*               bufferToReuse)
+                                       double*               bufferToReuse)
   : BaseOutputStream(file, groupName, sourceMatrix, reduceOp, bufferToReuse),
     mSensorMask(sensorMask),
     mCuboidsInfo(),
@@ -355,7 +355,7 @@ void CuboidOutputStream::sampleAggregated()
   const size_t slabSize = mSourceMatrix.getDimensionSizes().ny * mSourceMatrix.getDimensionSizes().nx;
   const size_t rowSize  = mSourceMatrix.getDimensionSizes().nx;
 
-  const float* sourceData = mSourceMatrix.getData();
+  const double* sourceData = mSourceMatrix.getData();
 
   size_t cuboidInBufferStart = 0;
 

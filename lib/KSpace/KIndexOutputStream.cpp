@@ -15,7 +15,7 @@ KIndexOutputStream::KIndexOutputStream(Hdf5File&            file,
                                      const RealMatrix&    sourceMatrix,
                                      const IndexMatrix&   sensorMask,
                                      const ReduceOperator reduceOp,
-                                     float*               bufferToReuse)
+                                     double*               bufferToReuse)
         : BaseOutputStream(file, datasetName, sourceMatrix, reduceOp, bufferToReuse),
           mSensorMask(sensorMask) { }
 
@@ -35,13 +35,13 @@ void KIndexOutputStream::create()
 
     mBufferSize = mSensorMask.size();
 
-    KMatrixType<float> elem;
+    KMatrixType<double> elem;
     for (size_t i = 0; i < mBufferSize; ++ i)
     {
-        elem.push_back(std::vector<float>());
+        elem.push_back(std::vector<double>());
     }
 
-    koutput.mPressureRaw = KMatrix<float>(elem);
+    koutput.mPressureRaw = KMatrix<double>(elem);
 }// end of create
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -56,7 +56,7 @@ void KIndexOutputStream::reopen() { }// end of reopen
  */
 void KIndexOutputStream::sample()
 {
-    const float*  sourceData = mSourceMatrix.getData();
+    const double*  sourceData = mSourceMatrix.getData();
     const size_t* sensorData = mSensorMask.getData();
 
     auto & params = Parameters::getInstance();

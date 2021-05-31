@@ -287,7 +287,7 @@ Parameters::init(KConfig &kcfg, KOutput &koutput)
 		mMatCached[name] = std::shared_ptr<KBaseMatrix>(mat); 
 
 		if(name == "c0")
-			auto &mat = *static_cast<KMatrix<float>*>(mMatCached[name].get());
+			auto &mat = *static_cast<KMatrix<double>*>(mMatCached[name].get());
 	};
 
 	addMatrix("rho0", medium.mRho0.clone());
@@ -457,10 +457,10 @@ void Parameters::readScalarsFromInputFile()
 		return value;
 	};// end of readIntValue
 
-	// Lambda to read a scalar the output file for float.
-	auto readFloatValue = [this, rootGroup](ParameterNameIdx paramIdx, bool present = true) -> float
+	// Lambda to read a scalar the output file for double.
+	auto readFloatValue = [this, rootGroup](ParameterNameIdx paramIdx, bool present = true) -> double
 	{
-		float value = 0.0f;
+		double value = 0.0f;
 		if (present)
 		{
 			mInputFile.readScalarValue(rootGroup, sParameterHdf5Names[paramIdx], value);
@@ -712,8 +712,8 @@ void Parameters::writeScalarsToOutputFile()
 		}
 	};// end of writeIntValue
 
-	// Lambda to write a scalar the output file for float.
-	auto writeFloatValue = [this, rootGroup](ParameterNameIdx paramIdx, float value, bool present = true)
+	// Lambda to write a scalar the output file for double.
+	auto writeFloatValue = [this, rootGroup](ParameterNameIdx paramIdx, double value, bool present = true)
 	{
 		if (present)
 		{
@@ -874,7 +874,7 @@ bool Parameters::isTimeToCheckpoint(TimeMeasure timer) const
 
 	return (isCheckpointEnabled() &&
 			((mTimeStepsToCheckpoint == 0) ||
-			 (( checkpointInterval > 0) && (timer.getElapsedTime() > float(checkpointInterval)))
+			 (( checkpointInterval > 0) && (timer.getElapsedTime() > double(checkpointInterval)))
 			)
 		   );
 }// end of isTimeToCheckpoint
@@ -896,7 +896,7 @@ void Parameters::incrementTimeIndex()
 void Parameters::exportWisdom()
 {
 #if (defined(__GNUC__) || defined(__GNUG__)) && !(defined(__clang__) || defined(__INTEL_COMPILER))
-	int success = fftwf_export_wisdom_to_filename(getWisdomFileName().c_str());
+	int success = fftw_export_wisdom_to_filename(getWisdomFileName().c_str());
 	if (success == 0)
 	{
 		throw std::runtime_error(kErrFmtFftWisdomNotExported);
@@ -911,7 +911,7 @@ void Parameters::exportWisdom()
 void Parameters::importWisdom()
 {
 #if (defined(__GNUC__) || defined(__GNUG__)) && !(defined(__clang__) || defined(__INTEL_COMPILER))
-	int success = fftwf_import_wisdom_from_filename(getWisdomFileName().c_str());
+	int success = fftw_import_wisdom_from_filename(getWisdomFileName().c_str());
 	if (success == 0)
 	{
 		// print out a warning!
@@ -1005,16 +1005,16 @@ void Parameters::printMediumProperties()
  */
 void Parameters::printSourceInfo()
 {
-	// Lambda function to convert the number of float elements to MB.
-	auto floatToMB = [](size_t size) -> float
+	// Lambda function to convert the number of double elements to MB.
+	auto floatToMB = [](size_t size) -> double
 	{
-		return (size / float(1024 * 1024 / 4));
+		return (size / double(1024 * 1024 / 4));
 	};
 
 	// Lambda function to convert the number of size_t elements to MB.
-	auto maskToMB = [](size_t size) -> float
+	auto maskToMB = [](size_t size) -> double
 	{
-		return (size / float(1024 * 1024 / 8));
+		return (size / double(1024 * 1024 / 8));
 	};
 
 	// Lambda function to convert source mode to string.
@@ -1055,7 +1055,7 @@ void Parameters::printSourceInfo()
 		// Mode
 		Logger::log(Logger::LogLevel::kAdvanced, kOutFmtSourceMode, getSourceModeText(sourceMode).c_str());
 		// size = sensor mask + signal size
-		const float sensorSize =  maskToMB(indexSize) +
+		const double sensorSize =  maskToMB(indexSize) +
 			((sourceMany) ? floatToMB(indexSize * sourceFlag) : floatToMB(sourceFlag));
 
 		Logger::log(Logger::LogLevel::kAdvanced, kOutFmtSourceMemoryUsage.c_str(), sensorSize);
@@ -1109,7 +1109,7 @@ void Parameters::printSourceInfo()
 	{
 		Logger::log(Logger::LogLevel::kAdvanced, kOutFmtTransducerSource);
 		// size = sensor mask + delay mask + signal size
-		float sensorSize = maskToMB(2 * getVelocitySourceIndexSize()) + floatToMB(getTransducerSourceInputSize());
+		double sensorSize = maskToMB(2 * getVelocitySourceIndexSize()) + floatToMB(getTransducerSourceInputSize());
 
 		Logger::log(Logger::LogLevel::kAdvanced, kOutFmtSourceMemoryUsage.c_str(), sensorSize);
 	}
@@ -1121,10 +1121,10 @@ void Parameters::printSourceInfo()
  */
 void Parameters::printSensorInfo()
 {
-	// Lambda function to convert the number of float elements to MB.
-	auto floatToMB = [](size_t size) -> float
+	// Lambda function to convert the number of double elements to MB.
+	auto floatToMB = [](size_t size) -> double
 	{
-		return (float(size) / float(1024 * 1024 / 4));
+		return (double(size) / double(1024 * 1024 / 4));
 	};// end of floatToMB
 
 	// Lambda to print sensor type

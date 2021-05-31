@@ -191,10 +191,10 @@ KSpaceSolverElastic::generateDerivativeOperators()
     constexpr FloatComplex imagUnit = FloatComplex(0, 1);
     constexpr FloatComplex posExp = FloatComplex(0, 1);
     constexpr FloatComplex negExp = FloatComplex(0, -1);
-    constexpr float pi2 = 2.0f * float(M_PI);
+    constexpr double pi2 = 2.0f * double(M_PI);
 
-    const float dx = mParameters.getDx();
-    const float dy = mParameters.getDy();
+    const double dx = mParameters.getDx();
+    const double dy = mParameters.getDy();
 
     FloatComplex *ddxKShiftPos = getComplexData(MI::kDdxKShiftPosR);
     FloatComplex *ddyKShiftPos = getComplexData(MI::kDdyKShiftPos);
@@ -211,9 +211,9 @@ KSpaceSolverElastic::generateDerivativeOperators()
     for (size_t i = 0; i < reducedDimensionSizes.nx; i++)
     {
         const ptrdiff_t shift = iFftShift(i, dimensionSizes.nx);
-        const float kx = (pi2 / dx) * (float(shift)
-                                       / float(dimensionSizes.nx));
-        const float exponent = kx * dx * 0.5f;
+        const double kx = (pi2 / dx) * (double(shift)
+                                       / double(dimensionSizes.nx));
+        const double exponent = kx * dx * 0.5f;
 
         ddxKShiftPos[i] = imagUnit * kx * std::exp(posExp * exponent);
         ddxKShiftNeg[i] = imagUnit * kx * std::exp(negExp * exponent);
@@ -223,9 +223,9 @@ KSpaceSolverElastic::generateDerivativeOperators()
     for (size_t i = 0; i < dimensionSizes.ny; i++)
     {
         const ptrdiff_t shift = iFftShift(i, dimensionSizes.ny);
-        const float ky = (pi2 / dy) * (float(shift)
-                                       / float(dimensionSizes.ny));
-        const float exponent = ky * dy * 0.5f;
+        const double ky = (pi2 / dy) * (double(shift)
+                                       / double(dimensionSizes.ny));
+        const double exponent = ky * dy * 0.5f;
 
         ddyKShiftPos[i] = imagUnit * ky * std::exp(posExp * exponent);
         ddyKShiftNeg[i] = imagUnit * ky * std::exp(negExp * exponent);
@@ -241,9 +241,9 @@ KSpaceSolverElastic::addInitialPressureSource()
 {
     const size_t nElements = mParameters.getFullDimensionSizes().nElements();
 
-    float *p0 = getRealData(MI::kInitialPressureSourceInput);
+    double *p0 = getRealData(MI::kInitialPressureSourceInput);
 
-    float *tmp = getRealData(MI::kTmpReal1);
+    double *tmp = getRealData(MI::kTmpReal1);
 
     for (size_t i = 0; i < nElements; i++)
     {
@@ -256,13 +256,13 @@ KSpaceSolverElastic::addInitialPressureSource()
     getRealMatrix(MI::kSyySplitY).copyData(getRealMatrix(MI::kTmpReal1));
 
 #if 0
-    float* sxxSplitX = getRealData(MI::kSxxSplitX);
-    float* sxxSplitY = getRealData(MI::kSxxSplitY);
+    double* sxxSplitX = getRealData(MI::kSxxSplitX);
+    double* sxxSplitY = getRealData(MI::kSxxSplitY);
 
-    float* syySplitX = getRealData(MI::kSyySplitX);
-    float* syySplitY = getRealData(MI::kSyySplitY);
+    double* syySplitX = getRealData(MI::kSyySplitX);
+    double* syySplitY = getRealData(MI::kSyySplitY);
 
-    float* pmat = getRealData(MI::kSxxSplitY);
+    double* pmat = getRealData(MI::kSxxSplitY);
 #endif
 }
 
@@ -277,13 +277,13 @@ KSpaceSolverElastic::computePressure()
 {
     const auto &fullDimSizes = mParameters.getFullDimensionSizes();
 
-    float *p = getRealData(MI::kP);
+    double *p = getRealData(MI::kP);
 
-    const float *sxxSplitX = getRealData(MI::kSxxSplitX);
-    const float *sxxSplitY = getRealData(MI::kSxxSplitY);
+    const double *sxxSplitX = getRealData(MI::kSxxSplitX);
+    const double *sxxSplitY = getRealData(MI::kSxxSplitY);
 
-    const float *syySplitX = getRealData(MI::kSyySplitX);
-    const float *syySplitY = getRealData(MI::kSyySplitY);
+    const double *syySplitX = getRealData(MI::kSyySplitX);
+    const double *syySplitY = getRealData(MI::kSyySplitY);
 
     /*
      p = -(sxx_split_x + sxx_split_y + syy_split_x + syy_split_y) / 2;
@@ -306,30 +306,30 @@ KSpaceSolverElastic::computePressureGradient()
     const FloatComplex *ddxKShiftNeg = getComplexData(MI::kDdxKShiftNegR);
     const FloatComplex *ddyKShiftNeg = getComplexData(MI::kDdyKShiftNeg);
 
-    float *tmpReal1 = getRealData(MI::kTmpReal1);
-    float *tmpReal2 = getRealData(MI::kTmpReal2);
-    float *tmpReal3 = getRealData(MI::kTmpReal3);
-    float *tmpReal4 = getRealData(MI::kTmpReal4);
+    double *tmpReal1 = getRealData(MI::kTmpReal1);
+    double *tmpReal2 = getRealData(MI::kTmpReal2);
+    double *tmpReal3 = getRealData(MI::kTmpReal3);
+    double *tmpReal4 = getRealData(MI::kTmpReal4);
 
     FloatComplex *ifftXXdx = getComplexData(MI::kTmpFftwXXdx);
     FloatComplex *ifftYYdy = getComplexData(MI::kTmpFftwYYdy);
     FloatComplex *ifftXYdx = getComplexData(MI::kTmpFftwXYdx);
     FloatComplex *ifftXYdy = getComplexData(MI::kTmpFftwXYdy);
 
-    const float *sxxSplitX = getRealData(MI::kSxxSplitX);
-    const float *sxxSplitY = getRealData(MI::kSxxSplitY);
+    const double *sxxSplitX = getRealData(MI::kSxxSplitX);
+    const double *sxxSplitY = getRealData(MI::kSxxSplitY);
 
-    const float *syySplitX = getRealData(MI::kSyySplitX);
-    const float *syySplitY = getRealData(MI::kSyySplitY);
+    const double *syySplitX = getRealData(MI::kSyySplitX);
+    const double *syySplitY = getRealData(MI::kSyySplitY);
 
-    const float *sxySplitX = getRealData(MI::kSxySplitX);
-    const float *sxySPlitY = getRealData(MI::kSxySplitY);
+    const double *sxySplitX = getRealData(MI::kSxySplitX);
+    const double *sxySPlitY = getRealData(MI::kSxySplitY);
 
     auto nx = params.getFullDimensionSizes().nx;
     auto ny = params.getFullDimensionSizes().ny;
 
-    const float dividerX = 1.0f / static_cast<float>(nx);
-    const float dividerY = 1.0f / static_cast<float>(ny);
+    const double dividerX = 1.0f / static_cast<double>(nx);
+    const double dividerY = 1.0f / static_cast<double>(ny);
 
     /*
     dsxxdx = real( ifft( bsxfun(@times, ddx_k_shift_pos,
@@ -412,31 +412,31 @@ KSpaceSolverElastic::computeSplitVelocity()
 {
     const auto &fullDimSizes = mParameters.getFullDimensionSizes();
 
-    float *dsXXdx = getRealData(MI::kDSxxdx);
-    float *dsYYdy = getRealData(MI::kDSyydy);
+    double *dsXXdx = getRealData(MI::kDSxxdx);
+    double *dsYYdy = getRealData(MI::kDSyydy);
 
-    float *dsXYdx = getRealData(MI::kDSxydx);
-    float *dsXYdy = getRealData(MI::kDSxydy);
+    double *dsXYdx = getRealData(MI::kDSxydx);
+    double *dsXYdy = getRealData(MI::kDSxydy);
 
-    float *mPmlX = getRealData(MI::kMPmlX);
-    float *mPmlY = getRealData(MI::kMPmlY);
+    double *mPmlX = getRealData(MI::kMPmlX);
+    double *mPmlY = getRealData(MI::kMPmlY);
 
-    float *mPmlXSgx = getRealData(MI::kMPmlXSgx);
-    float *mPmlYSgy = getRealData(MI::kMPmlYSgy);
+    double *mPmlXSgx = getRealData(MI::kMPmlXSgx);
+    double *mPmlYSgy = getRealData(MI::kMPmlYSgy);
 
-    float *pmlX = getRealData(MI::kPmlX);
-    float *pmlY = getRealData(MI::kPmlY);
+    double *pmlX = getRealData(MI::kPmlX);
+    double *pmlY = getRealData(MI::kPmlY);
 
-    float *pmlXSgx = getRealData(MI::kPmlXSgx);
-    float *pmlYSgy = getRealData(MI::kPmlYSgy);
+    double *pmlXSgx = getRealData(MI::kPmlXSgx);
+    double *pmlYSgy = getRealData(MI::kPmlYSgy);
 
-    float *uxSplitX = getRealData(MI::kUxSplitX);
-    float *uxSplitY = getRealData(MI::kUxSplitY);
-    float *uySplitX = getRealData(MI::kUySplitX);
-    float *uySplitY = getRealData(MI::kUySplitY);
+    double *uxSplitX = getRealData(MI::kUxSplitX);
+    double *uxSplitY = getRealData(MI::kUxSplitY);
+    double *uySplitX = getRealData(MI::kUySplitX);
+    double *uySplitY = getRealData(MI::kUySplitY);
 
-    float *dtRho0Sgx = getRealData(MI::kDtRho0Sgx);
-    float *dtRho0Sgy = getRealData(MI::kDtRho0Sgy);
+    double *dtRho0Sgx = getRealData(MI::kDtRho0Sgx);
+    double *dtRho0Sgy = getRealData(MI::kDtRho0Sgy);
 
     /*
      ux_split_x = bsxfun(@times, mpml_y, ...
@@ -490,13 +490,13 @@ KSpaceSolverElastic::computeVelocity()
 {
     const auto &fullDimSizes = mParameters.getFullDimensionSizes();
 
-    float *uxSplitX = getRealData(MI::kUxSplitX);
-    float *uxSplitY = getRealData(MI::kUxSplitY);
-    float *uySplitX = getRealData(MI::kUySplitX);
-    float *uySplitY = getRealData(MI::kUySplitY);
+    double *uxSplitX = getRealData(MI::kUxSplitX);
+    double *uxSplitY = getRealData(MI::kUxSplitY);
+    double *uySplitX = getRealData(MI::kUySplitX);
+    double *uySplitY = getRealData(MI::kUySplitY);
 
-    float *uxSgx = getRealData(MI::kUxSgx);
-    float *uySgy = getRealData(MI::kUySgy);
+    double *uxSgx = getRealData(MI::kUxSgx);
+    double *uySgy = getRealData(MI::kUySgy);
 
     /* ux_sgx = ux_split_x + ux_split_y;
        uy_sgy = uy_split_x + uy_split_y;
@@ -518,8 +518,8 @@ KSpaceSolverElastic::computeVelocityGradient()
     auto nx = params.getFullDimensionSizes().nx;
     auto ny = params.getFullDimensionSizes().ny;
 
-    const float dividerX = 1.0f / static_cast<float>(nx);
-    const float dividerY = 1.0f / static_cast<float>(ny);
+    const double dividerX = 1.0f / static_cast<double>(nx);
+    const double dividerY = 1.0f / static_cast<double>(ny);
 
 
     const FloatComplex *ddxKShiftPos = getComplexData(MI::kDdxKShiftPosR);
@@ -583,10 +583,10 @@ KSpaceSolverElastic::computeVelocityGradient()
     getTempFftwYYdy().computeC2RFft1DY(getRealMatrix(MI::kDuydy));
 
 #if 0
-    float *duxdx = getRealData(MI::kDuxdx);
-    float *duxdy = getRealData(MI::kDuxdy);
-    float *duydx = getRealData(MI::kDuydx);
-    float *duydy = getRealData(MI::kDuydy);
+    double *duxdx = getRealData(MI::kDuxdx);
+    double *duxdy = getRealData(MI::kDuxdy);
+    double *duydx = getRealData(MI::kDuydx);
+    double *duydy = getRealData(MI::kDuydy);
 
     auto pmat1 = getRealData(MI::kDuxdx);
     auto pmat2 = getRealData(MI::kDuydx);
@@ -602,37 +602,37 @@ KSpaceSolverElastic::computeSplitPressure()
 {
     const auto &fullDimSizes = mParameters.getFullDimensionSizes();
 
-    const float dt = mParameters.getDt();
+    const double dt = mParameters.getDt();
 
-    float *mu = getRealData(MI::kMu);
-    float *lambda = getRealData(MI::kLambda);
-    float *musgxy = getRealData(MI::kMuSgxy);
+    double *mu = getRealData(MI::kMu);
+    double *lambda = getRealData(MI::kLambda);
+    double *musgxy = getRealData(MI::kMuSgxy);
 
-    float *sxxSplitX = getRealData(MI::kSxxSplitX);
-    float *sxxSplitY = getRealData(MI::kSxxSplitY);
+    double *sxxSplitX = getRealData(MI::kSxxSplitX);
+    double *sxxSplitY = getRealData(MI::kSxxSplitY);
 
-    float *syySplitX = getRealData(MI::kSyySplitX);
-    float *syySplitY = getRealData(MI::kSyySplitY);
+    double *syySplitX = getRealData(MI::kSyySplitX);
+    double *syySplitY = getRealData(MI::kSyySplitY);
 
-    float *sxySplitX = getRealData(MI::kSxySplitX);
-    float *sxySplitY = getRealData(MI::kSxySplitY);
+    double *sxySplitX = getRealData(MI::kSxySplitX);
+    double *sxySplitY = getRealData(MI::kSxySplitY);
 
-    float *mPmlX = getRealData(MI::kMPmlX);
-    float *mPmlY = getRealData(MI::kMPmlY);
+    double *mPmlX = getRealData(MI::kMPmlX);
+    double *mPmlY = getRealData(MI::kMPmlY);
 
-    float *mPmlXSgx = getRealData(MI::kMPmlXSgx);
-    float *mPmlYSgy = getRealData(MI::kMPmlYSgy);
+    double *mPmlXSgx = getRealData(MI::kMPmlXSgx);
+    double *mPmlYSgy = getRealData(MI::kMPmlYSgy);
 
-    float *pmlX = getRealData(MI::kPmlX);
-    float *pmlY = getRealData(MI::kPmlY);
+    double *pmlX = getRealData(MI::kPmlX);
+    double *pmlY = getRealData(MI::kPmlY);
 
-    float *pmlXSgx = getRealData(MI::kPmlXSgx);
-    float *pmlYSgy = getRealData(MI::kPmlYSgy);
+    double *pmlXSgx = getRealData(MI::kPmlXSgx);
+    double *pmlYSgy = getRealData(MI::kPmlYSgy);
 
-    float *duxdx = getRealData(MI::kDuxdx);
-    float *duxdy = getRealData(MI::kDuxdy);
-    float *duydx = getRealData(MI::kDuydx);
-    float *duydy = getRealData(MI::kDuydy);
+    double *duxdx = getRealData(MI::kDuxdx);
+    double *duxdy = getRealData(MI::kDuxdy);
+    double *duydx = getRealData(MI::kDuydx);
+    double *duydy = getRealData(MI::kDuydy);
 
     /*
      sxx_split_x = bsxfun(@times, mpml_y, ...
@@ -725,22 +725,22 @@ KSpaceSolverElastic::generatePml()
 {
     const DimensionSizes dimensionSizes = mParameters.getFullDimensionSizes();
 
-    float pmlXAlpha = mParameters.getPmlXAlpha();
-    float pmlYAlpha = mParameters.getPmlYAlpha();
+    double pmlXAlpha = mParameters.getPmlXAlpha();
+    double pmlYAlpha = mParameters.getPmlYAlpha();
 
     const size_t pmlXSize = mParameters.getPmlXSize();
     const size_t pmlYSize = mParameters.getPmlYSize();
 
-    const float cRefDx = mParameters.getCRef() / mParameters.getDx();
-    const float cRefDy = mParameters.getCRef() / mParameters.getDy();
+    const double cRefDx = mParameters.getCRef() / mParameters.getDx();
+    const double cRefDy = mParameters.getCRef() / mParameters.getDy();
 
-    const float dt2 = mParameters.getDt() * 0.5f;
+    const double dt2 = mParameters.getDt() * 0.5f;
 
-    float *pmlX = getRealData(MI::kPmlX);
-    float *pmlY = getRealData(MI::kPmlY);
+    double *pmlX = getRealData(MI::kPmlX);
+    double *pmlY = getRealData(MI::kPmlY);
 
-    float *pmlXSgx = getRealData(MI::kPmlXSgx);
-    float *pmlYSgy = getRealData(MI::kPmlYSgy);
+    double *pmlXSgx = getRealData(MI::kPmlXSgx);
+    double *pmlYSgy = getRealData(MI::kPmlYSgy);
 
     auto mPmlX = getRealData(MI::kMPmlX);
     auto mPmlY = getRealData(MI::kMPmlY);
@@ -751,7 +751,7 @@ KSpaceSolverElastic::generatePml()
     auto multiAxialPmlRatio = mParameters.getMultiAxialPmlRatio();
 
     // Init arrays
-    auto initPml = [](float *pml, float *pmlSg, size_t size)
+    auto initPml = [](double *pml, double *pmlSg, size_t size)
     {
         for (size_t i = 0; i < size; i++)
         {
@@ -762,14 +762,14 @@ KSpaceSolverElastic::generatePml()
 
     // Calculate left value of PML exponent,
     // for staggered use i + 0.5f, i shifted by -1 (Matlab indexing).
-    auto pmlLeft = [dt2](float i, float cRef, float pmlAlpha, float pmlSize)
+    auto pmlLeft = [dt2](double i, double cRef, double pmlAlpha, double pmlSize)
     {
         return exp(-dt2 * pmlAlpha * cRef * pow((i - pmlSize) / (-pmlSize), 4));
     };// end of pmlLeft.
 
     // Calculate right value of PML exponent,
     // for staggered use i + 0.5f, i shifted by +1 (Matlab indexing).
-    auto pmlRight = [dt2](float i, float cRef, float pmlAlpha, float pmlSize)
+    auto pmlRight = [dt2](double i, double cRef, double pmlAlpha, double pmlSize)
     {
         return exp(-dt2 * pmlAlpha * cRef * pow((i + 1.0f) / pmlSize, 4));
     };// end of pmlRight.
@@ -780,13 +780,13 @@ KSpaceSolverElastic::generatePml()
     // Too difficult for SIMD
     for (size_t i = 0; i < pmlXSize; i++)
     {
-        pmlX[i] = pmlLeft(float(i), cRefDx, pmlXAlpha, pmlXSize);
-        pmlXSgx[i] = pmlLeft(float(i) + 0.5f, cRefDx, pmlXAlpha, pmlXSize);
+        pmlX[i] = pmlLeft(double(i), cRefDx, pmlXAlpha, pmlXSize);
+        pmlXSgx[i] = pmlLeft(double(i) + 0.5f, cRefDx, pmlXAlpha, pmlXSize);
 
         const size_t iR = dimensionSizes.nx - pmlXSize + i;
 
-        pmlX[iR] = pmlRight(float(i), cRefDx, pmlXAlpha, pmlXSize);
-        pmlXSgx[iR] = pmlRight(float(i) + 0.5f, cRefDx, pmlXAlpha, pmlXSize);
+        pmlX[iR] = pmlRight(double(i), cRefDx, pmlXAlpha, pmlXSize);
+        pmlXSgx[iR] = pmlRight(double(i) + 0.5f, cRefDx, pmlXAlpha, pmlXSize);
     }
 
     // PML in y dimension
@@ -797,14 +797,14 @@ KSpaceSolverElastic::generatePml()
     {
         if (!mParameters.isSimulationAS())
         { // for axisymmetric code the PML is only on the outer side
-            pmlY[i] = pmlLeft(float(i), cRefDy, pmlYAlpha, pmlYSize);
-            pmlYSgy[i] = pmlLeft(float(i) + 0.5f, cRefDy, pmlYAlpha, pmlYSize);
+            pmlY[i] = pmlLeft(double(i), cRefDy, pmlYAlpha, pmlYSize);
+            pmlYSgy[i] = pmlLeft(double(i) + 0.5f, cRefDy, pmlYAlpha, pmlYSize);
         }
 
         const size_t iR = dimensionSizes.ny - pmlYSize + i;
 
-        pmlY[iR] = pmlRight(float(i), cRefDy, pmlYAlpha, pmlYSize);
-        pmlYSgy[iR] = pmlRight(float(i) + 0.5f, cRefDy, pmlYAlpha, pmlYSize);
+        pmlY[iR] = pmlRight(double(i), cRefDy, pmlYAlpha, pmlYSize);
+        pmlYSgy[iR] = pmlRight(double(i) + 0.5f, cRefDy, pmlYAlpha, pmlYSize);
     }
 
     pmlXAlpha *= multiAxialPmlRatio;
@@ -815,13 +815,13 @@ KSpaceSolverElastic::generatePml()
     // Too difficult for SIMD
     for (size_t i = 0; i < pmlXSize; i++)
     {
-        mPmlX[i] = pmlLeft(float(i), cRefDx, pmlXAlpha, pmlXSize);
-        mPmlXSgx[i] = pmlLeft(float(i) + 0.5f, cRefDx, pmlXAlpha, pmlXSize);
+        mPmlX[i] = pmlLeft(double(i), cRefDx, pmlXAlpha, pmlXSize);
+        mPmlXSgx[i] = pmlLeft(double(i) + 0.5f, cRefDx, pmlXAlpha, pmlXSize);
 
         const size_t iR = dimensionSizes.nx - pmlXSize + i;
 
-        mPmlX[iR] = pmlRight(float(i), cRefDx, pmlXAlpha, pmlXSize);
-        mPmlXSgx[iR] = pmlRight(float(i) + 0.5f, cRefDx, pmlXAlpha, pmlXSize);
+        mPmlX[iR] = pmlRight(double(i), cRefDx, pmlXAlpha, pmlXSize);
+        mPmlXSgx[iR] = pmlRight(double(i) + 0.5f, cRefDx, pmlXAlpha, pmlXSize);
     }
 
     // PML in y dimension
@@ -832,14 +832,14 @@ KSpaceSolverElastic::generatePml()
     {
         if (!mParameters.isSimulationAS())
         { // for axisymmetric code the PML is only on the outer side
-            mPmlY[i] = pmlLeft(float(i), cRefDy, pmlYAlpha, pmlYSize);
-            mPmlYSgy[i] = pmlLeft(float(i) + 0.5f, cRefDy, pmlYAlpha, pmlYSize);
+            mPmlY[i] = pmlLeft(double(i), cRefDy, pmlYAlpha, pmlYSize);
+            mPmlYSgy[i] = pmlLeft(double(i) + 0.5f, cRefDy, pmlYAlpha, pmlYSize);
         }
 
         const size_t iR = dimensionSizes.ny - pmlYSize + i;
 
-        mPmlY[iR] = pmlRight(float(i), cRefDy, pmlYAlpha, pmlYSize);
-        mPmlYSgy[iR] = pmlRight(float(i) + 0.5f, cRefDy, pmlYAlpha, pmlYSize);
+        mPmlY[iR] = pmlRight(double(i), cRefDy, pmlYAlpha, pmlYSize);
+        mPmlYSgy[iR] = pmlRight(double(i) + 0.5f, cRefDy, pmlYAlpha, pmlYSize);
     }
 }
 
@@ -897,7 +897,7 @@ KSpaceSolverElastic::fftwVerify()
 
 #if 0
     FloatComplex *fftx = getComplexData(MI::kTmpFftwXXdx);
-    float *x = getRealData(MI::kTmpReal1);
+    double *x = getRealData(MI::kTmpReal1);
 
     x[49] = -5;
 
@@ -936,18 +936,18 @@ KSpaceSolverElastic::fftwVerify()
 
 #if 0
     FloatComplex *fftx = getComplexData(MI::kTmpFftwXXdx);
-    const float divider = 1.0f / float(mParameters.getFullDimensionSizes().nElements());
+    const double divider = 1.0f / double(mParameters.getFullDimensionSizes().nElements());
     const auto & dimSizes = mParameters.getFullDimensionSizes();
     const size_t nElements = mParameters.getFullDimensionSizes().nElements();
 
     const DimensionSizes& reducedDimSizes= mParameters.getReducedDimensionSizes();
 
-    float *p0 = getRealData(MI::kInitialPressureSourceInput);
+    double *p0 = getRealData(MI::kInitialPressureSourceInput);
 
-    float* sxxSplitX = getRealData(MI::kSxxSplitX);
-    float* sxxSplitY = getRealData(MI::kSxxSplitY);
+    double* sxxSplitX = getRealData(MI::kSxxSplitX);
+    double* sxxSplitY = getRealData(MI::kSxxSplitY);
 
-    float* tmp = getRealData(MI::kTmpReal1);
+    double* tmp = getRealData(MI::kTmpReal1);
 
     for (size_t i = 0; i < nElements; i++) {
         tmp[i] = -p0[i] / 2.f;
@@ -958,7 +958,7 @@ KSpaceSolverElastic::fftwVerify()
 
     getRealMatrix(MI::kSxxSplitY).copyData(getRealMatrix(MI::kTmpReal1));
 
-    float *tmpReal1 = getRealData(MI::kTmpReal1);
+    double *tmpReal1 = getRealData(MI::kTmpReal1);
     for (size_t i = 0; i < dimSizes.nElements(); i ++)
     {
         tmpReal1[i] = sxxSplitX[i] + sxxSplitY[i];
@@ -979,7 +979,7 @@ KSpaceSolverElastic::fftwVerify()
         }
     }
     getTempFftwXXdx().computeC2RFft1DX(getRealMatrix(MI::kDSxxdx));
-    float *dsxxdx = getRealData(MI::kDSxxdx);
+    double *dsxxdx = getRealData(MI::kDSxxdx);
     //std::cout << fftx[0 + 128] << std::endl;
     //std::cout << fftx[1 + 128] << std::endl;
     //std::cout << fftx[2 + 128] << std::endl;
@@ -995,14 +995,14 @@ KSpaceSolverElastic::fftwVerify()
 
     const DimensionSizes& reducedDimSizes= mParameters.getReducedDimensionSizes();
     auto ny = dimSizes.ny;
-    const float divider = 1.f / static_cast<float>(ny);
+    const double divider = 1.f / static_cast<double>(ny);
 
-    float *p0 = getRealData(MI::kInitialPressureSourceInput);
+    double *p0 = getRealData(MI::kInitialPressureSourceInput);
 
-    float* syySplitX = getRealData(MI::kSyySplitX);
-    float* syySplitY = getRealData(MI::kSyySplitY);
+    double* syySplitX = getRealData(MI::kSyySplitX);
+    double* syySplitY = getRealData(MI::kSyySplitY);
 
-    float* tmp = getRealData(MI::kTmpReal2);
+    double* tmp = getRealData(MI::kTmpReal2);
 
     for (size_t i = 0; i < nElements; i++) {
         tmp[i] = -p0[i] / 2.f;
@@ -1011,7 +1011,7 @@ KSpaceSolverElastic::fftwVerify()
     getRealMatrix(MI::kSyySplitX).copyData(getRealMatrix(MI::kTmpReal2));
     getRealMatrix(MI::kSyySplitY).copyData(getRealMatrix(MI::kTmpReal2));
 
-    float *tmpReal2 = getRealData(MI::kTmpReal2);
+    double *tmpReal2 = getRealData(MI::kTmpReal2);
     for (size_t i = 0; i < dimSizes.nElements(); i ++)
     {
         tmpReal2[i] = syySplitX[i] + syySplitY[i];
@@ -1032,7 +1032,7 @@ KSpaceSolverElastic::fftwVerify()
         }
     }
     getTempFftwYYdy().computeC2RFft1DY(getRealMatrix(MI::kDSyydy));
-    float *dsyydy = getRealData(MI::kDSyydy);
+    double *dsyydy = getRealData(MI::kDSyydy);
     for (size_t i = 0; i < nElements; ++ i)
         dsyydy[i] *= divider;
     //std::cout << fftx[0 + 128] << std::endl;

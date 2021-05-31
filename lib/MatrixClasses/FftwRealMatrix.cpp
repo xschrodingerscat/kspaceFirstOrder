@@ -71,7 +71,7 @@ FftwRealMatrix::~FftwRealMatrix()
   {
     if (kind.second != nullptr)
     {
-      fftwf_destroy_plan(kind.second);
+      fftw_destroy_plan(kind.second);
     }
   }
 
@@ -80,7 +80,7 @@ FftwRealMatrix::~FftwRealMatrix()
   {
     if (kind.second != nullptr)
     {
-      fftwf_destroy_plan(kind.second);
+      fftw_destroy_plan(kind.second);
     }
   }
 
@@ -133,7 +133,7 @@ void FftwRealMatrix::createPlans1DY(RealMatrix& inMatrix)
     // Set MKL number of threads for transposition
     mkl_set_num_threads(Parameters::getInstance().getNumberOfThreads());
     // Execute R2R FFT by a single thread, run multiple FFTW in parallel.
-    fftwf_plan_with_nthreads(1);
+    fftw_plan_with_nthreads(1);
   #endif
 
   const std::array<TransformKind, 4> usedTransforms
@@ -146,9 +146,9 @@ void FftwRealMatrix::createPlans1DY(RealMatrix& inMatrix)
 
   for (const auto kind : usedTransforms)
   {
-    fftwf_r2r_kind fftwKind = static_cast<fftwf_r2r_kind>(kind);
+    fftw_r2r_kind fftwKind = static_cast<fftw_r2r_kind>(kind);
 
-    mInPlaceR2RPlans1DY[kind] =  fftwf_plan_guru_r2r(rank,             // 1D FFT rank
+    mInPlaceR2RPlans1DY[kind] =  fftw_plan_guru_r2r(rank,             // 1D FFT rank
                                                      dims,             // 1D FFT dimensions of y
                                                      howManyRank,      // How many in x and z
                                                      howManyDims,      // Dims and strides in x and z
@@ -165,7 +165,7 @@ void FftwRealMatrix::createPlans1DY(RealMatrix& inMatrix)
 
     // MKL version do not use out-of-place r2r transforms
     #if (defined(__GNUC__) || defined(__GNUG__)) && !(defined(__clang__) || defined(__INTEL_COMPILER))
-      mOutPlaceR2RPlans1DY[kind] =  fftwf_plan_guru_r2r(rank,               // 1D FFT rank
+      mOutPlaceR2RPlans1DY[kind] =  fftw_plan_guru_r2r(rank,               // 1D FFT rank
                                                         dims,               // 1D FFT dimensions of y
                                                         howManyRank,        // How many in x and z
                                                         howManyDims,        // Dims and strides in x and z
@@ -185,7 +185,7 @@ void FftwRealMatrix::createPlans1DY(RealMatrix& inMatrix)
   // Intel Compiler + MKL
   #if (defined(__INTEL_COMPILER))
     // Set the number of FFTW threads to the default value
-    fftwf_plan_with_nthreads(Parameters::getInstance().getNumberOfThreads());
+    fftw_plan_with_nthreads(Parameters::getInstance().getNumberOfThreads());
   #endif
 }// end of createPlans1DY
 //----------------------------------------------------------------------------------------------------------------------
@@ -200,13 +200,13 @@ void FftwRealMatrix::computeForwardR2RFft1DY(const TransformKind kind,
 #ifdef __APPLE__
     if (mOutPlaceR2RPlans1DY[kind])
     {
-      fftwf_execute_r2r(mOutPlaceR2RPlans1DY[kind], inMatrix.getData(), mData);
+      fftw_execute_r2r(mOutPlaceR2RPlans1DY[kind], inMatrix.getData(), mData);
     }
 #endif
   #if (defined(__GNUC__) || defined(__GNUG__)) && !(defined(__clang__) || defined(__INTEL_COMPILER))
     if (mOutPlaceR2RPlans1DY[kind])
     {
-      fftwf_execute_r2r(mOutPlaceR2RPlans1DY[kind], inMatrix.getData(), mData);
+      fftw_execute_r2r(mOutPlaceR2RPlans1DY[kind], inMatrix.getData(), mData);
     }
   #endif
 
@@ -222,7 +222,7 @@ void FftwRealMatrix::computeForwardR2RFft1DY(const TransformKind kind,
       #pragma omp parallel for schedule(static)
       for (size_t slab_id = 0; slab_id < mDimensionSizes.nx; slab_id++)
       {
-        fftwf_execute_r2r(mInPlaceR2RPlans1DY[kind],
+        fftw_execute_r2r(mInPlaceR2RPlans1DY[kind],
                           &mData[slab_id * mDimensionSizes.ny],
                           &mData[slab_id * mDimensionSizes.ny]);
       }
@@ -247,7 +247,7 @@ void FftwRealMatrix::computeInverseR2RFft1DY(const TransformKind kind,
 #ifdef  __APPLE__
     if (mOutPlaceR2RPlans1DY[kind])
     {
-      fftwf_execute_r2r(mOutPlaceR2RPlans1DY[kind], mData, outMatrix.getData());
+      fftw_execute_r2r(mOutPlaceR2RPlans1DY[kind], mData, outMatrix.getData());
     }
 #endif 
   // GNU compiler + FFTW
@@ -255,7 +255,7 @@ void FftwRealMatrix::computeInverseR2RFft1DY(const TransformKind kind,
   #if (defined(__GNUC__) || defined(__GNUG__)) && !(defined(__clang__) || defined(__INTEL_COMPILER))
     if (mOutPlaceR2RPlans1DY[kind])
     {
-      fftwf_execute_r2r(mOutPlaceR2RPlans1DY[kind], mData, outMatrix.getData());
+      fftw_execute_r2r(mOutPlaceR2RPlans1DY[kind], mData, outMatrix.getData());
     }
   #endif
 
@@ -271,7 +271,7 @@ void FftwRealMatrix::computeInverseR2RFft1DY(const TransformKind kind,
       #pragma omp parallel for schedule(static)
       for (size_t slab_id = 0; slab_id < mDimensionSizes.nx; slab_id++)
       {
-        fftwf_execute_r2r(mInPlaceR2RPlans1DY[kind],
+        fftw_execute_r2r(mInPlaceR2RPlans1DY[kind],
                           &mData[slab_id * mDimensionSizes.ny],
                           &mData[slab_id * mDimensionSizes.ny]);
       }
@@ -296,7 +296,7 @@ void FftwRealMatrix::computeR2RFft1DY(const TransformKind kind)
   {
     // GNU compiler + FFTW
     #if (defined(__GNUC__) || defined(__GNUG__)) && !(defined(__clang__) || defined(__INTEL_COMPILER))
-      fftwf_execute_r2r(mInPlaceR2RPlans1DY[kind], mData, mData);
+      fftw_execute_r2r(mInPlaceR2RPlans1DY[kind], mData, mData);
     #endif
 
     // Intel compiler + MKL
@@ -310,7 +310,7 @@ void FftwRealMatrix::computeR2RFft1DY(const TransformKind kind)
       #pragma omp parallel for schedule(static)
       for (size_t slab_id = 0; slab_id < mDimensionSizes.nx; slab_id++)
       {
-        fftwf_execute_r2r(mInPlaceR2RPlans1DY[kind],
+        fftw_execute_r2r(mInPlaceR2RPlans1DY[kind],
                           &mData[slab_id * mDimensionSizes.ny],
                           &mData[slab_id * mDimensionSizes.ny]);
       }

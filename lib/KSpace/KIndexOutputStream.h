@@ -38,7 +38,7 @@ public:
                       const RealMatrix&    sourceMatrix,
                       const IndexMatrix&   sensorMask,
                       const ReduceOperator reduceOp,
-                      float*               bufferToReuse = nullptr);
+                      double*               bufferToReuse = nullptr);
 
     /// Copy constructor not allowed.
     KIndexOutputStream(const KIndexOutputStream&) = delete;

@@ -56,7 +56,7 @@ BaseOutputStream::BaseOutputStream(Hdf5File &file,
                                    const MatrixName &rootObjectName,
                                    const RealMatrix &sourceMatrix,
                                    const ReduceOperator reduceOp,
-                                   float *bufferToReuse)
+                                   double *bufferToReuse)
         : mFile(file),
           mRootObjectName(rootObjectName),
           mSourceMatrix(sourceMatrix),
@@ -84,7 +84,7 @@ void BaseOutputStream::postProcess()
 
         case ReduceOperator::kRms:
         {
-            const float scalingCoeff = 1.0f / (Parameters::getInstance().getNt() -
+            const double scalingCoeff = 1.0f / (Parameters::getInstance().getNt() -
                                                Parameters::getInstance().getSamplingStartTimeIndex());
 
 #pragma omp parallel for simd schedule(simd:static)
@@ -119,7 +119,7 @@ void BaseOutputStream::postProcess()
  */
 void BaseOutputStream::allocateMemory()
 {
-    mStoreBuffer = (float *) _mm_malloc(mBufferSize * sizeof(float), kDataAlignment);
+    mStoreBuffer = (double *) _mm_malloc(mBufferSize * sizeof(double), kDataAlignment);
 
     if (!mStoreBuffer)
     {
@@ -153,22 +153,22 @@ void BaseOutputStream::allocateMemory()
 
         case ReduceOperator::kMax:
         {
-            // Set the values to the highest negative float value
+            // Set the values to the highest negative double value
 #pragma omp parallel for simd schedule(simd:static)
             for (size_t i = 0; i < mBufferSize; i++)
             {
-                mStoreBuffer[i] = -1.0f * std::numeric_limits<float>::max();
+                mStoreBuffer[i] = -1.0f * std::numeric_limits<double>::max();
             }
             break;
         }// kMax
 
         case ReduceOperator::kMin:
         {
-            // Set the values to the highest float value
+            // Set the values to the highest double value
 #pragma omp parallel for simd schedule(simd:static)
             for (size_t i = 0; i < mBufferSize; i++)
             {
-                mStoreBuffer[i] = std::numeric_limits<float>::max();
+                mStoreBuffer[i] = std::numeric_limits<double>::max();
             }
             break;
         }//kMin

@@ -41,7 +41,7 @@ class ComplexMatrix;
 /**
  * @class   RealMatrix
  * @brief   The class for real matrices.
- * @details The class for real matrices based on the float datatype.
+ * @details The class for real matrices based on the double datatype.
  */
 class RealMatrix : public BaseFloatMatrix
 {
@@ -89,14 +89,14 @@ class RealMatrix : public BaseFloatMatrix
      * @param   [in] index - 1D index into the matrix.
      * @return  An element of the matrix.
      */
-    inline float&       operator[](const size_t& index)       { return mData[index]; };
+    inline double&       operator[](const size_t& index)       { return mData[index]; };
     /**
      * @brief   Operator [], constant version.
      * @details This operator is not used in the code due to persisting performance issues with vectorization.
      * @param   [in] index - 1D index into the matrix.
      * @return  An element of the matrix.
      */
-    inline const float& operator[](const size_t& index) const { return mData[index]; };
+    inline const double& operator[](const size_t& index) const { return mData[index]; };
 
   protected:
 

@@ -37,10 +37,10 @@
 
 /**
  * @class   BaseFloatMatrix
- * @brief   Abstract base class for float based matrices defining basic interface. Higher dimensional
+ * @brief   Abstract base class for double based matrices defining basic interface. Higher dimensional
  *          matrices stored as 1D arrays, row-major order.
  *
- * @details Abstract base class for float based matrices defining basic interface. Higher dimensional matrices stored
+ * @details Abstract base class for double based matrices defining basic interface. Higher dimensional matrices stored
  *          as 1D arrays, row-major order. The I/O is done via HDF5 files.
  */
 class BaseFloatMatrix : public BaseMatrix
@@ -76,12 +76,12 @@ class BaseFloatMatrix : public BaseMatrix
      * @brief  Get matrix data out of the class (for direct kernel access).
      * @return Pointer to mutable matrix data.
      */
-    virtual float*       getData()       { return mData; };
+    virtual double*       getData()       { return mData; };
     /**
      * @brief Get matrix data out of the class (for direct kernel access), const version.
      * @return Pointer to immutable matrix data.
      */
-    virtual const float* getData() const { return mData; };
+    virtual const double* getData() const { return mData; };
 
     /**
      * @brief Copy data from other matrix with the same size.
@@ -95,7 +95,7 @@ class BaseFloatMatrix : public BaseMatrix
      * @brief Calculate matrix = scalar / matrix.
      * @param [in] scalar - Scalar constant
      */
-    virtual void scalarDividedBy(const float scalar);
+    virtual void scalarDividedBy(const double scalar);
 
   protected:
    /**
@@ -115,7 +115,7 @@ class BaseFloatMatrix : public BaseMatrix
     size_t mCapacity;
 
     /// Raw matrix data.
-    float* mData;
+    double* mData;
 
   private:
 

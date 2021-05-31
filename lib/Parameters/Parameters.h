@@ -464,29 +464,29 @@ class Parameters
 		 * @brief  Get time step size.
 		 * @return dt value.
 		 */
-		float getDt() const { return mDt; };
+		double getDt() const { return mDt; };
 		/**
 		 * @brief  Get spatial displacement in x.
 		 * @return dx value.
 		 */
-		float getDx() const { return mDx; };
+		double getDx() const { return mDx; };
 		/**
 		 * @brief  Get spatial displacement in y.
 		 * @return dy value.
 		 */
-		float getDy() const { return mDy; };
+		double getDy() const { return mDy; };
 		/**
 		 * @brief  Get spatial displacement in z.
 		 * @return dz value
 		 */
-		float getDz() const { return mDz; };
+		double getDz() const { return mDz; };
 
 		//------------------------------------------- Sound speed and density --------------------------------------------//
 		/**
 		 * @brief  Get reference sound speed.
 		 * @return Reference sound speed.
 		 */
-		float  getCRef()            const { return mCRef; };
+		double  getCRef()            const { return mCRef; };
 		/**
 		 * @brief  Is sound speed in the medium homogeneous (scalar value)?
 		 * @return true if scalar.
@@ -496,12 +496,12 @@ class Parameters
 		 * @brief  Get scalar value of sound speed.
 		 * @return Sound speed.
 		 */
-		float  getC0Scalar()        const { return mC0Scalar; };
+		double  getC0Scalar()        const { return mC0Scalar; };
 		/**
 		 * @brief  Get scalar value of sound speed squared.
 		 * @return Sound speed.
 		 */
-		float  getC2Scalar()        const { return mC0Scalar * mC0Scalar; };
+		double  getC2Scalar()        const { return mC0Scalar * mC0Scalar; };
 
 		/**
 		 * @brief  Is density in the medium homogeneous (scalar value)?
@@ -512,37 +512,37 @@ class Parameters
 		 * @brief  Get value of homogeneous medium density.
 		 * @return Density.
 		 */
-		float  getRho0Scalar()      const { return mRho0Scalar; };
+		double  getRho0Scalar()      const { return mRho0Scalar; };
 		/**
 		 * @brief  Get value of homogeneous medium density on staggered grid in x direction.
 		 * @return Staggered density.
 		 */
-		float  getRho0SgxScalar()   const { return mRho0SgxScalar; };
+		double  getRho0SgxScalar()   const { return mRho0SgxScalar; };
 		/**
 		 * @brief  Get value of dt / rho0Sgx.
 		 * @return Staggered density.
 		 */
-		float  getDtRho0SgxScalar() const { return mDt / mRho0SgxScalar; };
+		double  getDtRho0SgxScalar() const { return mDt / mRho0SgxScalar; };
 		/**
 		 * @brief  Get value of homogeneous medium density on staggered grid in y direction.
 		 * @return Staggered density.
 		 */
-		float  getRho0SgyScalar()   const { return mRho0SgyScalar; };
+		double  getRho0SgyScalar()   const { return mRho0SgyScalar; };
 		/**
 		 * @brief  Get value of dt / rho0Sgy.
 		 * @return Staggered density.
 		 */
-		float  getDtRho0SgyScalar() const { return mDt / mRho0SgyScalar; };
+		double  getDtRho0SgyScalar() const { return mDt / mRho0SgyScalar; };
 		/**
 		 * @brief  Get value of homogeneous medium density on staggered grid in z direction.
 		 * @return Staggered density.
 		 */
-		float  getRho0SgzScalar()   const { return mRho0SgzScalar; };
+		double  getRho0SgzScalar()   const { return mRho0SgzScalar; };
 		/**
 		 * @brief  Get value of dt / rho0Sgz.
 		 * @return Staggered density.
 		 */
-		float  getDtRho0SgzScalar() const { return mDt / mRho0SgzScalar; };
+		double  getDtRho0SgzScalar() const { return mDt / mRho0SgzScalar; };
 
 		//----------------------------------------- Absorption and nonlinearity ------------------------------------------//
 		/**
@@ -570,32 +570,32 @@ class Parameters
 		 * @brief  Get value of alpha absorption coefficient.
 		 * @return Alpha absorption coefficient.
 		 */
-		float  getAlphaCoeffScalar()     const { return mAlphaCoeffScalar; };
+		double  getAlphaCoeffScalar()     const { return mAlphaCoeffScalar; };
 		/**
 		 * @brief  Get alpha power value for the absorption law.
 		 * @return Alpha power value.
 		 */
-		float  getAlphaPower()           const { return mAlphaPower; };
+		double  getAlphaPower()           const { return mAlphaPower; };
 		/**
 		 * @brief  Get absorb eta coefficient for homogeneous medium (scalar value)?
 		 * @return Absorb eta coefficient.
 		 */
-		float  getAbsorbEtaScalar()      const { return mAbsorbEtaScalar; };
+		double  getAbsorbEtaScalar()      const { return mAbsorbEtaScalar; };
 		/**
 		 * @brief Set absorb eta coefficient for homogeneous medium (scalar value).
 		 * @param [in] absrobEta - New value for absorb eta.
 		 */
-		void   setAbsorbEtaScalar(const float absrobEta) { mAbsorbEtaScalar = absrobEta; };
+		void   setAbsorbEtaScalar(const double absrobEta) { mAbsorbEtaScalar = absrobEta; };
 		/**
 		 * @brief  Get absorb tau coefficient for homogeneous medium.
 		 * @return Absorb tau coefficient.
 		 */
-		float  getAbsorbTauScalar()      const { return mAbsorbTauScalar; };
+		double  getAbsorbTauScalar()      const { return mAbsorbTauScalar; };
 		/**
 		 * @brief Set absorb tau coefficient for homogeneous medium (scalar value).
 		 * @param [in] absorbTau - New value for absorb tau.
 		 */
-		void   setAbsorbTauScalar(const float absorbTau) { mAbsorbTauScalar = absorbTau; };
+		void   setAbsorbTauScalar(const double absorbTau) { mAbsorbTauScalar = absorbTau; };
 
 		/**
 		 * @brief  Is nonlinear coefficient homogeneous in the medium (scalar value)?
@@ -606,7 +606,7 @@ class Parameters
 		 * @brief  Get nonlinear coefficient for homogenous medium.
 		 * @return Nonlinear coefficient.
 		 */
-		float  getBOnAScalar()           const { return mBOnAScalar; };
+		double  getBOnAScalar()           const { return mBOnAScalar; };
 
 		//------------------------------------------ Perfectly matched layer ---------------------------------------------//
 		/**
@@ -629,17 +629,17 @@ class Parameters
 		 * @brief  Get Perfectly matched layer attenuation in x, not implemented.
 		 * @return Attenuation for PML in x.
 		 */
-		float  getPmlXAlpha() const { return mPmlXAlpha; };
+		double  getPmlXAlpha() const { return mPmlXAlpha; };
 		/**
 		 * @brief  Get Perfectly matched layer attenuation in y, not implemented.
 		 * @return Attenuation for PML in y.
 		 */
-		float  getPmlYAlpha() const { return mPmlYAlpha; };
+		double  getPmlYAlpha() const { return mPmlYAlpha; };
 		/**
 		 * @brief  Get Perfectly matched layer attenuation in z , not implemented.
 		 * @return Attenuation for PML in z.
 		 */
-		float  getPmlZAlpha() const { return mPmlZAlpha; };
+		double  getPmlZAlpha() const { return mPmlZAlpha; };
 
 		//-------------------------------------------------- Sources -----------------------------------------------------//
 		/**
@@ -834,7 +834,7 @@ class Parameters
 
 		bool getS0ScalarFlag()				  const { return mS0ScalarFlag; };
 
-		float getMultiAxialPmlRatio()   const { return mMultiAxialPmlRatio; };
+		double getMultiAxialPmlRatio()   const { return mMultiAxialPmlRatio; };
 
 	protected:
 
@@ -846,13 +846,13 @@ class Parameters
 
 		bool		  mElasticFlag;
 
-		float		  mMultiAxialPmlRatio;
+		double		  mMultiAxialPmlRatio;
 
 		/// Is sound speed in the medium homogeneous?
 		bool  mS0ScalarFlag;
 
 		/// Scalar value of sound speed.
-		float mS0Scalar;
+		double mS0Scalar;
 
 		/// Constructor not allowed for public.
 		Parameters();
@@ -919,31 +919,31 @@ class Parameters
 		size_t mTimeStepsToCheckpoint;
 
 		/// Time step size.
-		float mDt;
+		double mDt;
 		/// Spatial displacement in x.
-		float mDx;
+		double mDx;
 		/// Spatial displacement in y.
-		float mDy;
+		double mDy;
 		/// Spatial displacement in z.
-		float mDz;
+		double mDz;
 
 		/// Reference sound speed.
-		float mCRef;
+		double mCRef;
 		/// Is sound speed in the medium homogeneous?
 		bool  mC0ScalarFlag;
 		/// Scalar value of sound speed.
-		float mC0Scalar;
+		double mC0Scalar;
 
 		/// Is density in the medium homogeneous?
 		bool  mRho0ScalarFlag;
 		/// Homogeneous medium density.
-		float mRho0Scalar;
+		double mRho0Scalar;
 		/// Homogeneous medium density on staggered grid in x direction.
-		float mRho0SgxScalar;
+		double mRho0SgxScalar;
 		///  Homogeneous medium density on staggered grid in y direction.
-		float mRho0SgyScalar;
+		double mRho0SgyScalar;
 		///  Homogeneous medium density on staggered grid in z direction.
-		float mRho0SgzScalar;
+		double mRho0SgzScalar;
 
 		/// Enable non uniform grid?
 		size_t         mNonUniformGridFlag;
@@ -955,19 +955,19 @@ class Parameters
 		/// Is alpha absorption coefficient homogeneous?
 		bool  mAlphaCoeffScalarFlag;
 		/// Alpha absorption coefficient.
-		float mAlphaCoeffScalar;
+		double mAlphaCoeffScalar;
 		/// Alpha power value for the absorption law.
-		float mAlphaPower;
+		double mAlphaPower;
 
 		/// Absorb eta coefficient for homogeneous medium.
-		float mAbsorbEtaScalar;
+		double mAbsorbEtaScalar;
 		/// Absorb tau coefficient for homogeneous medium.
-		float mAbsorbTauScalar;
+		double mAbsorbTauScalar;
 
 		/// Is nonlinear coefficient homogeneous in the medium?
 		bool  mBOnAScalarFlag;
 		/// Nonlinear coefficient for homogenous medium.
-		float mBOnAScalar;
+		double mBOnAScalar;
 
 		/// Depth of the perfectly matched layer in x.
 		size_t mPmlXSize;
@@ -977,11 +977,11 @@ class Parameters
 		size_t mPmlZSize;
 
 		/// Perfectly matched layer attenuation in x.
-		float mPmlXAlpha;
+		double mPmlXAlpha;
 		/// Perfectly matched layer attenuation in y.
-		float mPmlYAlpha;
+		double mPmlYAlpha;
 		/// Perfectly matched layer attenuation in z.
-		float mPmlZAlpha;
+		double mPmlZAlpha;
 
 		/// Pressure source flag.
 		size_t mPressureSourceFlag;

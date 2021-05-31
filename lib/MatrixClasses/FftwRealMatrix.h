@@ -130,9 +130,9 @@ class FftwRealMatrix : public RealMatrix
     static const unsigned kFftMeasureFlag  = FFTW_MEASURE;
 
     /// Map with FFTW plans for the 1D Real-to-Real transforms on 2D matrix, in-palace.
-    std::map<TransformKind, fftwf_plan> mInPlaceR2RPlans1DY;
+    std::map<TransformKind, fftw_plan> mInPlaceR2RPlans1DY;
     /// Map with FFTW plans for the 1D Real-to-Real transforms on 2D matrix, out-of-place.
-    std::map<TransformKind, fftwf_plan> mOutPlaceR2RPlans1DY;
+    std::map<TransformKind, fftw_plan> mOutPlaceR2RPlans1DY;
 
   private:
 

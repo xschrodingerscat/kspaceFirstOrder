@@ -63,17 +63,17 @@ FftwComplexMatrix::FftwComplexMatrix(const DimensionSizes& dimensionSizes)
 FftwComplexMatrix::~FftwComplexMatrix()
 {
   // free 3D plans
-  if (mR2CFftPlanND)  fftwf_destroy_plan(mR2CFftPlanND);
-  if (mC2RFftPlanND)  fftwf_destroy_plan(mC2RFftPlanND);
+  if (mR2CFftPlanND)  fftw_destroy_plan(mR2CFftPlanND);
+  if (mC2RFftPlanND)  fftw_destroy_plan(mC2RFftPlanND);
 
   //free 1D plans.
-  if (mR2CFftPlan1DX) fftwf_destroy_plan(mR2CFftPlan1DX);
-  if (mR2CFftPlan1DY) fftwf_destroy_plan(mR2CFftPlan1DY);
-  if (mR2CFftPlan1DZ) fftwf_destroy_plan(mR2CFftPlan1DZ);
+  if (mR2CFftPlan1DX) fftw_destroy_plan(mR2CFftPlan1DX);
+  if (mR2CFftPlan1DY) fftw_destroy_plan(mR2CFftPlan1DY);
+  if (mR2CFftPlan1DZ) fftw_destroy_plan(mR2CFftPlan1DZ);
 
-  if (mC2RFftPlan1DX) fftwf_destroy_plan(mC2RFftPlan1DX);
-  if (mC2RFftPlan1DY) fftwf_destroy_plan(mC2RFftPlan1DY);
-  if (mC2RFftPlan1DZ) fftwf_destroy_plan(mC2RFftPlan1DZ);
+  if (mC2RFftPlan1DX) fftw_destroy_plan(mC2RFftPlan1DX);
+  if (mC2RFftPlan1DY) fftw_destroy_plan(mC2RFftPlan1DY);
+  if (mC2RFftPlan1DZ) fftw_destroy_plan(mC2RFftPlan1DZ);
 
   mR2CFftPlanND = nullptr;
   mC2RFftPlanND = nullptr;
@@ -98,19 +98,19 @@ void FftwComplexMatrix::createR2CFftPlanND(RealMatrix& inMatrix)
 {
   if (Parameters::getInstance().isSimulation3D())
   {
-    mR2CFftPlanND = fftwf_plan_dft_r2c_3d(inMatrix.getDimensionSizes().nz,
+    mR2CFftPlanND = fftw_plan_dft_r2c_3d(inMatrix.getDimensionSizes().nz,
                                           inMatrix.getDimensionSizes().ny,
                                           inMatrix.getDimensionSizes().nx,
                                           inMatrix.getData(),
-                                          reinterpret_cast<fftwf_complex*>(mData),
+                                          reinterpret_cast<fftw_complex*>(mData),
                                           kFftMeasureFlag);
   }
   else if (Parameters::getInstance().isSimulation2D())
   {
-    mR2CFftPlanND = fftwf_plan_dft_r2c_2d(inMatrix.getDimensionSizes().ny,
+    mR2CFftPlanND = fftw_plan_dft_r2c_2d(inMatrix.getDimensionSizes().ny,
                                           inMatrix.getDimensionSizes().nx,
                                           inMatrix.getData(),
-                                          reinterpret_cast<fftwf_complex*>(mData),
+                                          reinterpret_cast<fftw_complex*>(mData),
                                           kFftMeasureFlag);
   }
 
@@ -128,18 +128,18 @@ void FftwComplexMatrix::createC2RFftPlanND(RealMatrix& outMatrix)
 {
   if (Parameters::getInstance().isSimulation3D())
   {
-    mC2RFftPlanND = fftwf_plan_dft_c2r_3d(outMatrix.getDimensionSizes().nz,
+    mC2RFftPlanND = fftw_plan_dft_c2r_3d(outMatrix.getDimensionSizes().nz,
                                           outMatrix.getDimensionSizes().ny,
                                           outMatrix.getDimensionSizes().nx,
-                                          reinterpret_cast<fftwf_complex*>(mData),
+                                          reinterpret_cast<fftw_complex*>(mData),
                                           outMatrix.getData(),
                                           kFftMeasureFlag);
   }
   else if (Parameters::getInstance().isSimulation2D())
   {
-    mC2RFftPlanND = fftwf_plan_dft_c2r_2d(outMatrix.getDimensionSizes().ny,
+    mC2RFftPlanND = fftw_plan_dft_c2r_2d(outMatrix.getDimensionSizes().ny,
                                           outMatrix.getDimensionSizes().nx,
-                                          reinterpret_cast<fftwf_complex*>(mData),
+                                          reinterpret_cast<fftw_complex*>(mData),
                                           outMatrix.getData(),
                                           kFftMeasureFlag);
   }
@@ -215,12 +215,12 @@ void FftwComplexMatrix::createR2CFftPlan1DX(RealMatrix& inMatrix)
     howManyDims[0].os = nxR;
   }
 
-  mR2CFftPlan1DX = fftwf_plan_guru_dft_r2c(rank,                                    // 1D FFT rank
+  mR2CFftPlan1DX = fftw_plan_guru_dft_r2c(rank,                                    // 1D FFT rank
                                            dims,                                    // 1D FFT dimensions of x
                                            howManyRank,                             // How many in y and z
                                            howManyDims,                             // Dims and strides in y and z
                                            inMatrix.getData(),                      // Input data
-                                           reinterpret_cast<fftwf_complex*>(mData), // Output data
+                                           reinterpret_cast<fftw_complex*>(mData), // Output data
                                            kFftMeasureFlag);                        // Flags
 
   if (!mR2CFftPlan1DX)
@@ -293,12 +293,12 @@ void FftwComplexMatrix::createR2CFftPlan1DY(RealMatrix& inMatrix)
     howManyDims[0].os = 1;
   }
 
-  mR2CFftPlan1DY = fftwf_plan_guru_dft_r2c(rank,                                    // 1D FFT rank
+  mR2CFftPlan1DY = fftw_plan_guru_dft_r2c(rank,                                    // 1D FFT rank
                                            dims,                                    // 1D FFT dimensions of y
                                            howManyRank,                             // How many in x and z
                                            howManyDims,                             // Dims and strides in x and z
                                            inMatrix.getData(),                      // Input data
-                                           reinterpret_cast<fftwf_complex*>(mData), // Output data
+                                           reinterpret_cast<fftw_complex*>(mData), // Output data
                                            kFftMeasureFlag);                        // Flags
 
   if (!mR2CFftPlan1DY)
@@ -372,12 +372,12 @@ void FftwComplexMatrix::createR2CFftPlan1DZ(RealMatrix& inMatrix)
       howManyDims[0].os = 1;
     #endif
 
-    mR2CFftPlan1DZ = fftwf_plan_guru_dft_r2c(rank,                                    // 1D FFT rank
+    mR2CFftPlan1DZ = fftw_plan_guru_dft_r2c(rank,                                    // 1D FFT rank
                                              dims,                                    // 1D FFT dimensions of z
                                              howManyRank,                             // How many in x and y
                                              howManyDims,                             // Dims and strides in x and y
                                              inMatrix.getData(),                      // Input data
-                                             reinterpret_cast<fftwf_complex*>(mData), // Output data
+                                             reinterpret_cast<fftw_complex*>(mData), // Output data
                                              kFftMeasureFlag);                        // Flags
 
   }
@@ -458,11 +458,11 @@ void FftwComplexMatrix::createC2RFftPlan1DX(RealMatrix& outMatrix)
     howManyDims[0].os = nx;
   }
 
-  mC2RFftPlan1DX = fftwf_plan_guru_dft_c2r(rank,                                    // 1D FFT rank
+  mC2RFftPlan1DX = fftw_plan_guru_dft_c2r(rank,                                    // 1D FFT rank
                                            dims,                                    // 1D FFT dimensions of x
                                            howManyRank,                             // how many in y and z
                                            howManyDims,                             // Dims and strides in y and z
-                                           reinterpret_cast<fftwf_complex*>(mData), // input data
+                                           reinterpret_cast<fftw_complex*>(mData), // input data
                                            outMatrix.getData(),                     // output data
                                            kFftMeasureFlag);                        // flags
 
@@ -536,11 +536,11 @@ void FftwComplexMatrix::createC2RFftPlan1DY(RealMatrix& outMatrix)
     howManyDims[0].os = 1;
   }
 
-  mC2RFftPlan1DY = fftwf_plan_guru_dft_c2r(rank,                                    // 1D FFT rank
+  mC2RFftPlan1DY = fftw_plan_guru_dft_c2r(rank,                                    // 1D FFT rank
                                            dims,                                    // 1D FFT dimensions of y
                                            howManyRank,                             // How many in x and z
                                            howManyDims,                             // Dims and strides in x and z
-                                           reinterpret_cast<fftwf_complex*>(mData), // Input data
+                                           reinterpret_cast<fftw_complex*>(mData), // Input data
                                            outMatrix.getData(),                     // Output data
                                            kFftMeasureFlag);                        // Flags
 
@@ -617,11 +617,11 @@ void FftwComplexMatrix::createC2RFftPlan1DZ(RealMatrix& outMatrix)
       howManyDims[0].os = 1;
     #endif
 
-    mC2RFftPlan1DZ = fftwf_plan_guru_dft_c2r(rank,                                    // 1D FFT rank
+    mC2RFftPlan1DZ = fftw_plan_guru_dft_c2r(rank,                                    // 1D FFT rank
                                              dims,                                    // 1D FFT dimensions of z
                                              howManyRank,                             // how many in x and y
                                              howManyDims,                             // Dims and strides in x and y
-                                             reinterpret_cast<fftwf_complex*>(mData), // input data
+                                             reinterpret_cast<fftw_complex*>(mData), // input data
                                              outMatrix.getData(),                     // output data
                                              kFftMeasureFlag);                        // flags
   }
@@ -646,7 +646,7 @@ void FftwComplexMatrix::computeR2CFftND(RealMatrix& inMatrix)
 {
   if (mR2CFftPlanND)
   {
-    fftwf_execute_dft_r2c(mR2CFftPlanND, inMatrix.getData(), reinterpret_cast<fftwf_complex*>(mData));
+    fftw_execute_dft_r2c(mR2CFftPlanND, inMatrix.getData(), reinterpret_cast<fftw_complex*>(mData));
   }
   else
   {
@@ -662,7 +662,7 @@ void FftwComplexMatrix::computeC2RFftND(RealMatrix & outMatrix)
 {
   if (mC2RFftPlanND)
   {
-    fftwf_execute_dft_c2r(mC2RFftPlanND, reinterpret_cast<fftwf_complex*>(mData), outMatrix.getData());
+    fftw_execute_dft_c2r(mC2RFftPlanND, reinterpret_cast<fftw_complex*>(mData), outMatrix.getData());
   }
   else
   {
@@ -681,15 +681,15 @@ void FftwComplexMatrix::computeR2CFft1DX(RealMatrix& inMatrix)
   {
     // GNU Compiler + FFTW
     #if (defined(__GNUC__) || defined(__GNUG__)) && !(defined(__clang__) || defined(__INTEL_COMPILER))
-      fftwf_execute_dft_r2c(mR2CFftPlan1DX,
+      fftw_execute_dft_r2c(mR2CFftPlan1DX,
                             inMatrix.getData(),
-                            reinterpret_cast<fftwf_complex*>(mData));
+                            reinterpret_cast<fftw_complex*>(mData));
     #endif
 
 #if __APPLE__
-      fftwf_execute_dft_r2c(mR2CFftPlan1DX,
+      fftw_execute_dft_r2c(mR2CFftPlan1DX,
                             inMatrix.getData(),
-                            reinterpret_cast<fftwf_complex*>(mData));
+                            reinterpret_cast<fftw_complex*>(mData));
 #endif
 
 
@@ -698,9 +698,9 @@ void FftwComplexMatrix::computeR2CFft1DX(RealMatrix& inMatrix)
       const DimensionSizes dims = Parameters::getInstance().getFullDimensionSizes();
       for (size_t slab_id = 0; slab_id < dims.nz; slab_id++)
       {
-        fftwf_execute_dft_r2c(mR2CFftPlan1DX,
+        fftw_execute_dft_r2c(mR2CFftPlan1DX,
                               &inMatrix.getData()[slab_id * dims.nx * dims.ny],
-                              (fftwf_complex *) &mData[slab_id * 2 * (dims.nx / 2 + 1) * dims.ny]);
+                              (fftw_complex *) &mData[slab_id * 2 * (dims.nx / 2 + 1) * dims.ny]);
       }
     #endif
   }
@@ -721,15 +721,15 @@ void FftwComplexMatrix::computeR2CFft1DY(RealMatrix& inMatrix)
   {
     // GNU Compiler + FFTW
     #if (defined(__GNUC__) || defined(__GNUG__)) && !(defined(__clang__) || defined(__INTEL_COMPILER))
-      fftwf_execute_dft_r2c(mR2CFftPlan1DY,
+      fftw_execute_dft_r2c(mR2CFftPlan1DY,
                             inMatrix.getData(),
-                            reinterpret_cast<fftwf_complex*>(mData));
+                            reinterpret_cast<fftw_complex*>(mData));
     #endif
 
 #if __APPLE__
-      fftwf_execute_dft_r2c(mR2CFftPlan1DY,
+      fftw_execute_dft_r2c(mR2CFftPlan1DY,
                             inMatrix.getData(),
-                            reinterpret_cast<fftwf_complex*>(mData));
+                            reinterpret_cast<fftw_complex*>(mData));
 #endif
 
     // Intel Compiler + MKL
@@ -737,9 +737,9 @@ void FftwComplexMatrix::computeR2CFft1DY(RealMatrix& inMatrix)
       const DimensionSizes dims = Parameters::getInstance().getFullDimensionSizes();
       for (size_t slab_id = 0; slab_id < dims.nz; slab_id++)
       {
-        fftwf_execute_dft_r2c(mR2CFftPlan1DY,
+        fftw_execute_dft_r2c(mR2CFftPlan1DY,
                               &inMatrix.getData()[slab_id * dims.nx * dims.ny],
-                              (fftwf_complex *) &mData[slab_id * dims.nx * 2 * (dims.ny / 2 + 1)]);
+                              (fftw_complex *) &mData[slab_id * dims.nx * 2 * (dims.ny / 2 + 1)]);
       }
     #endif
   }
@@ -760,15 +760,15 @@ void FftwComplexMatrix::computeR2CFft1DZ(RealMatrix& inMatrix)
   {
     // GNU Compiler + FFTW
     #if (defined(__GNUC__) || defined(__GNUG__)) && !(defined(__clang__) || defined(__INTEL_COMPILER))
-      fftwf_execute_dft_r2c(mR2CFftPlan1DZ,
+      fftw_execute_dft_r2c(mR2CFftPlan1DZ,
                             inMatrix.getData(),
-                            reinterpret_cast<fftwf_complex*>(mData));
+                            reinterpret_cast<fftw_complex*>(mData));
     #endif
 
 #if __APPLE__
-      fftwf_execute_dft_r2c(mR2CFftPlan1DZ,
+      fftw_execute_dft_r2c(mR2CFftPlan1DZ,
                             inMatrix.getData(),
-                            reinterpret_cast<fftwf_complex*>(mData));
+                            reinterpret_cast<fftw_complex*>(mData));
 #endif
 
     // Intel Compiler + MKL
@@ -776,9 +776,9 @@ void FftwComplexMatrix::computeR2CFft1DZ(RealMatrix& inMatrix)
       const DimensionSizes dims = Parameters::getInstance().getFullDimensionSizes();
       for (size_t slab_id = 0; slab_id < dims.ny; slab_id++)
       {
-        fftwf_execute_dft_r2c(mR2CFftPlan1DZ,
+        fftw_execute_dft_r2c(mR2CFftPlan1DZ,
                               &inMatrix.getData()[slab_id * dims.nx],
-                              (fftwf_complex *) &mData[slab_id * 2 * dims.nx]);
+                              (fftw_complex *) &mData[slab_id * 2 * dims.nx]);
       }
     #endif
   }
@@ -799,14 +799,14 @@ void FftwComplexMatrix::computeC2RFft1DX(RealMatrix& outMatrix)
   {
     // GNU Compiler + FFTW
     #if (defined(__GNUC__) || defined(__GNUG__)) && !(defined(__clang__) || defined(__INTEL_COMPILER))
-      fftwf_execute_dft_c2r(mC2RFftPlan1DX,
-                            reinterpret_cast<fftwf_complex*>(mData),
+      fftw_execute_dft_c2r(mC2RFftPlan1DX,
+                            reinterpret_cast<fftw_complex*>(mData),
                             outMatrix.getData());
     #endif
 
 #if __APPLE__
-      fftwf_execute_dft_c2r(mC2RFftPlan1DX,
-                            reinterpret_cast<fftwf_complex*>(mData),
+      fftw_execute_dft_c2r(mC2RFftPlan1DX,
+                            reinterpret_cast<fftw_complex*>(mData),
                             outMatrix.getData());
 #endif
 
@@ -815,8 +815,8 @@ void FftwComplexMatrix::computeC2RFft1DX(RealMatrix& outMatrix)
       const DimensionSizes dims = Parameters::getInstance().getFullDimensionSizes();
       for (size_t slab_id = 0; slab_id < dims.nz; slab_id++)
       {
-        fftwf_execute_dft_c2r(mC2RFftPlan1DX,
-                              (fftwf_complex *) &mData[slab_id * 2 * (dims.nx / 2 + 1) * dims.ny],
+        fftw_execute_dft_c2r(mC2RFftPlan1DX,
+                              (fftw_complex *) &mData[slab_id * 2 * (dims.nx / 2 + 1) * dims.ny],
                               &outMatrix.getData()[slab_id * dims.nx * dims.ny]);
       }
     #endif
@@ -838,14 +838,14 @@ void FftwComplexMatrix::computeC2RFft1DY(RealMatrix& outMatrix)
   {
     // GNU Compiler + FFTW
     #if (defined(__GNUC__) || defined(__GNUG__)) && !(defined(__clang__) || defined(__INTEL_COMPILER))
-      fftwf_execute_dft_c2r(mC2RFftPlan1DY,
-                            reinterpret_cast<fftwf_complex*>(mData),
+      fftw_execute_dft_c2r(mC2RFftPlan1DY,
+                            reinterpret_cast<fftw_complex*>(mData),
                             outMatrix.getData());
     #endif
 
 #if __APPLE__
-      fftwf_execute_dft_c2r(mC2RFftPlan1DY,
-                            reinterpret_cast<fftwf_complex*>(mData),
+      fftw_execute_dft_c2r(mC2RFftPlan1DY,
+                            reinterpret_cast<fftw_complex*>(mData),
                             outMatrix.getData());
 #endif
 
@@ -854,8 +854,8 @@ void FftwComplexMatrix::computeC2RFft1DY(RealMatrix& outMatrix)
       const DimensionSizes dims = Parameters::getInstance().getFullDimensionSizes();
       for (size_t slab_id = 0; slab_id < dims.nz; slab_id++)
       {
-        fftwf_execute_dft_c2r(mC2RFftPlan1DY,
-                              (fftwf_complex *) &mData[slab_id * dims.nx * 2 * (dims.ny / 2 + 1)],
+        fftw_execute_dft_c2r(mC2RFftPlan1DY,
+                              (fftw_complex *) &mData[slab_id * dims.nx * 2 * (dims.ny / 2 + 1)],
                               &outMatrix.getData()[slab_id * dims.nx * dims.ny]);
       }
     #endif
@@ -877,14 +877,14 @@ void FftwComplexMatrix::computeC2RFft1DZ(RealMatrix& outMatrix)
   {
     // GNU Compiler + FFTW
     #if (defined(__GNUC__) || defined(__GNUG__)) && !(defined(__clang__) || defined(__INTEL_COMPILER))
-      fftwf_execute_dft_c2r(mC2RFftPlan1DZ,
-                            reinterpret_cast<fftwf_complex*>(mData),
+      fftw_execute_dft_c2r(mC2RFftPlan1DZ,
+                            reinterpret_cast<fftw_complex*>(mData),
                             outMatrix.getData());
     #endif
 
 #if __APPLE__
-      fftwf_execute_dft_c2r(mC2RFftPlan1DZ,
-                            reinterpret_cast<fftwf_complex*>(mData),
+      fftw_execute_dft_c2r(mC2RFftPlan1DZ,
+                            reinterpret_cast<fftw_complex*>(mData),
                             outMatrix.getData());
 #endif
 
@@ -893,8 +893,8 @@ void FftwComplexMatrix::computeC2RFft1DZ(RealMatrix& outMatrix)
       const DimensionSizes dims = Parameters::getInstance().getFullDimensionSizes();
       for (size_t slab_id = 0; slab_id < dims.ny; slab_id++)
       {
-        fftwf_execute_dft_c2r(mC2RFftPlan1DZ,
-                              (fftwf_complex *) &mData[slab_id * 2 * dims.nx ],
+        fftw_execute_dft_c2r(mC2RFftPlan1DZ,
+                              (fftw_complex *) &mData[slab_id * 2 * dims.nx ],
                               &outMatrix.getData()[slab_id * dims.nx]);
       }
     #endif

@@ -844,7 +844,7 @@ class KSpaceFirstOrderSolver
      * @param  [in] present   - Is the matrix present in the container?
      * @return Pointer to raw data or nullptr if the matrix is not in the container.
      */
-    float* getRealData(const MatrixContainer::MatrixIdx matrixIdx,
+    double* getRealData(const MatrixContainer::MatrixIdx matrixIdx,
                        const bool                       present = true)
     {
       return (present) ? mMatrixContainer.getMatrix<RealMatrix>(matrixIdx).getData() : nullptr;
@@ -855,7 +855,7 @@ class KSpaceFirstOrderSolver
      * @param  [in] present   - Is the matrix present in the container?
      * @return Pointer to raw data or nullptr if the matrix is not in the container.
      */
-    const float* getRealData(const MatrixContainer::MatrixIdx matrixIdx,
+    const double* getRealData(const MatrixContainer::MatrixIdx matrixIdx,
                              const bool                       present = true) const
     {
       return (present) ? mMatrixContainer.getMatrix<RealMatrix>(matrixIdx).getData() : nullptr;

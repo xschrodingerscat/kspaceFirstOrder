@@ -54,9 +54,9 @@ TEST(KMatrix, Trivial01)
     auto Ny = 14;
 
     /* wedge mask */
-    auto r1_mask = KMatrix<float>::Rect(Nx, Ny, 0, 0, Ny-1, Nx/2-1);
+    auto r1_mask = KMatrix<double>::Rect(Nx, Ny, 0, 0, Ny-1, Nx/2-1);
     /* part mask */
-    auto r2_mask = KMatrix<float>::Rect(Nx, Ny, 0, Nx/2, Ny-1, Nx-1);
+    auto r2_mask = KMatrix<double>::Rect(Nx, Ny, 0, Nx/2, Ny-1, Nx-1);
     /* wedge */
     auto c1_magnitude = 2700.f;
 
@@ -71,8 +71,8 @@ TEST(KMatrix, Trivial01)
     {
     public:
         PrdFillDisc(size_t x, size_t y, size_t radius) : mX(x), mY(y), mRadius(radius), mVal(0) {}
-        void setVal(float val) { mVal = val; }
-        void operator()(float &e, size_t i, size_t j)
+        void setVal(double val) { mVal = val; }
+        void operator()(double &e, size_t i, size_t j)
         {
             if ((mX - i) * (mX - i) + (mY - j) * (mY - j) < mRadius * mRadius)
                 e = mVal;
@@ -81,8 +81,8 @@ TEST(KMatrix, Trivial01)
     private:
         size_t mX;
         size_t mY;
-        float mVal;
-        float mRadius;
+        double mVal;
+        double mRadius;
     };
 
     auto x_pos = 12;
@@ -92,9 +92,9 @@ TEST(KMatrix, Trivial01)
 
     auto fillDisc = PrdFillDisc(x_pos, y_pos, radius);
     fillDisc.setVal(flaw_c0_magnitude);
-    KMatrix<float>::Fill(C0, fillDisc);
+    KMatrix<double>::Fill(C0, fillDisc);
 
-    KMatrix<float>::Print(C0);
+    KMatrix<double>::Print(C0);
 }
 
 

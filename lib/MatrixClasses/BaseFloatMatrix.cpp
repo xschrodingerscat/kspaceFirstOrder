@@ -1,12 +1,12 @@
 /**
- * @file      BaseFloatMatrix.cpp
+ * @file      BasedoubleMatrix.cpp
  *
  * @author    Jiri Jaros \n
  *            Faculty of Information Technology \n
  *            Brno University of Technology \n
  *            jarosjir@fit.vutbr.cz
  *
- * @brief     The implementation file containing the base class for single precisions floating point numbers (floats).
+ * @brief     The implementation file containing the base class for single precisions doubleing point numbers (doubles).
  *
  * @version   kspaceFirstOrder 2.17
  *
@@ -58,7 +58,7 @@ BaseFloatMatrix::BaseFloatMatrix()
  */
 void BaseFloatMatrix::copyData(const BaseFloatMatrix& src)
 {
-  const float* srcData = src.getData();
+  const double* srcData = src.getData();
 
   #pragma omp parallel for simd schedule(simd:static) firstprivate(srcData)
   for (size_t i = 0; i < mCapacity; i++)
@@ -84,7 +84,7 @@ void BaseFloatMatrix::zeroMatrix()
 /**
  * Calculate matrix = scalar / matrix.
  */
-void BaseFloatMatrix::scalarDividedBy(const float scalar)
+void BaseFloatMatrix::scalarDividedBy(const double scalar)
 {
   #pragma omp parallel for simd schedule(simd:static) firstprivate(scalar)
   for (size_t i = 0; i < mCapacity; i++)
@@ -107,7 +107,7 @@ void BaseFloatMatrix::allocateMemory()
   // No memory allocated before this function
   assert(mData == nullptr);
 
-  mData = (float*) _mm_malloc(mCapacity * sizeof(float), kDataAlignment);
+  mData = (double*) _mm_malloc(mCapacity * sizeof(double), kDataAlignment);
 
   if (!mData)
   {

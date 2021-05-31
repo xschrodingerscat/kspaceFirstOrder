@@ -47,7 +47,7 @@ IndexOutputStream::IndexOutputStream(Hdf5File&            file,
                                      const RealMatrix&    sourceMatrix,
                                      const IndexMatrix&   sensorMask,
                                      const ReduceOperator reduceOp,
-                                     float*               bufferToReuse)
+                                     double*               bufferToReuse)
   : BaseOutputStream(file, datasetName, sourceMatrix, reduceOp, bufferToReuse),
     mSensorMask(sensorMask),
     mDataset(H5I_BADID),
@@ -166,7 +166,7 @@ void IndexOutputStream::reopen()
  */
 void IndexOutputStream::sample()
 {
-  const float*  sourceData = mSourceMatrix.getData();
+  const double*  sourceData = mSourceMatrix.getData();
   const size_t* sensorData = mSensorMask.getData();
 
   switch (mReduceOp)

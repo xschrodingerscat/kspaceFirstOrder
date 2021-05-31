@@ -60,7 +60,7 @@ void
 RealMatrix::readData(KMatrixCached& cached, const MatrixName& matrixName)
 {
 	size_t idx = 0;
-	auto &mat = *static_cast<KMatrix<float>*>(cached[matrixName].get());
+	auto &mat = *static_cast<KMatrix<double>*>(cached[matrixName].get());
 
 	for (size_t j = 0; j < mat.colSize(); ++ j)
 		for (size_t i = 0; i < mat.rowSize(); ++ i) 
