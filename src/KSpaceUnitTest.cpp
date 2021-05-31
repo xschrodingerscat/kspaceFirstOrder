@@ -78,6 +78,7 @@ TEST(KSpace, kElastic)
     /* set control parameters */
     auto koutput = AutoCreateInstance<KOutput>();
 
+
     std::string filename = "kspace_elastic_output.h5";
     koutput->setOutputFileName(filename);
     koutput->setOutputToFileFlag(false);
