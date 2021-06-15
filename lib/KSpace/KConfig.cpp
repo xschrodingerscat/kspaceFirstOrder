@@ -322,7 +322,7 @@ KElasticConfig::init()
     mKGrid.mDx = 1e-04;
     mKGrid.mDy = 1e-04;
 
-    mKGrid.mTimeEnd = 1e-5;
+    mKGrid.mTimeEnd = 10e-6;
 
     /* temp */
     auto Nx = mKGrid.mNx;

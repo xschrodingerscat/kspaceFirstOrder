@@ -7,6 +7,7 @@
 #include <memory>
 #include <exception>
 #include <functional>
+#include <iomanip>
 
 #include <Logger/Logger.h>
 
@@ -58,6 +59,17 @@ public:
     ~KSpaceSolverElastic() override = default;
 
     void fftwVerify();
+
+    template <Parameters::SimulationDimension simulationDimension>
+    void smooth(const MatrixContainer::MatrixIdx matrixIdx, bool isRestoreMax);
+
+    using MatrixType = std::vector<std::vector<double>>;
+    std::pair<MatrixType, std::vector<double>>
+    getWindow(std::vector<size_t> a, std::vector<bool> s);
+
+    void miscVerify();
+
+    void debugVariableNorm();
 
     void allocateMemory() override;
 

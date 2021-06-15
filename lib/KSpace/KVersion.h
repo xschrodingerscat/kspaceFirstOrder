@@ -11,8 +11,8 @@
 inline std::string getVersion()
 {
     const std::string version = "Version";
-    const std::string majorNo = "1";
-    const std::string minorNo = "12";
+    const std::string majorNo = "2";
+    const std::string minorNo = "20";
 
     return version + '-' + majorNo + '.' + minorNo;
 }
