@@ -151,6 +151,30 @@ KSpaceSolverElastic::preProcessing()
     // Get the correct sensor mask and recompute indices
     auto &params = mParameters;
 
+    // smooth
+    smooth<SD::k2D>(MI::kInitialPressureSourceInput, true);
+    smooth<SD::k2D>(MI::kRho0, false);
+    smooth<SD::k2D>(MI::kDtRho0Sgx, false);
+    smooth<SD::k2D>(MI::kDtRho0Sgy, false);
+//    smooth<SD::k2D>(MI::kC2, false);
+//    smooth<SD::k2D>(MI::kS2, false);
+
+#ifndef __KSPACE_DEBUG__
+    const size_t nElements = mParameters.getFullDimensionSizes().nElements();
+    double *dtRho0Sgx = getRealData(MI::kDtRho0Sgx);
+    double *rho0 = getRealData(MI::kRho0);
+    double dtRho0Sgx_norm = 0;
+    double rho0_norm = 0;
+
+    for (size_t i = 0; i < nElements; ++ i)
+    {
+        dtRho0Sgx_norm += std::abs(dtRho0Sgx[i]);
+        rho0_norm += std::abs(rho0[i]);
+    }
+    std::cout << "dtRho0Sgx_norm = " << dtRho0Sgx_norm << std::endl;
+    std::cout << "rho0_norm = " << rho0_norm << std::endl;
+#endif
+
     if (params.getSensorMaskType() == Parameters::SensorMaskType::kIndex)
         getIndexMatrix(MI::kSensorMaskIndex).recomputeIndicesToCPP();
 
@@ -158,11 +182,6 @@ KSpaceSolverElastic::preProcessing()
         getRealMatrix(MI::kDtRho0Sgx).scalarDividedBy(params.getDt());
         getRealMatrix(MI::kDtRho0Sgy).scalarDividedBy(params.getDt());
     }
-    // smooth
-//    smooth<SD::k2D>(MI::kInitialPressureSourceInput, true);
-//    smooth<SD::k2D>(MI::kRho0, false);
-//    smooth<SD::k2D>(MI::kC2, false);
-//    smooth<SD::k2D>(MI::kS2, false);
 
     // Generate shift variables
     generateDerivativeOperators();
@@ -294,10 +313,17 @@ KSpaceSolverElastic::computePressure()
     /*
      p = -(sxx_split_x + sxx_split_y + syy_split_x + syy_split_y) / 2;
      */
-    double sum = 0.0;
     for (size_t i = 0; i < fullDimSizes.nElements(); ++i) {
         p[i] = -(sxxSplitX[i] + sxxSplitY[i] + syySplitX[i] + syySplitY[i]) / 2;
     }
+
+#ifdef __KSPACE_DEBUG__
+    double p_norm = 0.0;
+    for (size_t i = 0; i < fullDimSizes.nElements(); ++i) {
+        p_norm += std::abs(p[i]);
+    }
+    std::cout <<  "p_norm = " << p_norm << std::endl;
+#endif
 }
 
 
@@ -398,7 +424,7 @@ KSpaceSolverElastic::computePressureGradient()
     getTempFftwXYdx().computeC2RFft1DX(getRealMatrix(MI::kDSxydx));
     getTempFftwXYdy().computeC2RFft1DY(getRealMatrix(MI::kDSxydy));
 
-#if 1
+#ifdef __KSPACE_DEBUG__
     auto pmat1 = getRealData(MI::kDSxxdx);
     auto pmat2 = getRealData(MI::kDSyydy);
     auto pmat3 = getRealData(MI::kDSxydx);
@@ -500,22 +526,25 @@ KSpaceSolverElastic::computeSplitVelocity()
                 uySplitY[i] = coef * expr;
             }
 
-#if 1
+#ifdef __KSPACE_DEBUG__
     const size_t nElements = mParameters.getFullDimensionSizes().nElements();
     double uxSplitX_norm = 0;
     double uxSplitY_norm = 0;
     double uySplitX_norm = 0;
     double uySplitY_norm = 0;
+    double dtRho0Sgx_norm = 0;
     for (size_t i = 0; i < nElements; ++i) {
         uxSplitX_norm += std::abs(uxSplitX[i]);
         uxSplitY_norm += std::abs(uxSplitY[i]);
         uySplitX_norm += std::abs(uySplitX[i]);
         uySplitY_norm += std::abs(uySplitY[i]);
+        dtRho0Sgx_norm += std::abs(dtRho0Sgx[i]);
     }
     std::cout << "uxSplitX_norm = " << uxSplitX_norm << std::endl;
     std::cout << "uxSplitY_norm = " << uxSplitY_norm << std::endl;
     std::cout << "uySplitX_norm = " << uySplitX_norm << std::endl;
     std::cout << "uySplitY_norm = " << uySplitY_norm << std::endl;
+    std::cout << "dtRho0Sgx_norm = " << dtRho0Sgx_norm << std::endl;
 
 #endif
 }
@@ -542,6 +571,18 @@ KSpaceSolverElastic::computeVelocity()
         uxSgx[i] = uxSplitX[i] + uxSplitY[i];
         uySgy[i] = uySplitX[i] + uySplitY[i];
     }
+
+#ifdef __KSPACE_DEBUG__
+    double uxSgx_norm = 0;
+    double uySgy_norm = 0;
+    for (size_t i = 0; i < fullDimSizes.nElements(); ++i) {
+        uxSgx_norm += std::abs(uxSgx[i]);
+        uySgy_norm += std::abs(uySgy[i]);
+    }
+
+    std::cout << "uxSgx_norm = " << uxSgx_norm << std::endl;
+    std::cout << "uySgy_norm = " << uySgy_norm << std::endl;
+#endif
 }
 
 template <Parameters::SimulationDimension simulationDimension>
@@ -615,16 +656,34 @@ KSpaceSolverElastic::computeVelocityGradient()
     getTempFftwYYdx().computeC2RFft1DX(getRealMatrix(MI::kDuydx));
     getTempFftwYYdy().computeC2RFft1DY(getRealMatrix(MI::kDuydy));
 
-#if 0
-    double *duxdx = getRealData(MI::kDuxdx);
-    double *duxdy = getRealData(MI::kDuxdy);
-    double *duydx = getRealData(MI::kDuydx);
-    double *duydy = getRealData(MI::kDuydy);
+#ifdef __KSPACE_DEBUG__
+//    double *duxdx = getRealData(MI::kDuxdx);
+//    double *duxdy = getRealData(MI::kDuxdy);
+//    double *duydx = getRealData(MI::kDuydx);
+//    double *duydy = getRealData(MI::kDuydy);
 
     auto pmat1 = getRealData(MI::kDuxdx);
     auto pmat2 = getRealData(MI::kDuydx);
     auto pmat3 = getRealData(MI::kDuxdy);
     auto pmat4 = getRealData(MI::kDuydy);
+
+    double duxdx_norm = 0;
+    double duydx_norm = 0;
+    double duxdy_norm = 0;
+    double duydy_norm = 0;
+
+    auto nElements = mParameters.getFullDimensionSizes().nElements();
+    for (size_t i = 0; i < nElements; ++i) {
+        duxdx_norm += std::abs(pmat1[i]);
+        duydx_norm += std::abs(pmat2[i]);
+        duxdy_norm += std::abs(pmat3[i]);
+        duydy_norm += std::abs(pmat4[i]);
+    }
+
+    std::cout << "duxdx_norm = " << duxdx_norm << std::endl;
+    std::cout << "duydx_norm = " << duydx_norm << std::endl;
+    std::cout << "duxdy_norm = " << duxdy_norm << std::endl;
+    std::cout << "duydy_norm = " << duydy_norm << std::endl;
 #endif
 }
 
@@ -723,6 +782,33 @@ KSpaceSolverElastic::computeSplitPressure()
                 expr = coef * sxySplitY[i] + dt * musgxy[i] * duxdy[i];
                 sxySplitY[i] = coef * expr;
             }
+
+#ifdef __KSPACE_DEBUG__
+    double sxxSplitX_norm = 0;
+    double sxxSplitY_norm = 0;
+    double syySplitX_norm = 0;
+    double syySplitY_norm = 0;
+    double sxySplitX_norm = 0;
+    double sxySplitY_norm = 0;
+
+    for (size_t i = 0; i < fullDimSizes.nElements(); ++i)
+    {
+        sxxSplitX_norm += std::abs(sxxSplitX[i]);
+        sxxSplitY_norm += std::abs(sxxSplitY[i]);
+        syySplitX_norm += std::abs(syySplitX[i]);
+        syySplitY_norm += std::abs(syySplitY[i]);
+        sxySplitX_norm += std::abs(sxySplitX[i]);
+        sxySplitY_norm += std::abs(sxySplitY[i]);
+    }
+    std::cout << "sxxSplitX_norm = " << sxxSplitX_norm << std::endl;
+    std::cout << "sxxSplitY_norm = " << sxxSplitY_norm << std::endl;
+    std::cout << "syySplitX_norm = " << syySplitX_norm << std::endl;
+    std::cout << "syySplitY_norm = " << syySplitY_norm << std::endl;
+    std::cout << "sxySplitX_norm = " << sxySplitX_norm << std::endl;
+    std::cout << "sxySplitY_norm = " << sxySplitY_norm << std::endl;
+
+
+#endif
 }
 
 void
@@ -746,8 +832,17 @@ KSpaceSolverElastic::generateLameConstant()
     for (size_t i = 0; i < nElements; i++) {
         mu[i] = s2[i] * s2[i] * rho0[i];
         lambda[i] = c2[i] * c2[i] * rho0[i] - 2 * mu[i];
-        musgxy[i] = 1. / mu[i];
+        musgxy[i] = mu[i];
     }
+
+#if 1
+    double rho0_norm = 0;
+    for (size_t i = 0; i < nElements; i++) {
+        rho0_norm += std::abs(rho0[i]);
+    }
+
+    std::cout << "rho0_norm = " << rho0_norm << std::endl;
+#endif
 }
 
 
@@ -866,50 +961,51 @@ KSpaceSolverElastic::generatePml()
         mPmlYSgy[iR] = pmlRight(double(i) + 0.5f, cRefDy, pmlYAlpha, pmlYSize);
     }
 
-#if 1
-//    double *pmlX = getRealData(MI::kPmlX);
-//    double *pmlY = getRealData(MI::kPmlY);
-//
-//    double *pmlXSgx = getRealData(MI::kPmlXSgx);
-//    double *pmlYSgy = getRealData(MI::kPmlYSgy);
-//
-//    auto mPmlX = getRealData(MI::kMPmlX);
-//    auto mPmlY = getRealData(MI::kMPmlY);
-//
-//    auto mPmlXSgx = getRealData(MI::kMPmlXSgx);
-//    auto mPmlYSgy = getRealData(MI::kMPmlYSgy);
-    const size_t nElements = dimensionSizes.nElements();
-    double pmlX_norm = 0;
-    double pmlY_norm = 0;
-    double mPmlX_norm = 0;
-    double mPmlY_norm = 0;
-    double pmlXSgx_norm = 0;
-    double pmlYSgy_norm = 0;
-    double mPmlXSgx_norm = 0;
-    double mPmlYSgy_norm = 0;
+#if 0
+    //    double *pmlX = getRealData(MI::kPmlX);
+    //    double *pmlY = getRealData(MI::kPmlY);
+    //
+    //    double *pmlXSgx = getRealData(MI::kPmlXSgx);
+    //    double *pmlYSgy = getRealData(MI::kPmlYSgy);
+    //
+    //    auto mPmlX = getRealData(MI::kMPmlX);
+    //    auto mPmlY = getRealData(MI::kMPmlY);
+    //
+    //    auto mPmlXSgx = getRealData(MI::kMPmlXSgx);
+    //    auto mPmlYSgy = getRealData(MI::kMPmlYSgy);
+        const size_t nElements = dimensionSizes.nElements();
+        double pmlX_norm = 0;
+        double pmlY_norm = 0;
+        double mPmlX_norm = 0;
+        double mPmlY_norm = 0;
+        double pmlXSgx_norm = 0;
+        double pmlYSgy_norm = 0;
+        double mPmlXSgx_norm = 0;
+        double mPmlYSgy_norm = 0;
 
-    for (size_t i = 0; i < nElements; ++i) {
-        pmlX_norm += std::abs(pmlX[i]);
-        pmlY_norm += std::abs(pmlY[i]);
-        mPmlX_norm += std::abs(mPmlX[i]);
-        mPmlY_norm += std::abs(mPmlY[i]);
-        pmlXSgx_norm += std::abs(pmlXSgx[i]);
-        pmlYSgy_norm += std::abs(pmlYSgy[i]);
-        mPmlXSgx_norm += std::abs(mPmlXSgx[i]);
-        mPmlYSgy_norm += std::abs(mPmlYSgy[i]);
-    }
+        for (size_t i = 0; i < dimensionSizes.nx; ++i) {
+            pmlX_norm += std::abs(pmlX[i]);
+            pmlY_norm += std::abs(pmlY[i]);
+            mPmlX_norm += std::abs(mPmlX[i]);
+            mPmlY_norm += std::abs(mPmlY[i]);
+            pmlXSgx_norm += std::abs(pmlXSgx[i]);
+            pmlYSgy_norm += std::abs(pmlYSgy[i]);
+            mPmlXSgx_norm += std::abs(mPmlXSgx[i]);
+            mPmlYSgy_norm += std::abs(mPmlYSgy[i]);
+        }
 
-    std::cout << "pmlX_norm = " << pmlX_norm << std::endl;
-    std::cout << "pmlXSgx_norm = " << pmlXSgx_norm << std::endl;
+        double max_pmlX = *std::max_element(pmlX, pmlX+nElements);
+        std::cout << "pmlX_norm = " << pmlX_norm << std::endl;
+        std::cout << "pmlXSgx_norm = " << pmlXSgx_norm << std::endl;
 
-    std::cout << "pmlY_norm = " << pmlY_norm << std::endl;
-    std::cout << "pmlYSgy_norm = " << pmlYSgy_norm << std::endl;
+        std::cout << "pmlY_norm = " << pmlY_norm << std::endl;
+        std::cout << "pmlYSgy_norm = " << pmlYSgy_norm << std::endl;
 
-    std::cout << "mPmlX_norm = " << mPmlX_norm << std::endl;
-    std::cout << "mPmlXSgx_norm = " << mPmlXSgx_norm << std::endl;
+        std::cout << "mPmlX_norm = " << mPmlX_norm << std::endl;
+        std::cout << "mPmlXSgx_norm = " << mPmlXSgx_norm << std::endl;
 
-    std::cout << "mPmlY_norm = " << mPmlY_norm << std::endl;
-    std::cout << "mPmlYSgy_norm = " << mPmlYSgy_norm << std::endl;
+        std::cout << "mPmlY_norm = " << mPmlY_norm << std::endl;
+        std::cout << "mPmlYSgy_norm = " << mPmlYSgy_norm << std::endl;
 
 #endif
 }

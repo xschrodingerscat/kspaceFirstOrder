@@ -236,7 +236,7 @@ TEST(KSpace, kMixtureWithFlaws)
     auto radius = 10;
     auto flaw_c0_magnitude = 340.;
     auto flaw_s0_magnitude = 10.;
-    auto flaw_rho0 = 100;
+    auto flaw_rho0 = 1.29;
 
     auto fillDisc = PrdFillDisc(x_pos, y_pos, radius);
 
